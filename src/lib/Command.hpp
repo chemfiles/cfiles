@@ -11,8 +11,6 @@
 #ifndef CHRP_FRONTEND_COMMAND_HPP
 #define CHRP_FRONTEND_COMMAND_HPP
 
-
-#include <vector>
 #include <string>
 
 /**
@@ -31,6 +29,13 @@ public:
 
     //! Run the command, with the arguments \c argv, of size argc.
     virtual int run(int argc, char** argv) = 0;
+
+    //! Basic description of the command
+    virtual std::string description() = 0;
+    //! More detailed help of the command
+    virtual std::string help() {
+        return description();
+    }
 };
 
 #endif

@@ -8,42 +8,31 @@
 */
 
 #include <iostream>
-#include <map>
-#include <memory>
 
-#include "lib/Command.hpp"
+#include "lib/CommandFactory.hpp"
 
-int usage(const char* name);
+int usage() {
+    std::cout << "Usage: chrp subcommand [--options] [args]" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Some usefull subcommands:" << std::endl;
 
-using command_creator_t = std::unique_ptr<Command>(*)(void);
-static std::map<std::string, command_creator_t> COMMANDS = {
-};
+    const std::string SEP = "    ";
+    auto help = get_command("help");
+    std::cout << SEP << "'help' " << help->description() << std::endl;
 
+    return 1;
+}
 
 int main(int argc, char** argv) {
     if (argc < 2){
-        return usage(argv[0]);
+        return usage();
     }
 
-    auto com = COMMANDS.find(argv[1]);
-    int res = 0;
-    if (com != COMMANDS.end()){
-        auto command = (*com).second();
-        try {
-            res = command->run(argc - 1, &argv[1]);
-        } catch (const std::exception& e){
-            std::cout << "Error: " << e.what() << std::endl;
-            res = -1;
-        }
-    } else {
-        std::cout << "Could not find the '" << argv[1] << "' subcommand." << std::endl;
-        std::cout << std::endl;
-        res = usage(argv[0]);
+    try {
+        auto command = get_command(argv[1]);
+        return command->run(argc - 1, &argv[1]);
+    } catch (const std::exception& e){
+        std::cout << "Error: " << e.what() << std::endl;
+        return 2;
     }
-    return res;
-}
-
-int usage(const char* name) {
-    std::cout << "usage: " << name << " subcommand [--options] args" << std::endl;
-    return 1;
 }

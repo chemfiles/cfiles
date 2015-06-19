@@ -8,8 +8,6 @@
 */
 
 #include <string>
-#include <sstream>
-#include <fstream>
 
 #include "docopt/docopt.h"
 #include <Chemharp.hpp>
@@ -47,8 +45,6 @@ Options:
                                 <L> format. This option set <max> to L/2.
 )";
 
-#include <iostream>
-
 static void parse_options(int argc, char** argv, rdf_options& options) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
     options.infile = args["<trajectory>"].asString();
@@ -66,7 +62,7 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
     options.stride = stol(args["--stride"].asString());
 
     if (args["--topology"]){
-        options.topology = args["--topology"].asLong();
+        options.topology = args["--topology"].asString();
     } else {
         options.topology = "";
     }
@@ -94,10 +90,6 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
 
         double L = std::min(options.cell[0], std::min(options.cell[1], options.cell[2]));
         options.rmax = L/2;
-	} else {
-		options.cell.push_back(0);
-        options.cell.push_back(0);
-        options.cell.push_back(0);
 	}
 }
 

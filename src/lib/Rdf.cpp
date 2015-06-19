@@ -14,16 +14,7 @@
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
-
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::stringstream ss(s);
-    std::string item;
-    std::vector<std::string> elems;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
+#include "utils.hpp"
 
 static const char OPTIONS[] =
 R"(chrp rdf: radial distribution function calculations
@@ -68,26 +59,7 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
     }
 
     if (args["--cell"]) {
-		auto cell_strs = split(args["--cell"].asString(), ':');
-		if (cell_strs.size()==1) {
-			options.cell.push_back(stod(cell_strs[0]));
-			options.cell.push_back(stod(cell_strs[0]));
-			options.cell.push_back(stod(cell_strs[0]));
-		} else if (cell_strs.size()==3) {
-			options.cell.push_back(stod(cell_strs[0]));
-			options.cell.push_back(stod(cell_strs[1]));
-			options.cell.push_back(stod(cell_strs[2]));
-		} else if (cell_strs.size()==3) {
-			options.cell.push_back(stod(cell_strs[0]));
-			options.cell.push_back(stod(cell_strs[1]));
-			options.cell.push_back(stod(cell_strs[2]));
-            options.cell.push_back(stod(cell_strs[3]));
-            options.cell.push_back(stod(cell_strs[4]));
-            options.cell.push_back(stod(cell_strs[5]));
-		} else {
-			throw chrp_exception("The cell option should have 1, 3 or 6 values.");
-		}
-
+		options.cell = parse_cell(args["--cell"].asString());
         double L = std::min(options.cell[0], std::min(options.cell[1], options.cell[2]));
         options.rmax = L/2;
 	}

@@ -11,11 +11,13 @@
 
 #include "Help.hpp"
 #include "Rdf.hpp"
+#include "Convert.hpp"
 
 const std::map<std::string, command_creator_t>& COMMANDS() {
     static std::map<std::string, command_creator_t> commands = {
         {"help", [](){return std::unique_ptr<Command>(new Help());}},
         {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
+        {"convert", [](){return std::unique_ptr<Command>(new Convert());}},
     };
     return commands;
 }

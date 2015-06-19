@@ -38,7 +38,5 @@ void Help::list_commands() const {
 
 void Help::about(const std::string& name) const {
     auto command = get_command(name);
-
-    std::cout << "Help about the '" + name + "' subcommand:" << std::endl << std::endl;
     std::cout << command->help() << std::endl;
 }

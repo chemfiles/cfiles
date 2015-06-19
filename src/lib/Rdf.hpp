@@ -12,6 +12,7 @@
 #define CHRP_FRONTEND_RDF_HPP
 
 #include <vector>
+#include <fstream>
 
 #include "Histogram.hpp"
 #include "Command.hpp"

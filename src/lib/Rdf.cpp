@@ -101,11 +101,11 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
 	}
 }
 
-std::string Rdf::description() {
+std::string Rdf::description() const {
     return "Compute radial distribution functions";
 }
 
-std::string Rdf::help() {
+std::string Rdf::help() const {
     return OPTIONS;
 }
 

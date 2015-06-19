@@ -36,8 +36,8 @@ class Rdf : public Command {
 public:
     Rdf() : nsteps_(0) {}
     virtual int run(int argc, char** argv) override;
-    virtual std::string description() override;
-    virtual std::string help() override;
+    virtual std::string description() const override;
+    virtual std::string help() const override;
 private:
     //! Add the data from a frame to the histogram
     void accumulate(harp::Frame& frame);

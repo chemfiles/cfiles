@@ -26,14 +26,12 @@ class Command {
 public:
     Command() = default;
     virtual ~Command() = default;
-
     //! Run the command, with the arguments \c argv, of size argc.
     virtual int run(int argc, char** argv) = 0;
-
     //! Basic description of the command
-    virtual std::string description() = 0;
+    virtual std::string description() const = 0;
     //! More detailed help of the command
-    virtual std::string help() {
+    virtual std::string help() const {
         return description();
     }
 };

@@ -10,7 +10,7 @@
 #include "Help.hpp"
 #include "CommandFactory.hpp"
 
-std::string Help::description(){
+std::string Help::description() const{
     return "Print help and return.";
 }
 
@@ -23,7 +23,7 @@ int Help::run(int argc, char** argv){
     return 0;
 }
 
-void Help::list_commands() {
+void Help::list_commands() const {
     std::cout << "Use 'chrp help <subcommand>' to get help about one subcommand." ;
     std::cout << std::endl << std::endl;
 
@@ -36,7 +36,7 @@ void Help::list_commands() {
     }
 }
 
-void Help::about(const std::string& name) {
+void Help::about(const std::string& name) const {
     auto command = get_command(name);
 
     std::cout << "Help about the '" + name + "' subcommand:" << std::endl << std::endl;

@@ -30,21 +30,27 @@ template <class U = T, typename = typename std::enable_if<std::is_arithmetic<U>:
  * determined by the bin_size and the
  */
 template <class T>
-class Histogram {
+class Histogram : private std::vector<T> {
+    using data_t = std::vector<T>;
 public:
+    using data_t::size;
+    using data_t::operator[];
+    using data_t::begin;
+    using data_t::end;
+
     //! Default constructor
     Histogram() : Histogram(0) {}
     //! Constructor with a specific number of bins \c nbins
-    Histogram(size_t nbins) : data_(nbins) {}
+    Histogram(size_t nbins) : data_t(nbins) {}
     //! Constructor with a specific number of bins \c nbins, and which can hold data in
     //! the \c min - \c max range.
     //! This can only be used if T is arithmetic (integer or floating point type).
     ENABLE_FOR_ARITHMETIC_TYPES
-    Histogram(size_t nbins, double min, double max) : data_(nbins), dr_((max-min)/nbins) {}
-    //! TODO
+    Histogram(size_t nbins, double min, double max) : data_t(nbins), dr_((max-min)/nbins) {}
+    //! Constructor with a specific number of \c bins and a specific bin size \c dr
     //! This can only be used if T is arithmetic (integer or floating point type).
     ENABLE_FOR_ARITHMETIC_TYPES
-    Histogram(size_t nbins, double dr) : data_(nbins), dr_(dr) {}
+    Histogram(size_t nbins, double dr) : data_t(nbins), dr_(dr) {}
 
     ~Histogram() = default;
     Histogram(const Histogram&) = default;
@@ -62,23 +68,23 @@ public:
 
     //! Insert some \c data in the histogram, at the position \c bin.
     void insert(T new_data, size_t bin) {
-        assert(bin < data_.size());
-        data_[bin] += new_data;
+        assert(bin < size());
+        (*this)[bin] += new_data;
     }
     //! Insert some \c data in the histogram, and guess the position using the \c bin_size
     //! of the Histogram.
     ENABLE_FOR_ARITHMETIC_TYPES
     void insert(T new_data) {
         size_t bin = static_cast<size_t>(new_data / dr_);
-        assert(bin < data_.size());
-        data_[bin] += new_data;
+        assert(bin < size());
+        (*this)[bin] += new_data;
     }
 
     //! Normalize the data so that the mean of the data is 1
     ENABLE_FOR_ARITHMETIC_TYPES
     void normalize() {
-        double mean = std::accumulate(begin(data_), end(data_), 0.0) / data_.size();
-        for (auto& val : data_) {
+        double mean = std::accumulate(begin(*this), end(*this), 0.0) / size();
+        for (auto& val : (*this)) {
             val /= mean;
         }
     }
@@ -86,28 +92,12 @@ public:
     //! The function should take two arguments being the current bin and the data, and
     //! return the new data.
     void normalize(std::function<T(size_t, T)> function) {
-        for (size_t i=0; i< data_.size(); i++){
-            data_[i] = function(i, data_[i]);
+        for (size_t i=0; i< size(); i++){
+            (*this)[i] = function(i, (*this)[i]);
         }
     }
-
-    //! Access the underlying data.
-    const std::vector<T>& data() const {return data_;}
-    //! Access the size of the underlying data.
-    size_t size() const {return data_.size();}
-    //! Remove all data.
-    void clear() {data_.clear();}
-
-    using iterator = typename std::vector<T>::iterator;
-    using const_iterator = typename std::vector<T>::const_iterator;
-    iterator begin() { return std::begin(data_);}
-    const_iterator begin() const { return std::begin(data_);}
-    iterator end() { return std::end(data_);}
-    const_iterator end() const { return std::end(data_);}
 private:
-    //! Holding the data
-    std::vector<T> data_;
-    //! TODO
+    //! Width of a bin in the Histogram, for arithmetic types only
     double dr_ = 0;
     //! Number of elements added into this Histogram
     size_t nadded_ = 0;

@@ -4,6 +4,10 @@
 implementing analysis algorithms for post-processing data from Molecular or quantum
 simulations.
 
+## Analysis functionalities
+
+* Radial distribution functions
+
 ## Get it, build it
 
 Be sure you have [installed](http://chemharp.readthedocs.org/en/latest/installation.html)

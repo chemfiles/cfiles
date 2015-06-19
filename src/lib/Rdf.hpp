@@ -24,6 +24,7 @@ struct rdf_options {
     std::string infile;
     std::string outfile;
     size_t nbins;
+    double rmax;
     size_t start;
     size_t end;
     size_t stride;

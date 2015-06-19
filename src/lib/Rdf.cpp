@@ -29,23 +29,25 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 static const char OPTIONS[] =
 R"(chrp rdf: radial distribution function calculations
-  Usage:
-    chrp rdf <trajectory>
-    chrp rdf [--bin=300] <trajectory> [-o <outfile>]
-    chrp rdf [-t <topology>] [--cell=10:11:12] <trajectory> [-o <outfile>]
-    chrp rdf (-h | --help)
+Usage:
+  chrp rdf [options] <trajectory>
+  chrp rdf (-h | --help)
 
-  Options:
-    -h --help              Show this help
-    -o --output=<file>     Write result to this file. Default to 'trajectory.rdf'
-    --start=<n>            First step to use [default: 0]
-    --end=<n>              Last step to use (-1 for the last file step) [default: -1]
-    --stride=<n>           Use a step every 'stride' step [default: 1]
-    -b --bins=<n>          Number of bins in the histogram [default: 200]
-    -t --topology=<path>   Path to an alternative topology file
-    -c --cell=<cell>       Alternative unit cell. <cell> should be formated using the
-                           <a:b:c:alpha:beta:gamma> or <a:b:c> or <L> format.
+Options:
+  -h --help                     show this help
+  -o <file>, --output=<file>    write result to <file>
+  --max=<max>                   maximal distance to use [default: 10]
+  --start=<n>                   first step [default: 0]
+  --end=<n>                     last step (-1 is the last step) [default: -1]
+  --stride=<n>                  use a step every <n> steps [default: 1]
+  -b <n>, --bins=<n>            number of bins in the histogram [default: 200]
+  -t <path>, --topology=<path>  path to an alternative topology file
+  -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
+                                using the <a:b:c:alpha:beta:gamma> or <a:b:c> or
+                                <L> format. This option set <max> to L/2.
 )";
+
+#include <iostream>
 
 static void parse_options(int argc, char** argv, rdf_options& options) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
@@ -57,29 +59,11 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
         options.outfile = options.infile + ".rdf";
     }
 
-    if (args["--bins"]){
-        options.nbins = args["--bins"].asLong();
-    } else {
-        options.nbins = 200;
-    }
-
-    if (args["--start"]){
-        options.start = args["--start"].asLong();
-    } else {
-        options.start = 0;
-    }
-
-    if (args["--end"]){
-        options.end = args["--end"].asLong();
-    } else {
-        options.end = -1;
-    }
-
-    if (args["--stride"]){
-        options.stride = args["--stride"].asLong();
-    } else {
-        options.stride = 1;
-    }
+    options.rmax = stod(args["--max"].asString());
+    options.nbins = stol(args["--bins"].asString());
+    options.start = stol(args["--start"].asString());
+    options.end = stol(args["--end"].asString());
+    options.stride = stol(args["--stride"].asString());
 
     if (args["--topology"]){
         options.topology = args["--topology"].asLong();
@@ -107,6 +91,9 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
 		} else {
 			throw chrp_exception("The cell option should have 1, 3 or 6 values.");
 		}
+
+        double L = std::min(options.cell[0], std::min(options.cell[1], options.cell[2]));
+        options.rmax = L/2;
 	} else {
 		options.cell.push_back(0);
         options.cell.push_back(0);
@@ -127,7 +114,7 @@ static const double pi = 3.141592653589793238463;
 int Rdf::run(int argc, char** argv) {
     parse_options(argc, argv, options_);
 
-    histogram_ = Histogram<double>(200, 0, 10);
+    histogram_ = Histogram<double>(options_.nbins, 0, options_.rmax);
     result_ = std::vector<double>(histogram_.size(), 0);
 
     harp::Trajectory file(options_.infile);
@@ -168,18 +155,20 @@ using namespace std;
 void Rdf::accumulate(harp::Frame& frame) {
     auto positions = frame.positions();
     auto cell = frame.cell();
-    size_t natoms = 0;
+    size_t npairs = 0;
 
 	for(size_t i=0; i<frame.natoms(); i++){
 		// TODO: add selection to only compute RDF on some atoms
 		auto ri = positions[i];
+        npairs++;
 		for(size_t j=i+1; j<frame.natoms(); j++){
 			// TODO: add selection to only compute RDF on some atoms
 
             auto rj = positions[j];
             double rij = norm(cell.wrap(ri - rj));
-			histogram_.insert(rij);
-            natoms += 2;
+            if (rij < options_.rmax){
+			    histogram_.insert(rij);
+            }
 		}
 	}
 	nsteps_++;
@@ -189,9 +178,9 @@ void Rdf::accumulate(harp::Frame& frame) {
     double norm = 1;
 
     if (V > 0) {
-        norm = 4*pi * natoms / V * dr;
+        norm = 2*pi * npairs * npairs / V * dr;
     } else {
-        norm = 4*pi * dr;
+        norm = 2*pi * dr;
     }
 
     histogram_.normalize([&norm, &dr](size_t i, double val){

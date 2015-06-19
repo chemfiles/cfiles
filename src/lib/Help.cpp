@@ -28,6 +28,7 @@ void Help::list_commands() {
     std::cout << std::endl << std::endl;
 
     const std::string SEP = "    ";
+    std::cout << "Available subcommands:" << std::endl;
     for (auto it : COMMANDS) {
         auto name = it.first;
         auto command = it.second();

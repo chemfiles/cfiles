@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <string>
+#include <map>
 
 #include "Command.hpp"
 #include "Errors.hpp"

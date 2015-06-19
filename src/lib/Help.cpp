@@ -29,7 +29,7 @@ void Help::list_commands() const {
 
     const std::string SEP = "    ";
     std::cout << "Available subcommands:" << std::endl;
-    for (auto it : COMMANDS) {
+    for (auto it : COMMANDS()) {
         auto name = it.first;
         auto command = it.second();
         std::cout << SEP << "'" << name << "' " << command->description() << std::endl;

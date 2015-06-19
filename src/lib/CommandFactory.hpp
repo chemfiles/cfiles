@@ -18,19 +18,12 @@
 #include "Command.hpp"
 #include "Errors.hpp"
 
-#include "Help.hpp"
-#include "Rdf.hpp"
-
 using command_creator_t = std::unique_ptr<Command>(*)(void);
-
-static std::map<std::string, command_creator_t> COMMANDS = {
-    {"help", [](){return std::unique_ptr<Command>(new Help());}},
-    {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
-};
+const std::map<std::string, command_creator_t>& COMMANDS();
 
 inline std::unique_ptr<Command> get_command(const std::string& name) {
-    auto it = COMMANDS.find(name);
-    if (it == COMMANDS.end()){
+    auto it = COMMANDS().find(name);
+    if (it == COMMANDS().end()){
         throw chrp_exception("Can not find the subcommand '" + name + "'");
     }
     return it->second();

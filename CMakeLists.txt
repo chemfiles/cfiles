@@ -36,11 +36,13 @@ target_link_libraries(chrp frontend docopt ${CHEMHARP_LIBRARIES})
 
 install(TARGETS chrp DESTINATION bin)
 
-# uninstall target
-configure_file(
-    "${CMAKE_SOURCE_DIR}/cmake/uninstall.in.cmake"
-    "${CMAKE_BINARY_DIR}/uninstall.cmake"
-    IMMEDIATE @ONLY)
+if(NOT TARGET uninstall)
+    # uninstall target
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/uninstall.in.cmake"
+        "${CMAKE_BINARY_DIR}/uninstall.cmake"
+        IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+endif()

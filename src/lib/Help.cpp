@@ -11,7 +11,7 @@
 #include "CommandFactory.hpp"
 
 std::string Help::description() const{
-    return "Print help and return.";
+    return "Get help about the subcommands.";
 }
 
 int Help::run(int argc, char** argv){
@@ -24,15 +24,16 @@ int Help::run(int argc, char** argv){
 }
 
 void Help::list_commands() const {
-    std::cout << "Use 'chrp help <subcommand>' to get help about one subcommand." ;
+    std::cout << "Use 'chrp help <subcommand>' to get help about a specific subcommand." ;
     std::cout << std::endl << std::endl;
 
-    const std::string SEP = "    ";
+    const size_t command_width = 10;
     std::cout << "Available subcommands:" << std::endl;
     for (auto it : COMMANDS()) {
         auto name = it.first;
         auto command = it.second();
-        std::cout << SEP << "'" << name << "' " << command->description() << std::endl;
+        std::cout << "  " << name  << std::string(command_width - name.size(), ' ');
+        std::cout << command->description() << std::endl;
     }
 }
 

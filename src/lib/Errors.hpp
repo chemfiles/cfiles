@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,13 +7,13 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_ERRORS_HPP
-#define CHRP_FRONTEND_ERRORS_HPP
+#ifndef CFILES_ERRORS_HPP
+#define CFILES_ERRORS_HPP
 
 #include <stdexcept>
 
-class chrp_exception : public std::runtime_error {
-    using runtime_error::runtime_error;
+struct CFilesError : public std::runtime_error {
+    CFilesError(const std::string& message): std::runtime_error(message) {}
 };
 
 #endif

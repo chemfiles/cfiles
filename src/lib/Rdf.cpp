@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -10,17 +9,18 @@
 #include <string>
 
 #include "docopt/docopt.h"
-#include <Chemharp.hpp>
+#include "chemfiles.hpp"
+using namespace chemfiles;
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 
 static const char OPTIONS[] =
-R"(chrp rdf: radial distribution function calculations
+R"(cfiles rdf: radial distribution function calculations
 Usage:
-  chrp rdf [options] <trajectory>
-  chrp rdf (-h | --help)
+  cfiles rdf [options] <trajectory>
+  cfiles rdf (-h | --help)
 
 Options:
   -h --help                     show this help
@@ -81,12 +81,12 @@ int Rdf::run(int argc, char** argv) {
     histogram_ = Histogram<double>(options_.nbins, 0, options_.rmax);
     result_ = std::vector<double>(histogram_.size(), 0);
 
-    harp::Trajectory file(options_.infile);
+    auto file = Trajectory(options_.infile);
 
     if (options_.cell.size() == 3) {
-        file.cell(harp::UnitCell(options_.cell[0], options_.cell[2], options_.cell[2]));
+        file.cell(UnitCell(options_.cell[0], options_.cell[2], options_.cell[2]));
     } else if (options_.cell.size() == 6) {
-        file.cell(harp::UnitCell(
+        file.cell(UnitCell(
             options_.cell[0], options_.cell[2], options_.cell[2],
             options_.cell[3], options_.cell[4], options_.cell[5]
         ));
@@ -105,7 +105,7 @@ int Rdf::run(int argc, char** argv) {
     }
 
     for (size_t i=start; i<end; i+=stride) {
-        harp::Frame frame = file.read();
+        auto frame = file.read();
         accumulate(frame);
     }
     finish();
@@ -116,7 +116,7 @@ int Rdf::run(int argc, char** argv) {
 #include <iostream>
 using namespace std;
 
-void Rdf::accumulate(harp::Frame& frame) {
+void Rdf::accumulate(Frame& frame) {
     auto positions = frame.positions();
     auto cell = frame.cell();
     size_t npairs = 0;

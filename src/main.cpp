@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,7 +11,7 @@
 #include "lib/CommandFactory.hpp"
 
 int usage() {
-    std::cout << "Usage: chrp subcommand [--options] [args]" << std::endl;
+    std::cout << "Usage: cfiles subcommand [--options] [args]" << std::endl;
     std::cout << std::endl;
     std::cout << "Some usefull subcommands:" << std::endl;
 

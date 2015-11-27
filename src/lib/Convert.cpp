@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,18 +10,19 @@
 #include "utils.hpp"
 
 #include "docopt/docopt.h"
-#include <Chemharp.hpp>
+#include "chemfiles.hpp"
+using namespace chemfiles;
 
 static const char OPTIONS[] =
-R"(chrp convert: trajectory conversion
+R"(cfiles convert: trajectory conversion
 
 Convert trajectories from one format to another, automatically guessing the format to use
 based on the files extension. The '--input-format' and '--output-format' can be used to
 force the format.
 
 Usage:
-  chrp convert [options] <input> <output>
-  chrp convert (-h | --help)
+  cfiles convert [options] <input> <output>
+  cfiles convert (-h | --help)
 
 Options:
   -h --help                     show this help
@@ -85,13 +85,13 @@ int Convert::run(int argc, char** argv) {
     convert_options options;
     parse_options(argc, argv, options);
 
-    harp::Trajectory infile(options.in_file, "r", options.in_format);
-    harp::Trajectory outfile(options.out_file, "w", options.out_format);
+    auto infile = Trajectory(options.in_file, "r", options.in_format);
+    auto outfile = Trajectory(options.out_file, "w", options.out_format);
 
     if (options.cell.size() == 3) {
-        infile.cell(harp::UnitCell(options.cell[0], options.cell[2], options.cell[2]));
+        infile.cell(UnitCell(options.cell[0], options.cell[2], options.cell[2]));
     } else if (options.cell.size() == 6) {
-        infile.cell(harp::UnitCell(
+        infile.cell(UnitCell(
             options.cell[0], options.cell[2], options.cell[2],
             options.cell[3], options.cell[4], options.cell[5]
         ));
@@ -102,7 +102,7 @@ int Convert::run(int argc, char** argv) {
     }
 
     for (size_t i=0; i<infile.nsteps(); i++) {
-        harp::Frame frame = infile.read();
+        auto frame = infile.read();
         outfile.write(frame);
     }
 

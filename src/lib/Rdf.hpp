@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,8 +7,8 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_RDF_HPP
-#define CHRP_FRONTEND_RDF_HPP
+#ifndef CFILES_RDF_HPP
+#define CFILES_RDF_HPP
 
 #include <vector>
 #include <fstream>
@@ -17,7 +16,7 @@
 #include "Histogram.hpp"
 #include "Command.hpp"
 
-namespace harp {
+namespace chemfiles {
     class Frame;
 }
 
@@ -41,7 +40,7 @@ public:
     virtual std::string help() const override;
 private:
     //! Add the data from a frame to the histogram
-    void accumulate(harp::Frame& frame);
+    void accumulate(chemfiles::Frame& frame);
     //! Normalize the histogram data
     void finish();
     //! Write the histogram data to a file

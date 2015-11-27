@@ -8,8 +8,8 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_HISTOGRAM_HPP
-#define CHRP_FRONTEND_HISTOGRAM_HPP
+#ifndef CFILES_HISTOGRAM_HPP
+#define CFILES_HISTOGRAM_HPP
 
 #include <cstdlib>
 #include <cassert>

@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,8 +7,8 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_COMMAND_FACTORY_HPP
-#define CHRP_FRONTEND_COMMAND_FACTORY_HPP
+#ifndef CFILES_COMMAND_FACTORY_HPP
+#define CFILES_COMMAND_FACTORY_HPP
 
 #include <memory>
 #include <string>
@@ -24,7 +23,7 @@ const std::map<std::string, command_creator_t>& COMMANDS();
 inline std::unique_ptr<Command> get_command(const std::string& name) {
     auto it = COMMANDS().find(name);
     if (it == COMMANDS().end()){
-        throw chrp_exception("Can not find the subcommand '" + name + "'");
+        throw CFilesError("Can not find the subcommand '" + name + "'");
     }
     return it->second();
 }

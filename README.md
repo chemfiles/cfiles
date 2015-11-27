@@ -1,8 +1,12 @@
-# chrp, multi-formats analysis tools for chemistry
+# cfiles, multi-formats analysis tools for chemistry
 
-`chrp` is the binary frontend to [Chemharp](https://github.com/Luthaf/Chemharp/),
-implementing analysis algorithms for post-processing data from Molecular or quantum
-simulations.
+`cfiles` is an analysis frontend for the
+[Chemfiles](https://github.com/chemfiles/chemfiles/) library, implementing analysis
+algorithms for post-processing data from molecular or quantum simulations.
+
+This is still in alpha mode, largely untested, created for dog-feeding purpose and as such
+it will surely eat your laundry and do nasty things. Feel free to use it, without any
+guarantee about the result.
 
 ## Analysis functionalities
 
@@ -10,18 +14,13 @@ simulations.
 
 ## Get it, build it
 
-Be sure you have [installed](http://chemharp.readthedocs.org/en/latest/installation.html)
-the Chemharp library, and then run:
+To build it you can run
+
 ```bash
-git clone https://github.com/Luthaf/chrp
-cd chrp
+git clone https://github.com/chemfiles/cfiles
+cd cfiles
 mkdir build
 cd build
 cmake ..
 make install
 ```
-
-## How do you pronounce it ?
-
-As you can, without broking your teeth! I try to say something like *sharp*, but very
-quick and without any vowel.

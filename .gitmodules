@@ -1,0 +1,3 @@
+[submodule "chemfiles"]
+	path = chemfiles
+	url = https://github.com/chemfiles/chemfiles

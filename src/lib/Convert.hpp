@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,8 +7,8 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_CONVERT_HPP
-#define CHRP_FRONTEND_CONVERT_HPP
+#ifndef CFILES_CONVERT_HPP
+#define CFILES_CONVERT_HPP
 
 #include "Command.hpp"
 

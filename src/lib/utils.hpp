@@ -1,5 +1,4 @@
-/*
- * chrp, an analysis frontend for the Chemharp library
+/* cfiles, an analysis frontend for the Chemfiles library
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,8 +7,8 @@
 */
 
 #pragma once
-#ifndef CHRP_FRONTEND_UTILS_HPP
-#define CHRP_FRONTEND_UTILS_HPP
+#ifndef CFILES_UTILS_HPP
+#define CFILES_UTILS_HPP
 
 #include <vector>
 #include <string>
@@ -47,7 +46,7 @@ inline std::vector<double> parse_cell(const std::string& cell_string) {
         cell.push_back(stod(cell_strs[4]));
         cell.push_back(stod(cell_strs[5]));
     } else {
-        throw chrp_exception("The cell string should have 1, 3 or 6 values.");
+        throw CFilesError("The cell string should have 1, 3 or 6 values.");
     }
 
     return cell;

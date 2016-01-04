@@ -5,12 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-
 #pragma once
 #ifndef CFILES_HELP_HPP
 #define CFILES_HELP_HPP
 
-#include <iostream>
 #include "Command.hpp"
 
 class Help : public Command {

@@ -25,6 +25,9 @@ Usage:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>
+  -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a single
+                                selection ("name O") or two selections separated by a
+                                comma ("name O, name H") [default: all]
   --max=<max>                   maximal distance to use [default: 10]
   --start=<n>                   first step [default: 0]
   --end=<n>                     last step (-1 is the last step) [default: -1]
@@ -51,6 +54,22 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
     options.start = stol(args["--start"].asString());
     options.end = stol(args["--end"].asString());
     options.stride = stol(args["--stride"].asString());
+
+    if (args["--selection"]){
+        auto selections = split(args["--selection"].asString(), ',');
+        if (selections.size() == 1) {
+            options.selection_i = selections[0];
+            options.selection_j = selections[0];
+        } else if (selections.size() == 2) {
+            options.selection_i = selections[0];
+            options.selection_j = selections[1];
+        } else {
+            throw CFilesError("Wrong size for selection string. Only two selection are allowed.");
+        }
+    } else {
+        options.selection_i = "all";
+        options.selection_j = "all";
+    }
 
     if (args["--topology"]){
         options.topology = args["--topology"].asString();
@@ -97,12 +116,15 @@ int Rdf::run(int argc, char** argv) {
     }
 
     size_t start=options_.start, end=options_.end, stride=options_.stride;
-    if (end == -1){
+    if (end == static_cast<size_t>(-1)) {
         end = file.nsteps();
     }
     if (start > end) {
-        chrp_exception("Can not have 'start' bigger than 'end'.");
+        throw CFilesError("Can not have 'start' bigger than 'end'.");
     }
+
+    sel_i = Selection(options_.selection_i);
+    sel_j = Selection(options_.selection_j);
 
     for (size_t i=start; i<end; i+=stride) {
         auto frame = file.read();
@@ -113,49 +135,54 @@ int Rdf::run(int argc, char** argv) {
     return 0;
 }
 
-#include <iostream>
-using namespace std;
-
 void Rdf::accumulate(Frame& frame) {
     auto positions = frame.positions();
     auto cell = frame.cell();
     size_t npairs = 0;
 
-	for(size_t i=0; i<frame.natoms(); i++){
-		// TODO: add selection to only compute RDF on some atoms
-		auto ri = positions[i];
-        npairs++;
-		for(size_t j=i+1; j<frame.natoms(); j++){
-			// TODO: add selection to only compute RDF on some atoms
+    std::vector<Bool> matched_i, matched_j;
+    if (options_.selection_i == options_.selection_j) {
+        // Only evaluate the selection once
+        matched_i = sel_i.evaluate(frame);
+        matched_j = matched_i;
+    } else {
+        matched_i = sel_i.evaluate(frame);
+        matched_j = sel_j.evaluate(frame);
+    }
 
-            auto rj = positions[j];
+	for(size_t i=0; i<frame.natoms(); i++){
+	    if (!matched_i[i]) continue;
+		auto& ri = positions[i];
+
+		for(size_t j=0; j<frame.natoms(); j++){
+            if (i == j) continue;
+			if (!matched_j[j]) continue;
+
+            auto& rj = positions[j];
             double rij = norm(cell.wrap(ri - rj));
             if (rij < options_.rmax){
-			    histogram_.insert(rij);
+                npairs++;
+			    histogram_.insert_at(rij);
             }
 		}
 	}
-	nsteps_++;
 
     double V = cell.volume();
+    if (V > 0) V = 1;
+
     double dr = histogram_.bin_size();
-    double norm = 1;
+    double norm = 8 * pi * npairs / V * dr;
 
-    if (V > 0) {
-        norm = 2*pi * npairs * npairs / V * dr;
-    } else {
-        norm = 2*pi * dr;
-    }
-
-    histogram_.normalize([&norm, &dr](size_t i, double val){
-        double rr = (i + 0.5)*dr * (i + 0.5)*dr;
-        return val / (norm * rr);
+    histogram_.normalize([norm, dr](size_t i, double val){
+        double r = (i + 0.5) * dr;
+        return val / (norm * r * r);
     });
 
     for (size_t i=0; i<histogram_.size(); i++){
         result_[i] += histogram_[i];
         histogram_[i] = 0;
     }
+    nsteps_++;
 }
 
 void Rdf::finish() {
@@ -168,14 +195,14 @@ void Rdf::write(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Radial distribution function for file " << options_.infile << std::endl;
+        outfile << "# Atoms: " << options_.selection_i << " & " << options_.selection_j << std::endl;
 
         double dr = histogram_.bin_size();
         for (size_t i=0; i<result_.size(); i++){
             outfile << i * dr << "  " << result_[i] << "\n";
         }
-
         outfile << std::endl;
     } else {
-        throw chrp_exception("Could not open the " + filename + "file.");
+        throw CFilesError("Could not open the '" + filename + "' file.");
     }
 }

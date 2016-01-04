@@ -66,15 +66,10 @@ public:
     ENABLE_FOR_ARITHMETIC_TYPES
     void bin_size(double dr) {dr_ = dr;}
 
-    //! Insert some \c data in the histogram, at the position \c bin.
-    void insert(T new_data, size_t bin) {
-        assert(bin < size());
-        (*this)[bin] += 1;
-    }
     //! Insert some \c data in the histogram, and guess the position using the \c bin_size
     //! of the Histogram.
     ENABLE_FOR_ARITHMETIC_TYPES
-    void insert(T new_data) {
+    void insert_at(T new_data) {
         size_t bin = static_cast<size_t>(new_data / dr_);
         assert(bin < size());
         (*this)[bin] += 1;

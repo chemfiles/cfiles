@@ -38,7 +38,7 @@ inline std::vector<double> parse_cell(const std::string& cell_string) {
         cell.push_back(stod(cell_strs[0]));
         cell.push_back(stod(cell_strs[1]));
         cell.push_back(stod(cell_strs[2]));
-    } else if (cell_strs.size()==3) {
+    } else if (cell_strs.size()==6) {
         cell.push_back(stod(cell_strs[0]));
         cell.push_back(stod(cell_strs[1]));
         cell.push_back(stod(cell_strs[2]));

@@ -89,16 +89,16 @@ int Convert::run(int argc, char** argv) {
     auto outfile = Trajectory(options.out_file, "w", options.out_format);
 
     if (options.cell.size() == 3) {
-        infile.cell(UnitCell(options.cell[0], options.cell[2], options.cell[2]));
+        infile.set_cell(UnitCell(options.cell[0], options.cell[2], options.cell[2]));
     } else if (options.cell.size() == 6) {
-        infile.cell(UnitCell(
+        infile.set_cell(UnitCell(
             options.cell[0], options.cell[2], options.cell[2],
             options.cell[3], options.cell[4], options.cell[5]
         ));
     }
 
     if (options.topology != "") {
-        infile.topology(options.topology);
+        infile.set_topology(options.topology);
     }
 
     for (size_t i=0; i<infile.nsteps(); i++) {

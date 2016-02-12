@@ -103,16 +103,16 @@ int Rdf::run(int argc, char** argv) {
     auto file = Trajectory(options_.infile);
 
     if (options_.cell.size() == 3) {
-        file.cell(UnitCell(options_.cell[0], options_.cell[2], options_.cell[2]));
+        file.set_cell(UnitCell(options_.cell[0], options_.cell[2], options_.cell[2]));
     } else if (options_.cell.size() == 6) {
-        file.cell(UnitCell(
+        file.set_cell(UnitCell(
             options_.cell[0], options_.cell[2], options_.cell[2],
             options_.cell[3], options_.cell[4], options_.cell[5]
         ));
     }
 
     if (options_.topology != "") {
-        file.topology(options_.topology);
+        file.set_topology(options_.topology);
     }
 
     size_t start=options_.start, end=options_.end, stride=options_.stride;

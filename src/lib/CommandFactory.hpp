@@ -12,20 +12,28 @@
 
 #include <memory>
 #include <string>
-#include <map>
+#include <vector>
 
 #include "Command.hpp"
 #include "Errors.hpp"
 
-using command_creator_t = std::unique_ptr<Command>(*)(void);
-const std::map<std::string, command_creator_t>& COMMANDS();
+struct command_creator {
+    using command_creator_t = std::unique_ptr<Command>(*)(void);
+    //! Command name
+    std::string name;
+    //! Command instanciation
+    command_creator_t create;
+};
+
+const std::vector<command_creator>& all_commands();
 
 inline std::unique_ptr<Command> get_command(const std::string& name) {
-    auto it = COMMANDS().find(name);
-    if (it == COMMANDS().end()){
-        throw CFilesError("Can not find the subcommand '" + name + "'");
+    for (auto& command: all_commands()) {
+        if (command.name == name) {
+            return command.create();
+        }
     }
-    return it->second();
+    throw CFilesError("Can not find the subcommand '" + name + "'");
 }
 
 #endif

@@ -27,11 +27,11 @@ int Help::run(int argc, char** argv){
 void Help::list_commands() const {
     const size_t command_width = 10;
     std::cout << "Available subcommands:" << std::endl;
-    for (auto it : COMMANDS()) {
-        auto name = it.first;
-        auto command = it.second();
-        std::cout << "  " << name  << std::string(command_width - name.size(), ' ');
-        std::cout << command->description() << std::endl;
+    for (auto& command: all_commands()) {
+        auto name = command.name;
+        auto description = command.create()->description();
+        std::cout << "  " <<  name << std::string(command_width - name.size(), ' ');
+        std::cout << description << std::endl;
     }
 }
 

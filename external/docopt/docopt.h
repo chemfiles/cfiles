@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Jared Grubb. All rights reserved.
 //
 
-#ifndef __docopt__docopt__
-#define __docopt__docopt__
+#ifndef docopt__docopt_h_
+#define docopt__docopt_h_
 
 #include "docopt_value.h"
 
@@ -16,19 +16,19 @@
 #include <string>
 
 namespace docopt {
-
+	
 	// Usage string could not be parsed (ie, the developer did something wrong)
 	struct DocoptLanguageError : std::runtime_error { using runtime_error::runtime_error; };
-
+	
 	// Arguments passed by user were incorrect (ie, developer was good, user is wrong)
 	struct DocoptArgumentError : std::runtime_error { using runtime_error::runtime_error; };
-
+	
 	// Arguments contained '--help' and parsing was aborted early
 	struct DocoptExitHelp : std::runtime_error { DocoptExitHelp(); };
-
+	
 	// Arguments contained '--version' and parsing was aborted early
 	struct DocoptExitVersion : std::runtime_error { DocoptExitVersion(); };
-
+	
 	/// Parse user options from the given option string.
 	///
 	/// @param doc   The usage string
@@ -47,7 +47,7 @@ namespace docopt {
 					    bool help = true,
 					    bool version = true,
 					    bool options_first = false);
-
+	
 	/// Parse user options from the given string, and exit appropriately
 	///
 	/// Calls 'docopt_parse' and will terminate the program if any of the exceptions above occur:
@@ -62,4 +62,4 @@ namespace docopt {
 					    bool options_first = false) noexcept;
 }
 
-#endif /* defined(__docopt__docopt__) */
+#endif /* defined(docopt__docopt_h_) */

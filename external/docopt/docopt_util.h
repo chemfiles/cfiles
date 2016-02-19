@@ -21,7 +21,7 @@ namespace {
 		return std::equal(prefix.begin(), prefix.end(),
 				  str.begin());
 	}
-
+	
 	std::string trim(std::string&& str,
 			 const std::string& whitespace = " \t\n")
 	{
@@ -29,38 +29,38 @@ namespace {
 		if (strEnd==std::string::npos)
 			return {}; // no content
 		str.erase(strEnd+1);
-
+		
 		const auto strBegin = str.find_first_not_of(whitespace);
 		str.erase(0, strBegin);
-
+		
 		return std::move(str);
 	}
-
+	
 	std::vector<std::string> split(std::string const& str, size_t pos = 0)
 	{
 		const char* const anySpace = " \t\r\n\v\f";
-
+		
 		std::vector<std::string> ret;
 		while (pos != std::string::npos) {
 			auto start = str.find_first_not_of(anySpace, pos);
 			if (start == std::string::npos) break;
-
+			
 			auto end = str.find_first_of(anySpace, start);
 			auto size = end==std::string::npos ? end : end-start;
 			ret.emplace_back(str.substr(start, size));
-
+			
 			pos = end;
 		}
-
+		
 		return ret;
 	}
-
+	
 	std::tuple<std::string, std::string, std::string> partition(std::string str, std::string const& point)
 	{
 		std::tuple<std::string, std::string, std::string> ret;
-
+		
 		auto i = str.find(point);
-
+		
 		if (i == std::string::npos) {
 			// no match: string goes in 0th spot only
 		} else {
@@ -69,15 +69,15 @@ namespace {
 			str.resize(i);
 		}
 		std::get<0>(ret) = std::move(str);
-
+		
 		return ret;
 	}
-
+	
 	template <typename I>
 	std::string join(I iter, I end, std::string const& delim) {
 		if (iter==end)
 			return {};
-
+		
 		std::string ret = *iter;
 		for(++iter; iter!=end; ++iter) {
 			ret.append(delim);

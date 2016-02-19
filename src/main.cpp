@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include "lib/CommandFactory.hpp"
-#include "lib/Help.hpp"
+#include "CommandFactory.hpp"
+#include "Help.hpp"
 
 
 int usage() {

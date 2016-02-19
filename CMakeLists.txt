@@ -18,12 +18,8 @@ include_directories(chemfiles/include/)
 include_directories(SYSTEM external/)
 add_library(docopt STATIC external/docopt/docopt.cpp)
 
-file(GLOB_RECURSE sources src/lib/**.cpp)
-add_library(frontend STATIC ${sources})
-
-add_executable(cfiles src/main.cpp)
-target_link_libraries(cfiles frontend docopt)
-
-target_link_libraries(cfiles chemfiles)
+file(GLOB sources src/*.cpp)
+add_executable(cfiles ${sources})
+target_link_libraries(cfiles docopt chemfiles)
 
 install(TARGETS cfiles DESTINATION bin)

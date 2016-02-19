@@ -17,26 +17,33 @@ using namespace chemfiles;
 #include "utils.hpp"
 
 static const char OPTIONS[] =
-R"(cfiles rdf: radial distribution function calculations
+R"(cfiles rdf: compute radial distribution function
+
+Compute pair radial distrubution function (often called g(r)). The pairs of particles to
+use can be specified using the chemfiles selection language. It is possible to provide an
+alternative topology or unit cell when this information is not present in the trajectory.
+
 Usage:
   cfiles rdf [options] <trajectory>
   cfiles rdf (-h | --help)
 
 Options:
   -h --help                     show this help
-  -o <file>, --output=<file>    write result to <file>
+  -o <file>, --output=<file>    write result to <file>. This default to the trajectoty
+                                file name with the `.rdf` extension.
   -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a single
                                 selection ("name O") or two selections separated by a
                                 comma ("name O, name H") [default: all]
-  --max=<max>                   maximal distance to use [default: 10]
-  --start=<n>                   first step [default: 0]
-  --end=<n>                     last step (-1 is the last step) [default: -1]
-  --stride=<n>                  use a step every <n> steps [default: 1]
-  -b <n>, --bins=<n>            number of bins in the histogram [default: 200]
   -t <path>, --topology=<path>  path to an alternative topology file
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
                                 using the <a:b:c:alpha:beta:gamma> or <a:b:c> or
                                 <L> format. This option set <max> to L/2.
+  --start=<n>                   first step [default: 0]
+  --end=<n>                     last step (-1 is the last step) [default: -1]
+  --stride=<n>                  use a step every <n> steps [default: 1]
+  --max=<max>                   maximal distance to use [default: 10]
+  -p <n>, --points=<n>          number of points in the histogram [default: 200]
+
 )";
 
 static rdf_options parse_options(int argc, char** argv) {
@@ -52,7 +59,7 @@ static rdf_options parse_options(int argc, char** argv) {
     }
 
     options.rmax = stod(args["--max"].asString());
-    options.nbins = stol(args["--bins"].asString());
+    options.npoints = stol(args["--points"].asString());
     options.start = stol(args["--start"].asString());
     options.end = stol(args["--end"].asString());
     options.stride = stol(args["--stride"].asString());
@@ -101,7 +108,7 @@ static const double pi = 3.141592653589793238463;
 int Rdf::run(int argc, char** argv) {
     options_ = parse_options(argc, argv);
 
-    histogram_ = Histogram<double>(options_.nbins, 0, options_.rmax);
+    histogram_ = Histogram<double>(options_.npoints, 0, options_.rmax);
     result_ = std::vector<double>(histogram_.size(), 0);
 
     auto file = Trajectory(options_.infile);

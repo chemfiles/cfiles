@@ -27,7 +27,7 @@ struct rdf_options {
     //! Selection for the second atom in radial distribution
     std::string selection_j;
     //! Number of points in the histogram
-    size_t nbins;
+    size_t npoints;
     //! Maximum distance for the histogram
     double rmax;
     //! First step to use in g(r)

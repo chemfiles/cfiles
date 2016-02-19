@@ -43,7 +43,8 @@ struct convert_options {
     std::string topology;
 };
 
-static void parse_options(int argc, char** argv, convert_options& options) {
+static convert_options parse_options(int argc, char** argv) {
+    convert_options options;
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
     options.in_file = args["<input>"].asString();
@@ -70,6 +71,7 @@ static void parse_options(int argc, char** argv, convert_options& options) {
     if (args["--cell"]) {
 		options.cell = parse_cell(args["--cell"].asString());
 	}
+    return options;
 }
 
 
@@ -82,8 +84,7 @@ std::string Convert::help() const {
 }
 
 int Convert::run(int argc, char** argv) {
-    convert_options options;
-    parse_options(argc, argv, options);
+    auto options = parse_options(argc, argv);
 
     auto infile = Trajectory(options.in_file, "r", options.in_format);
     auto outfile = Trajectory(options.out_file, "w", options.out_format);

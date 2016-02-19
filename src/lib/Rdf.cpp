@@ -39,8 +39,10 @@ Options:
                                 <L> format. This option set <max> to L/2.
 )";
 
-static void parse_options(int argc, char** argv, rdf_options& options) {
+static rdf_options parse_options(int argc, char** argv) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
+
+    rdf_options options;
     options.infile = args["<trajectory>"].asString();
 
     if (args["--output"]){
@@ -82,6 +84,8 @@ static void parse_options(int argc, char** argv, rdf_options& options) {
         double L = std::min(options.cell[0], std::min(options.cell[1], options.cell[2]));
         options.rmax = L/2;
 	}
+
+    return options;
 }
 
 std::string Rdf::description() const {
@@ -95,7 +99,7 @@ std::string Rdf::help() const {
 static const double pi = 3.141592653589793238463;
 
 int Rdf::run(int argc, char** argv) {
-    parse_options(argc, argv, options_);
+    options_ = parse_options(argc, argv);
 
     histogram_ = Histogram<double>(options_.nbins, 0, options_.rmax);
     result_ = std::vector<double>(histogram_.size(), 0);

@@ -16,9 +16,10 @@ public:
     Help() = default;
     virtual int run(int argc, char** argv) override;
     virtual std::string description() const override;
-private:
+
     //! List all available commands with the associated description
     void list_commands() const;
+private:
     //! Get help about one command
     void about(const std::string& command) const;
 };

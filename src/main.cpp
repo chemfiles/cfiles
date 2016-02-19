@@ -9,15 +9,15 @@
 #include <iostream>
 
 #include "lib/CommandFactory.hpp"
+#include "lib/Help.hpp"
+
 
 int usage() {
     std::cout << "Usage: cfiles subcommand [--options] [args]" << std::endl;
     std::cout << std::endl;
-    std::cout << "Some usefull subcommands:" << std::endl;
 
-    const std::string SEP = "    ";
-    auto help = get_command("help");
-    std::cout << SEP << "'help' " << help->description() << std::endl;
+    auto help = Help();
+    help.list_commands();
 
     return 1;
 }

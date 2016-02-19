@@ -10,11 +10,13 @@
 #include "CommandFactory.hpp"
 
 std::string Help::description() const{
-    return "Get help about the subcommands.";
+    return "Get help about subcommands.";
 }
 
 int Help::run(int argc, char** argv){
     if (argc == 1) {
+        std::cout << "Use 'cfiles help <subcommand>' to get help about a specific subcommand." ;
+        std::cout << std::endl << std::endl;
         list_commands();
     } else {
         about(argv[1]);
@@ -23,9 +25,6 @@ int Help::run(int argc, char** argv){
 }
 
 void Help::list_commands() const {
-    std::cout << "Use 'cfiles help <subcommand>' to get help about a specific subcommand." ;
-    std::cout << std::endl << std::endl;
-
     const size_t command_width = 10;
     std::cout << "Available subcommands:" << std::endl;
     for (auto it : COMMANDS()) {

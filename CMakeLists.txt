@@ -22,4 +22,10 @@ file(GLOB sources src/*.cpp)
 add_executable(cfiles ${sources})
 target_link_libraries(cfiles docopt chemfiles)
 
+if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.9)
+    find_package(Boost REQUIRED COMPONENTS Regex)
+    include_directories(${Boost_INCLUDE_DIRS})
+    target_link_libraries(cfiles ${Boost_LIBRARIES})
+endif()
+
 install(TARGETS cfiles DESTINATION bin)

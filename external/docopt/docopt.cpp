@@ -17,10 +17,24 @@
 #include <unordered_map>
 #include <map>
 #include <string>
-#include <regex>
 #include <iostream>
 #include <cassert>
 #include <cstddef>
+
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 8)
+#include <boost/regex.hpp>
+namespace std {
+	using boost::regex;
+	using boost::sregex_iterator;
+	using boost::smatch;
+	using boost::regex_search;
+	namespace regex_constants {
+		using boost::regex_constants::match_not_null;
+	}
+}
+#else
+#include <regex>
+#endif
 
 using namespace docopt;
 

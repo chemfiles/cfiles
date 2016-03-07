@@ -23,8 +23,10 @@ cd cfiles
 mkdir build
 cd build
 cmake ..
-make install
+make
 ```
+
+You can then copy the `cfiles` executable to some place in your path
 
 > Note: on CentOS 7 with GCC 4.8, `cfiles` rely on the `boost_regex` library,
 > which can be installed using `yum install boost-regex`. The cmake invocation

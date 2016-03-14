@@ -21,7 +21,7 @@
 #include <cassert>
 #include <cstddef>
 
-#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 8)
+#ifdef DOCOPT_USES_BOOST_REGEX
 #include <boost/regex.hpp>
 namespace std {
 	using boost::regex;

@@ -27,6 +27,14 @@ int main(int argc, const char* argv[]) {
         return usage();
     }
 
+    for (int i = 0; i<argc ; i++) {
+        if (argv[i] == std::string("-h") || argv[i] == std::string("--help")) {
+            auto command = get_command("help");
+            const char* args[] = {""};
+            return command->run(1, args);
+        }
+    }
+
     try {
         auto command = get_command(argv[1]);
         return command->run(argc - 1, &argv[1]);

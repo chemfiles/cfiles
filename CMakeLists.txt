@@ -30,3 +30,6 @@ if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.9)
 endif()
 
 install(TARGETS cfiles DESTINATION bin)
+
+enable_testing()
+add_subdirectory(tests)

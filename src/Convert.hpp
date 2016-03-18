@@ -15,7 +15,7 @@
 class Convert : public Command {
 public:
     Convert() {}
-    virtual int run(int argc, char** argv) override;
+    virtual int run(int argc, const char* argv[]) override;
     virtual std::string description() const override;
     virtual std::string help() const override;
 private:

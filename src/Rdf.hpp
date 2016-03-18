@@ -45,7 +45,7 @@ struct rdf_options {
 class Rdf : public Command {
 public:
     Rdf() : nsteps_(0), sel_i("all"), sel_j("all") {}
-    virtual int run(int argc, char** argv) override;
+    virtual int run(int argc, const char* argv[]) override;
     virtual std::string description() const override;
     virtual std::string help() const override;
 private:

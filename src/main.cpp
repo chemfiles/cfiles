@@ -22,7 +22,7 @@ int usage() {
     return 1;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, const char* argv[]) {
     if (argc < 2){
         return usage();
     }

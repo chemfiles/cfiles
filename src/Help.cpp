@@ -13,7 +13,7 @@ std::string Help::description() const{
     return "Get help about subcommands.";
 }
 
-int Help::run(int argc, char** argv){
+int Help::run(int argc, const char* argv[]){
     if (argc == 1) {
         std::cout << "Use 'cfiles help <subcommand>' to get help about a specific subcommand." ;
         std::cout << std::endl << std::endl;

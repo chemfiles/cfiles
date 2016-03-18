@@ -46,7 +46,7 @@ Options:
 
 )";
 
-static rdf_options parse_options(int argc, char** argv) {
+static rdf_options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
     rdf_options options;
@@ -105,7 +105,7 @@ std::string Rdf::help() const {
 
 static const double pi = 3.141592653589793238463;
 
-int Rdf::run(int argc, char** argv) {
+int Rdf::run(int argc, const char* argv[]) {
     options_ = parse_options(argc, argv);
 
     histogram_ = Histogram<double>(options_.npoints, 0, options_.rmax);

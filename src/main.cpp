@@ -7,32 +7,54 @@
 */
 
 #include <iostream>
+#include "chemfiles.hpp"
 
 #include "CommandFactory.hpp"
 #include "Help.hpp"
 
+static auto CFILES_VERSION = "0.0.1";
 
-int usage() {
+static std::string version() {
+    return std::string("version ") + CFILES_VERSION + " (using chemfiles " + CHEMFILES_VERSION + ")";
+}
+
+static void print_usage() {
     std::cout << "Usage: cfiles subcommand [--options] [args]" << std::endl;
     std::cout << std::endl;
 
     auto help = Help();
     help.list_commands();
-
-    return 1;
 }
 
 int main(int argc, const char* argv[]) {
     if (argc < 2){
-        return usage();
+        std::cout << "cfiles: analysis algorithms for theoretical chemistry" << std::endl;
+        std::cout << version() << std::endl;
+        std::cout << std::endl;
+        print_usage();
+        return EXIT_FAILURE;
     }
 
+    // Check first for version or help flags
     for (int i = 0; i<argc ; i++) {
         if (argv[i] == std::string("-h") || argv[i] == std::string("--help")) {
             auto command = get_command("help");
             const char* args[] = {""};
             return command->run(1, args);
         }
+
+        if (argv[i] == std::string("-V") || argv[i] == std::string("--version")) {
+            std::cout << "cfiles " << version() << std::endl;
+            return EXIT_SUCCESS;
+        }
+    }
+
+    // Error on other flags
+    if (argv[1][0] == '-') {
+        std::cout << "Unkown flag: " << argv[1] << std::endl;
+        std::cout << std::endl;
+        print_usage();
+        return EXIT_FAILURE;
     }
 
     try {

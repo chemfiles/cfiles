@@ -1,5 +1,5 @@
 # -*- codding: utf8 -*-
-from chfltests import cfiles
+from testrun import cfiles
 
 
 def help_flag():

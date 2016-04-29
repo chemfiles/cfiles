@@ -1,5 +1,5 @@
 # -*- codding: utf8 -*-
-from chfltests import cfiles
+from testrun import cfiles
 import os
 
 PDB_CONTENT = """CRYST1   15.000   15.000   15.000  90.00  90.00  90.00

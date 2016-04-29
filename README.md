@@ -28,6 +28,5 @@ make
 
 You can then copy the `cfiles` executable to some place in your path
 
-> Note: on CentOS 7 with GCC 4.8, `cfiles` rely on the `boost_regex` library,
-> which can be installed using `yum install boost-regex`. The cmake invocation
-> must then be `cmake -DBoost_REGEX_LIBRARY_RELEASE=/usr/lib64/libboost_regex.so ..`.
+**Note:** When using GCC 4.8, `cfiles` rely on the `boost_regex` library, which
+can be installed using your favorite package manager.

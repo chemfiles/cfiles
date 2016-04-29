@@ -22,7 +22,12 @@ file(GLOB sources src/*.cpp)
 add_executable(cfiles ${sources})
 target_link_libraries(cfiles docopt chemfiles)
 
-if("${CMAKE_COMPILER_IS_GNUCXX}" AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.9)
+try_compile(STD_REGEX_WORKS
+    ${PROJECT_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/cmake/check_std_regex.cpp
+)
+
+if(NOT ${STD_REGEX_WORKS})
     message(STATUS "Using Boost.Regex instead of std::regex")
     find_package(Boost REQUIRED COMPONENTS Regex)
     include_directories(${Boost_INCLUDE_DIRS})

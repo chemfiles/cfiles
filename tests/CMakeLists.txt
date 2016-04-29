@@ -10,6 +10,7 @@ function(cfiles_test _file_)
         COMMAND ${PYTHON_EXECUTABLE} ${_file_}
         WORKING_DIRECTORY ${cfiles_BINARY_DIR}
     )
+    set_tests_properties(${_name_} PROPERTIES LABELS "cfiles")
 endfunction()
 
 file(GLOB all_test_files

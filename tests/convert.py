@@ -50,8 +50,7 @@ class isolate_files(object):
 
     def __exit__(self, type, value, traceback):
         try:
-            # os.unlink(self.name + ".pdb")
-            pass
+            os.unlink(self.name + ".pdb")
         except OSError:
             pass
         try:

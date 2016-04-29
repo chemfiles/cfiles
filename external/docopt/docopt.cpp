@@ -100,9 +100,6 @@ std::ostream& docopt::operator<<(std::ostream& os, value const& val)
 	return os;
 }
 
-#pragma mark -
-#pragma mark Pattern types
-
 std::vector<LeafPattern*> Pattern::leaves() {
 	std::vector<LeafPattern*> ret;
 	collect_leaves(ret);
@@ -351,9 +348,6 @@ std::pair<size_t, std::shared_ptr<LeafPattern>> Option::single_match(PatternList
 
 	return ret;
 }
-
-#pragma mark -
-#pragma mark Parsing stuff
 
 static std::vector<PatternList> transform(PatternList pattern);
 

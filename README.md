@@ -1,5 +1,8 @@
 # cfiles, multi-formats analysis tools for chemistry
 
+[![Build Status](https://travis-ci.org/chemfiles/cfiles.svg?branch=master)](https://travis-ci.org/chemfiles/cfiles)
+[![codecov](https://codecov.io/gh/chemfiles/cfiles/branch/master/graph/badge.svg)](https://codecov.io/gh/chemfiles/cfiles)
+
 `cfiles` is an analysis frontend for the
 [Chemfiles](https://github.com/chemfiles/chemfiles/) library, implementing analysis
 algorithms for post-processing data from molecular or quantum simulations.

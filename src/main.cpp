@@ -7,6 +7,7 @@
 */
 
 #include <iostream>
+#include <iterator>
 #include "chemfiles.hpp"
 
 #include "CommandFactory.hpp"
@@ -36,17 +37,24 @@ int main(int argc, const char* argv[]) {
     }
 
     // Check first for version or help flags
-    for (int i = 0; i<argc ; i++) {
-        if (argv[i] == std::string("-h") || argv[i] == std::string("--help")) {
-            auto command = get_command("help");
-            const char* args[] = {""};
-            return command->run(1, args);
-        }
+    if (argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
+        auto command = get_command("help");
+        const char* args[] = {""};
+        return command->run(1, args);
+    }
 
-        if (argv[i] == std::string("-V") || argv[i] == std::string("--version")) {
-            std::cout << "cfiles " << version() << std::endl;
-            return EXIT_SUCCESS;
+    auto find_in_argv = [&argc, &argv](const std::string& value) -> bool {
+        for (int i = 0; i<argc; i++) {
+            if (argv[i] == value) {
+                return true;
+            }
         }
+        return false;
+    };
+
+    if (find_in_argv("-V") || find_in_argv("--version")) {
+        std::cout << "cfiles " << version() << std::endl;
+        return EXIT_SUCCESS;
     }
 
     // Error on other flags

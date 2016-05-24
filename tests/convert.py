@@ -62,6 +62,8 @@ class isolate_files(object):
 if __name__ == '__main__':
     filename = "convert"
     with isolate_files(filename):
-        cfiles("convert", filename + ".pdb", filename + ".xyz")
+        out, err = cfiles("convert", filename + ".pdb", filename + ".xyz")
+        assert(out == "")
+        assert(err == "")
         with open(filename + ".xyz") as fd:
             assert(fd.read() == XYZ_CONTENT)

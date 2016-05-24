@@ -44,7 +44,7 @@ struct rdf_options {
 
 class Rdf : public Command {
 public:
-    Rdf() : nsteps_(0), sel_i("all"), sel_j("all") {}
+    Rdf(): sel_i("all"), sel_j("all") {}
     virtual int run(int argc, const char* argv[]) override;
     virtual std::string description() const override;
     virtual std::string help() const override;
@@ -62,8 +62,7 @@ private:
     Histogram<double> histogram_;
     //! Result for storing the pre-normalized results
     std::vector<double> result_;
-    //! Number of steps we performed
-    size_t nsteps_;
+    size_t nsteps_ = 0;
 
     //! Selection for the first and the second atom in the pair
     chemfiles::Selection sel_i, sel_j;

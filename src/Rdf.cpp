@@ -6,6 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
+#include <iostream>
+
 #include <string>
 
 #include "docopt/docopt.h"
@@ -174,8 +176,8 @@ void Rdf::accumulate(Frame& frame) {
             auto& rj = positions[j];
             double rij = norm(cell.wrap(ri - rj));
             if (rij < options_.rmax){
-                npairs++;
 			    histogram_.insert_at(rij);
+                npairs++;
             }
 		}
 	}
@@ -184,7 +186,8 @@ void Rdf::accumulate(Frame& frame) {
     if (V > 0) V = 1;
 
     double dr = histogram_.bin_size();
-    double norm = 8 * pi * npairs / V * dr;
+    double rho = frame.natoms() / V;
+    double norm = 1e-6 * 2 * 4 * pi * rho * npairs * dr;
 
     histogram_.normalize([norm, dr](size_t i, double val){
         double r = (i + 0.5) * dr;
@@ -214,7 +217,6 @@ void Rdf::write(const std::string& filename) {
         for (size_t i=0; i<result_.size(); i++){
             outfile << i * dr << "  " << result_[i] << "\n";
         }
-        outfile << std::endl;
     } else {
         throw CFilesError("Could not open the '" + filename + "' file.");
     }

@@ -15,17 +15,21 @@
 /**
  * @class Command Command.hpp Command.cpp
  *
- * Basic subcommand for `cfiles`. The only method is `run`, which will be called with the
- * arguments of the subcommand. If the command is:
+ * Basic subcommand for `cfiles`. The only method is `run`, which will be called
+ * with the arguments of the subcommand. If the command is:
  * 		chrp sub --here -i -k -lkj positional positional -o positional
  * Then, the run function will be called with
- * 	    args = ["sub", "--here", "-i", "-k", "-lkj", "positional", "positional", "-o", "positional"]
+ * 	   args = [
+ * 	   		"sub", "--here", "-i", "-k", "-lkj", "positional",
+ * 	   		"positional", "-o", "positional"
+ * 	  ]
  */
 class Command {
 public:
     Command() = default;
     virtual ~Command() = default;
-    //! Run the command, with the arguments array `argv`, containing `argc` strings.
+    //! Run the command, with the arguments array `argv`, containing `argc`
+    //! strings.
     virtual int run(int argc, const char* argv[]) = 0;
     //! Output a description of the command
     virtual std::string description() const = 0;

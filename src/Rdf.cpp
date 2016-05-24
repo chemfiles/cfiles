@@ -19,9 +19,10 @@ using namespace chemfiles;
 static const char OPTIONS[] =
 R"(cfiles rdf: compute radial distribution function
 
-Compute pair radial distrubution function (often called g(r)). The pairs of particles to
-use can be specified using the chemfiles selection language. It is possible to provide an
-alternative topology or unit cell when this information is not present in the trajectory.
+Compute pair radial distrubution function (often called g(r)). The pairs of
+particles to use can be specified using the chemfiles selection language. It
+is possible to provide an alternative topology or unit cell when this
+information is not present in the trajectory.
 
 Usage:
   cfiles rdf [options] <trajectory>
@@ -29,11 +30,12 @@ Usage:
 
 Options:
   -h --help                     show this help
-  -o <file>, --output=<file>    write result to <file>. This default to the trajectoty
-                                file name with the `.rdf` extension.
-  -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a single
-                                selection ("name O") or two selections separated by a
-                                comma ("name O, name H") [default: all]
+  -o <file>, --output=<file>    write result to <file>. This default to the
+                                trajectory file name with the `.rdf` extension.
+  -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a
+                                single selection ("name O") or two selections
+                                separated by a comma ("name O, name H")
+                                [default: all]
   -t <path>, --topology=<path>  path to an alternative topology file
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
                                 using the <a:b:c:alpha:beta:gamma> or <a:b:c> or

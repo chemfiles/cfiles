@@ -40,14 +40,14 @@ public:
 
     //! Default constructor
     Histogram() : Histogram(0) {}
-    //! Constructor with a specific number of bins \c nbins
+    //! Constructor with a specific number of bins `nbins`
     Histogram(size_t nbins) : data_t(nbins) {}
-    //! Constructor with a specific number of bins \c nbins, and which can hold data in
-    //! the \c min - \c max range.
-    //! This can only be used if T is arithmetic (integer or floating point type).
+    //! Constructor with a specific number of bins `nbins`, and which can hold
+    //! data in the `min - max` range. This can only be used if T is arithmetic
+    //! (integer or floating point type).
     ENABLE_FOR_ARITHMETIC_TYPES
     Histogram(size_t nbins, double min, double max) : data_t(nbins), dr_((max-min)/nbins) {}
-    //! Constructor with a specific number of \c bins and a specific bin size \c dr
+    //! Constructor with a specific number of `bins` and a specific bin size `dr`
     //! This can only be used if T is arithmetic (integer or floating point type).
     ENABLE_FOR_ARITHMETIC_TYPES
     Histogram(size_t nbins, double dr) : data_t(nbins), dr_(dr) {}
@@ -61,13 +61,13 @@ public:
     //! Get the size of the bins
     ENABLE_FOR_ARITHMETIC_TYPES
     double bin_size() const {return dr_;}
-    //! Set the size of the bins. This should be called before any attempt to add data
-    //! inside the Histogram.
+    //! Set the size of the bins. This should be called before any attempt to
+    //! add data inside the Histogram.
     ENABLE_FOR_ARITHMETIC_TYPES
     void bin_size(double dr) {dr_ = dr;}
 
-    //! Insert some \c data in the histogram, and guess the position using the \c bin_size
-    //! of the Histogram.
+    //! Insert some \c data in the histogram, and guess the position using the
+    //! `bin_size` of the Histogram.
     ENABLE_FOR_ARITHMETIC_TYPES
     void insert_at(T new_data) {
         size_t bin = static_cast<size_t>(new_data / dr_);
@@ -83,9 +83,9 @@ public:
             val /= mean;
         }
     }
-    //! Normalize the data with a \c function callback, which will be called for each value.
-    //! The function should take two arguments being the current bin and the data, and
-    //! return the new data.
+    //! Normalize the data with a `function` callback, which will be called for
+    //! each value. The function should take two arguments being the current
+    //! bin index and the data, and return the new data.
     void normalize(std::function<T(size_t, T)> function) {
         for (size_t i=0; i< size(); i++){
             (*this)[i] = function(i, (*this)[i]);

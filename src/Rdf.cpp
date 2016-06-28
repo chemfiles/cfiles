@@ -35,8 +35,8 @@ Options:
   -o <file>, --output=<file>    write result to <file>. This default to the
                                 trajectory file name with the `.rdf` extension.
   -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a
-                                single selection ("name O") or two selections
-                                separated by a comma ("name O, name H")
+                                single selection ("name O") or a selection of
+                                two atoms ("pairs: name($1) O and name($2) H")
                                 [default: all]
   -t <path>, --topology=<path>  path to an alternative topology file
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
@@ -67,22 +67,7 @@ static rdf_options parse_options(int argc, const char* argv[]) {
     options.start = stol(args["--start"].asString());
     options.end = stol(args["--end"].asString());
     options.stride = stol(args["--stride"].asString());
-
-    if (args["--selection"]){
-        auto selections = split(args["--selection"].asString(), ',');
-        if (selections.size() == 1) {
-            options.selection_i = selections[0];
-            options.selection_j = selections[0];
-        } else if (selections.size() == 2) {
-            options.selection_i = selections[0];
-            options.selection_j = selections[1];
-        } else {
-            throw CFilesError("Wrong size for selection string. Only two selection are allowed.");
-        }
-    } else {
-        options.selection_i = "all";
-        options.selection_j = "all";
-    }
+    options.selection = args["--selection"].asString();
 
     if (args["--topology"]){
         options.topology = args["--topology"].asString();
@@ -138,10 +123,10 @@ int Rdf::run(int argc, const char* argv[]) {
         throw CFilesError("Can not have 'start' bigger than 'end'.");
     }
 
-    sel_i = Selection(options_.selection_i);
-    sel_j = Selection(options_.selection_j);
-    assert(sel_i.size() == 1);
-    assert(sel_j.size() == 1);
+    selection_ = Selection(options_.selection);
+    if (selection_.size() > 2) {
+        throw CFilesError("Can not use a selection with more than two atoms in RDF.");
+    }
 
     for (size_t i=start; i<end; i+=stride) {
         auto frame = file.read();
@@ -152,35 +137,43 @@ int Rdf::run(int argc, const char* argv[]) {
     return 0;
 }
 
-void Rdf::accumulate(Frame& frame) {
+void Rdf::accumulate(const Frame& frame) {
     auto positions = frame.positions();
     auto cell = frame.cell();
     size_t npairs = 0;
 
-    std::vector<size_t> matched_i, matched_j;
-    if (options_.selection_i == options_.selection_j) {
-        // Only evaluate the selection once
-        matched_i = sel_i.list(frame);
-        matched_j = matched_i;
+    if (selection_.size() == 1) {
+        // If we have a single atom selection, use it for both atoms of the
+        // pairs
+        auto matched = selection_.list(frame);
+        for (auto i: matched) {
+            for (auto j: matched) {
+                if (i == j) continue;
+
+                auto rij = norm(cell.wrap(positions[j] - positions[i]));
+                if (rij < options_.rmax){
+                    histogram_.insert_at(rij);
+                    npairs++;
+                }
+            }
+    	}
     } else {
-        matched_i = sel_i.list(frame);
-        matched_j = sel_j.list(frame);
-    }
+        // If we have a pair selection, use it directly
+        assert(selection_.size() == 2);
+        auto matched = selection_.evaluate(frame);
 
-	for (auto i: matched_i) {
-		auto& ri = positions[i];
-		for (auto j: matched_j) {
-            if (i == j) continue;
-
-            auto& rj = positions[j];
-            double rij = norm(cell.wrap(ri - rj));
+        for (auto match: matched) {
+    		auto i = match[0];
+    		auto j = match[1];
+            auto rij = norm(cell.wrap(positions[j] - positions[i]));
             if (rij < options_.rmax){
-			    histogram_.insert_at(rij);
+                histogram_.insert_at(rij);
                 npairs++;
             }
-		}
-	}
+    	}
+    }
 
+    // Normalize the rdf to be 1 at long distances
     double V = cell.volume();
     if (V > 0) V = 1;
 
@@ -210,7 +203,7 @@ void Rdf::write(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Radial distribution function for file " << options_.infile << std::endl;
-        outfile << "# Atoms: " << options_.selection_i << " & " << options_.selection_j << std::endl;
+        outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = histogram_.bin_size();
         for (size_t i=0; i<result_.size(); i++){

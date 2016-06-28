@@ -22,10 +22,8 @@ struct rdf_options {
     std::string infile;
     //! Output data file
     std::string outfile;
-    //! Selection for the first atom in radial distribution
-    std::string selection_i;
-    //! Selection for the second atom in radial distribution
-    std::string selection_j;
+    //! Selection for the atoms in radial distribution
+    std::string selection;
     //! Number of points in the histogram
     size_t npoints;
     //! Maximum distance for the histogram
@@ -44,13 +42,13 @@ struct rdf_options {
 
 class Rdf : public Command {
 public:
-    Rdf(): sel_i("all"), sel_j("all") {}
+    Rdf(): selection_("all") {}
     virtual int run(int argc, const char* argv[]) override;
     virtual std::string description() const override;
     virtual std::string help() const override;
 private:
     //! Add the data from a frame to the histogram
-    void accumulate(chemfiles::Frame& frame);
+    void accumulate(const chemfiles::Frame& frame);
     //! Normalize the histogram data
     void finish();
     //! Write the histogram data to a file
@@ -62,10 +60,11 @@ private:
     Histogram<double> histogram_;
     //! Result for storing the pre-normalized results
     std::vector<double> result_;
+    //! Number of pairs found inside the rdf
     size_t nsteps_ = 0;
 
-    //! Selection for the first and the second atom in the pair
-    chemfiles::Selection sel_i, sel_j;
+    //! Selection for the atoms in the pair
+    chemfiles::Selection selection_;
 };
 
 #endif

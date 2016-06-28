@@ -43,7 +43,7 @@ Options:
                                 using one of the <a:b:c:α:β:γ> or <a:b:c> or <L>
                                 formats. This option set <max> to L/2.
   --start=<n>                   first step [default: 0]
-  --end=<n>                     last step (-1 is the last step) [default: -1]
+  --end=<n>                     last step (-1 for the input end) [default: -1]
   --stride=<n>                  use a step every <n> steps [default: 1]
   --max=<max>                   maximal distance to use [default: 10]
   -p <n>, --points=<n>          number of points in the histogram [default: 200]
@@ -54,12 +54,12 @@ static rdf_options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
     rdf_options options;
-    options.infile = args["<trajectory>"].asString();
+    options.trajectory = args["<trajectory>"].asString();
 
     if (args["--output"]){
         options.outfile = args["--output"].asString();
     } else {
-        options.outfile = options.infile + ".rdf";
+        options.outfile = options.trajectory + ".rdf";
     }
 
     options.rmax = stod(args["--max"].asString());
@@ -76,10 +76,13 @@ static rdf_options parse_options(int argc, const char* argv[]) {
     }
 
     if (args["--cell"]) {
+        options.custom_cell = true;
 		options.cell = parse_cell(args["--cell"].asString());
-        double L = std::min(options.cell[0], std::min(options.cell[1], options.cell[2]));
+        double L = std::min(options.cell.a(), std::min(options.cell.b(), options.cell.c()));
         options.rmax = L/2;
-	}
+	} else {
+        options.custom_cell = false;
+    }
 
     return options;
 }
@@ -100,15 +103,10 @@ int Rdf::run(int argc, const char* argv[]) {
     histogram_ = Histogram<double>(options_.npoints, 0, options_.rmax);
     result_ = std::vector<double>(histogram_.size(), 0);
 
-    auto file = Trajectory(options_.infile);
+    auto file = Trajectory(options_.trajectory);
 
-    if (options_.cell.size() == 3) {
-        file.set_cell(UnitCell(options_.cell[0], options_.cell[2], options_.cell[2]));
-    } else if (options_.cell.size() == 6) {
-        file.set_cell(UnitCell(
-            options_.cell[0], options_.cell[2], options_.cell[2],
-            options_.cell[3], options_.cell[4], options_.cell[5]
-        ));
+    if (options_.custom_cell) {
+        file.set_cell(options_.cell);
     }
 
     if (options_.topology != "") {
@@ -202,7 +200,7 @@ void Rdf::finish() {
 void Rdf::write(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::out);
     if(outfile.is_open()) {
-        outfile << "# Radial distribution function for file " << options_.infile << std::endl;
+        outfile << "# Radial distribution function for file " << options_.trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = histogram_.bin_size();

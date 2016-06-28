@@ -15,6 +15,7 @@
 #include <sstream>
 
 #include "Errors.hpp"
+#include "chemfiles.hpp"
 
 
 inline std::vector<std::string> split(const std::string &s, char delim) {
@@ -27,29 +28,26 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
-inline std::vector<double> parse_cell(const std::string& cell_string) {
-    auto cell = std::vector<double>();
-    auto cell_strs = split(cell_string, ':');
-    if (cell_strs.size()==1) {
-        cell.push_back(stod(cell_strs[0]));
-        cell.push_back(stod(cell_strs[0]));
-        cell.push_back(stod(cell_strs[0]));
-    } else if (cell_strs.size()==3) {
-        cell.push_back(stod(cell_strs[0]));
-        cell.push_back(stod(cell_strs[1]));
-        cell.push_back(stod(cell_strs[2]));
-    } else if (cell_strs.size()==6) {
-        cell.push_back(stod(cell_strs[0]));
-        cell.push_back(stod(cell_strs[1]));
-        cell.push_back(stod(cell_strs[2]));
-        cell.push_back(stod(cell_strs[3]));
-        cell.push_back(stod(cell_strs[4]));
-        cell.push_back(stod(cell_strs[5]));
+inline chemfiles::UnitCell parse_cell(const std::string& cell_string) {
+    auto splitted = split(cell_string, ':');
+    if (splitted.size() == 1) {
+        return chemfiles::UnitCell(stod(splitted[0]));
+    } else if (splitted.size() == 3) {
+        auto a = stod(splitted[0]);
+        auto b = stod(splitted[1]);
+        auto c = stod(splitted[2]);
+        return chemfiles::UnitCell(a, b, c);
+    } else if (splitted.size() == 6) {
+        auto a = stod(splitted[0]);
+        auto b = stod(splitted[1]);
+        auto c = stod(splitted[2]);
+        auto alpha = stod(splitted[3]);
+        auto beta  = stod(splitted[4]);
+        auto gamma = stod(splitted[5]);
+        return chemfiles::UnitCell(a, b, c, alpha, beta, gamma);
     } else {
         throw CFilesError("The cell string should have 1, 3 or 6 values.");
     }
-
-    return cell;
 }
 
 #endif

@@ -19,7 +19,7 @@
 
 struct rdf_options {
     //! Input trajectory
-    std::string infile;
+    std::string trajectory;
     //! Output data file
     std::string outfile;
     //! Selection for the atoms in radial distribution
@@ -34,8 +34,10 @@ struct rdf_options {
     size_t end;
     //! Use a step every `stride` steps
     size_t stride;
+    //! Do we have a custom cell to use?
+    bool custom_cell;
     //! Unit cell to use
-    std::vector<double> cell;
+    chemfiles::UnitCell cell;
     //! Topology file to use
     std::string topology;
 };

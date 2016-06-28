@@ -35,11 +35,12 @@ Options:
 )";
 
 struct convert_options {
-    std::string in_file;
-    std::string out_file;
-    std::string in_format;
-    std::string out_format;
-    std::vector<double> cell;
+    std::string infile;
+    std::string outfile;
+    std::string input_format;
+    std::string output_format;
+    bool custom_cell;
+    chemfiles::UnitCell cell;
     std::string topology;
 };
 
@@ -47,19 +48,19 @@ static convert_options parse_options(int argc, const char* argv[]) {
     convert_options options;
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
-    options.in_file = args["<input>"].asString();
-    options.out_file = args["<output>"].asString();
+    options.infile = args["<input>"].asString();
+    options.outfile = args["<output>"].asString();
 
     if (args["--input-format"]){
-        options.in_format = args["--input-format"].asString();
+        options.input_format = args["--input-format"].asString();
     } else {
-        options.in_format = "";
+        options.input_format = "";
     }
 
     if (args["--output-format"]){
-        options.out_format = args["--output-format"].asString();
+        options.output_format = args["--output-format"].asString();
     } else {
-        options.out_format = "";
+        options.output_format = "";
     }
 
     if (args["--topology"]){
@@ -70,7 +71,11 @@ static convert_options parse_options(int argc, const char* argv[]) {
 
     if (args["--cell"]) {
 		options.cell = parse_cell(args["--cell"].asString());
-	}
+        options.custom_cell = true;
+	} else {
+        options.custom_cell = false;
+    }
+
     return options;
 }
 
@@ -86,16 +91,11 @@ std::string Convert::help() const {
 int Convert::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
-    auto infile = Trajectory(options.in_file, 'r', options.in_format);
-    auto outfile = Trajectory(options.out_file, 'w', options.out_format);
+    auto infile = Trajectory(options.infile, 'r', options.input_format);
+    auto outfile = Trajectory(options.outfile, 'w', options.output_format);
 
-    if (options.cell.size() == 3) {
-        infile.set_cell(UnitCell(options.cell[0], options.cell[2], options.cell[2]));
-    } else if (options.cell.size() == 6) {
-        infile.set_cell(UnitCell(
-            options.cell[0], options.cell[2], options.cell[2],
-            options.cell[3], options.cell[4], options.cell[5]
-        ));
+    if (options.custom_cell) {
+        infile.set_cell(options.cell);
     }
 
     if (options.topology != "") {

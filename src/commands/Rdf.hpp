@@ -64,7 +64,6 @@ private:
     std::vector<double> result_;
     //! Number of pairs found inside the rdf
     size_t nsteps_ = 0;
-
     //! Selection for the atoms in the pair
     chemfiles::Selection selection_;
 };

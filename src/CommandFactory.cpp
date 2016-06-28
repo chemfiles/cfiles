@@ -8,9 +8,9 @@
 
 #include "CommandFactory.hpp"
 
-#include "Help.hpp"
-#include "Rdf.hpp"
-#include "Convert.hpp"
+#include "commands/Help.hpp"
+#include "commands/Rdf.hpp"
+#include "commands/Convert.hpp"
 
 const std::vector<command_creator>& all_commands() {
     static std::vector<command_creator> commands = {

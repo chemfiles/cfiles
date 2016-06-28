@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "Command.hpp"
+#include "commands/Command.hpp"
 #include "Errors.hpp"
 
 struct command_creator {

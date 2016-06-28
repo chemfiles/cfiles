@@ -200,7 +200,7 @@ void Rdf::finish() {
 void Rdf::write(const std::string& filename) {
     std::ofstream outfile(filename, std::ios::out);
     if(outfile.is_open()) {
-        outfile << "# Radial distribution function for file " << options_.trajectory << std::endl;
+        outfile << "# Radial distribution function in trajectory " << options_.trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = histogram_.bin_size();

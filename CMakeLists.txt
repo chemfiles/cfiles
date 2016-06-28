@@ -14,11 +14,11 @@ endif()
 include(CompilerFlags)
 
 include_directories(chemfiles/include/)
-
+include_directories(src/)
 include_directories(SYSTEM external/)
 add_library(docopt STATIC external/docopt/docopt.cpp)
 
-file(GLOB sources src/*.cpp)
+file(GLOB_RECURSE sources src/**.cpp)
 add_executable(cfiles ${sources})
 target_link_libraries(cfiles docopt chemfiles)
 

@@ -8,10 +8,11 @@
 
 #include <iostream>
 #include <iterator>
+
 #include "chemfiles.hpp"
 
 #include "CommandFactory.hpp"
-#include "Help.hpp"
+#include "commands/Help.hpp"
 
 static auto CFILES_VERSION = "0.0.1";
 

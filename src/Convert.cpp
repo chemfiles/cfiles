@@ -86,8 +86,8 @@ std::string Convert::help() const {
 int Convert::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
-    auto infile = Trajectory(options.in_file, "r", options.in_format);
-    auto outfile = Trajectory(options.out_file, "w", options.out_format);
+    auto infile = Trajectory(options.in_file, 'r', options.in_format);
+    auto outfile = Trajectory(options.out_file, 'w', options.out_format);
 
     if (options.cell.size() == 3) {
         infile.set_cell(UnitCell(options.cell[0], options.cell[2], options.cell[2]));

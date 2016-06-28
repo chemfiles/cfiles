@@ -140,6 +140,8 @@ int Rdf::run(int argc, const char* argv[]) {
 
     sel_i = Selection(options_.selection_i);
     sel_j = Selection(options_.selection_j);
+    assert(sel_i.size() == 1);
+    assert(sel_j.size() == 1);
 
     for (size_t i=start; i<end; i+=stride) {
         auto frame = file.read();
@@ -155,23 +157,20 @@ void Rdf::accumulate(Frame& frame) {
     auto cell = frame.cell();
     size_t npairs = 0;
 
-    std::vector<Bool> matched_i, matched_j;
+    std::vector<size_t> matched_i, matched_j;
     if (options_.selection_i == options_.selection_j) {
         // Only evaluate the selection once
-        matched_i = sel_i.evaluate(frame);
+        matched_i = sel_i.list(frame);
         matched_j = matched_i;
     } else {
-        matched_i = sel_i.evaluate(frame);
-        matched_j = sel_j.evaluate(frame);
+        matched_i = sel_i.list(frame);
+        matched_j = sel_j.list(frame);
     }
 
-	for(size_t i=0; i<frame.natoms(); i++){
-	    if (!matched_i[i]) continue;
+	for (auto i: matched_i) {
 		auto& ri = positions[i];
-
-		for(size_t j=0; j<frame.natoms(); j++){
+		for (auto j: matched_j) {
             if (i == j) continue;
-			if (!matched_j[j]) continue;
 
             auto& rj = positions[j];
             double rij = norm(cell.wrap(ri - rj));

@@ -38,10 +38,10 @@ Options:
                                 single selection ("name O") or a selection of
                                 two atoms ("pairs: name($1) O and name($2) H")
                                 [default: all]
-  -t <path>, --topology=<path>  path to an alternative topology file
+  -t <path>, --topology=<path>  alternative topology file for the input
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
-                                using the <a:b:c:alpha:beta:gamma> or <a:b:c> or
-                                <L> format. This option set <max> to L/2.
+                                using one of the <a:b:c:α:β:γ> or <a:b:c> or <L>
+                                formats. This option set <max> to L/2.
   --start=<n>                   first step [default: 0]
   --end=<n>                     last step (-1 is the last step) [default: -1]
   --stride=<n>                  use a step every <n> steps [default: 1]

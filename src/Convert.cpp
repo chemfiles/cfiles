@@ -16,9 +16,9 @@ using namespace chemfiles;
 static const char OPTIONS[] =
 R"(cfiles convert: trajectory conversion
 
-Convert trajectories from one format to another, automatically guessing the format to use
-based on the files extension. The '--input-format' and '--output-format' can be used to
-force the format.
+Convert trajectories from one format to another, automatically guessing the
+format to use based on the files extension. The '--input-format' and
+'--output-format' can be used to force the format.
 
 Usage:
   cfiles convert [options] <input> <output>
@@ -28,10 +28,10 @@ Options:
   -h --help                     show this help
   --input-format=<format>       force the input file format to be <format>
   --output-format=<format>      force the output file format to be <format>
-  -t <path>, --topology=<path>  path to an alternative topology file for the input
-  -c <cell>, --cell=<cell>      use alternative unit cell for the input. <cell>
-                                should be formated using the <a:b:c:alpha:beta:gamma>
-                                or <a:b:c> or <L> format.
+  -t <path>, --topology=<path>  alternative topology file for the input
+  -c <cell>, --cell=<cell>      alternative unit cell for the input. <cell>
+                                should be formated using one of the
+                                <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
 )";
 
 struct convert_options {

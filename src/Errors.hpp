@@ -6,7 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
-#pragma once
 #ifndef CFILES_ERRORS_HPP
 #define CFILES_ERRORS_HPP
 

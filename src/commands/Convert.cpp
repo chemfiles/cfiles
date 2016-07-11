@@ -33,20 +33,10 @@ Options:
                                 <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
 )";
 
-struct convert_options {
-    std::string infile;
-    std::string outfile;
-    std::string input_format;
-    std::string output_format;
-    bool custom_cell;
-    chemfiles::UnitCell cell;
-    std::string topology;
-};
-
-static convert_options parse_options(int argc, const char* argv[]) {
-    convert_options options;
+static Convert::Options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
+    Convert::Options options;
     options.infile = args["<input>"].asString();
     options.outfile = args["<output>"].asString();
 

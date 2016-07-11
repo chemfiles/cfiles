@@ -17,37 +17,38 @@
 #include "Histogram.hpp"
 #include "Command.hpp"
 
-struct rdf_options {
-    //! Input trajectory
-    std::string trajectory;
-    //! Output data file
-    std::string outfile;
-    //! Selection for the atoms in radial distribution
-    std::string selection;
-    //! Number of points in the histogram
-    size_t npoints;
-    //! Maximum distance for the histogram
-    double rmax;
-    //! First step to use in g(r)
-    size_t start;
-    //! Last step to use in g(r)
-    size_t end;
-    //! Use a step every `stride` steps
-    size_t stride;
-    //! Do we have a custom cell to use?
-    bool custom_cell;
-    //! Unit cell to use
-    chemfiles::UnitCell cell;
-    //! Topology file to use
-    std::string topology;
-};
-
-class Rdf : public Command {
+class Rdf final: public Command {
 public:
+    struct Options {
+        //! Input trajectory
+        std::string trajectory;
+        //! Output data file
+        std::string outfile;
+        //! Selection for the atoms in radial distribution
+        std::string selection;
+        //! Number of points in the histogram
+        size_t npoints;
+        //! Maximum distance for the histogram
+        double rmax;
+        //! First step to use in g(r)
+        size_t start;
+        //! Last step to use in g(r)
+        size_t end;
+        //! Use a step every `stride` steps
+        size_t stride;
+        //! Do we have a custom cell to use?
+        bool custom_cell;
+        //! Unit cell to use
+        chemfiles::UnitCell cell;
+        //! Topology file to use
+        std::string topology;
+    };
+
     Rdf(): selection_("all") {}
-    virtual int run(int argc, const char* argv[]) override;
-    virtual std::string description() const override;
-    virtual std::string help() const override;
+    int run(int argc, const char* argv[]) override;
+    std::string description() const override;
+    std::string help() const override;
+
 private:
     //! Add the data from a frame to the histogram
     void accumulate(const chemfiles::Frame& frame);
@@ -57,7 +58,7 @@ private:
     void write(const std::string& filename);
 
     //! Options for this instance of RDF
-    rdf_options options_;
+    Options options_;
     //! Histogram, for inserting the data at each step
     Histogram<double> histogram_;
     //! Result for storing the pre-normalized results

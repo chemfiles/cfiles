@@ -9,15 +9,29 @@
 #ifndef CFILES_CONVERT_HPP
 #define CFILES_CONVERT_HPP
 
+#include <chemfiles.hpp>
+
 #include "Command.hpp"
 
-class Convert : public Command {
+class Convert final: public Command {
 public:
+    struct Options {
+        std::string infile;
+        std::string outfile;
+        std::string input_format;
+        std::string output_format;
+        bool custom_cell;
+        chemfiles::UnitCell cell;
+        std::string topology;
+    };
+
     Convert() {}
     virtual int run(int argc, const char* argv[]) override;
     virtual std::string description() const override;
     virtual std::string help() const override;
+
 private:
+    Options options_;
 };
 
 #endif

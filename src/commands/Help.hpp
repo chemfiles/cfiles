@@ -11,7 +11,7 @@
 
 #include "Command.hpp"
 
-class Help : public Command {
+class Help final: public Command {
 public:
     Help() = default;
     virtual int run(int argc, const char* argv[]) override;

@@ -45,10 +45,10 @@ Options:
 
 )";
 
-static rdf_options parse_options(int argc, const char* argv[]) {
+static Rdf::Options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
 
-    rdf_options options;
+    Rdf::Options options;
     options.trajectory = args["<trajectory>"].asString();
 
     if (args["--output"]){

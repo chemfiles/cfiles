@@ -29,7 +29,7 @@ try_compile(STD_REGEX_WORKS
 
 if(NOT ${STD_REGEX_WORKS})
     message(STATUS "Using Boost.Regex instead of std::regex")
-    find_package(Boost REQUIRED COMPONENTS Regex)
+    find_package(Boost 1.53 REQUIRED COMPONENTS regex)
     include_directories(${Boost_INCLUDE_DIRS})
     target_link_libraries(cfiles ${Boost_LIBRARIES})
     add_definitions("-DDOCOPT_USES_BOOST_REGEX")

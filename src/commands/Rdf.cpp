@@ -9,10 +9,10 @@
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
-#include "utils.hpp"
 
 using namespace chemfiles;
 
+static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
 R"(cfiles rdf: compute radial distribution function
 
@@ -33,54 +33,8 @@ Options:
                                 single selection ("name O") or a selection of
                                 two atoms ("pairs: name($1) O and name($2) H")
                                 [default: all]
-  -t <path>, --topology=<path>  alternative topology file for the input
-  -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
-                                using one of the <a:b:c:α:β:γ> or <a:b:c> or <L>
-                                formats. This option set <max> to L/2.
-  --start=<n>                   first step [default: 0]
-  --end=<n>                     last step (-1 for the input end) [default: -1]
-  --stride=<n>                  use a step every <n> steps [default: 1]
   --max=<max>                   maximal distance to use [default: 10]
-  -p <n>, --points=<n>          number of points in the histogram [default: 200]
-
-)";
-
-static Rdf::Options parse_options(int argc, const char* argv[]) {
-    auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
-
-    Rdf::Options options;
-    options.trajectory = args["<trajectory>"].asString();
-
-    if (args["--output"]){
-        options.outfile = args["--output"].asString();
-    } else {
-        options.outfile = options.trajectory + ".rdf";
-    }
-
-    options.rmax = stod(args["--max"].asString());
-    options.npoints = stol(args["--points"].asString());
-    options.start = stol(args["--start"].asString());
-    options.end = stol(args["--end"].asString());
-    options.stride = stol(args["--stride"].asString());
-    options.selection = args["--selection"].asString();
-
-    if (args["--topology"]){
-        options.topology = args["--topology"].asString();
-    } else {
-        options.topology = "";
-    }
-
-    if (args["--cell"]) {
-        options.custom_cell = true;
-		options.cell = parse_cell(args["--cell"].asString());
-        double L = std::min(options.cell.a(), std::min(options.cell.b(), options.cell.c()));
-        options.rmax = L/2;
-	} else {
-        options.custom_cell = false;
-    }
-
-    return options;
-}
+  -p <n>, --points=<n>          number of points in the histogram [default: 200])";
 
 std::string Rdf::description() const {
     return "Compute radial distribution functions";
@@ -90,47 +44,52 @@ std::string Rdf::help() const {
     return OPTIONS;
 }
 
-static const double pi = 3.141592653589793238463;
+void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
+    auto options = std::string(OPTIONS) + AverageCommand::AVERAGE_OPTIONS;
+    auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
-int Rdf::run(int argc, const char* argv[]) {
-    options_ = parse_options(argc, argv);
+    AverageCommand::parse_options(args);
 
-    histogram_ = Histogram<double>(options_.npoints, 0, options_.rmax);
-    result_ = std::vector<double>(histogram_.size(), 0);
-
-    auto file = Trajectory(options_.trajectory);
-
-    if (options_.custom_cell) {
-        file.set_cell(options_.cell);
+    if (args["--output"]){
+        options_.outfile = args["--output"].asString();
+    } else {
+        options_.outfile = AverageCommand::options().trajectory + ".rdf";
     }
 
-    if (options_.topology != "") {
-        file.set_topology(options_.topology);
-    }
+    options_.rmax = stod(args["--max"].asString());
+    options_.npoints = stol(args["--points"].asString());
+    options_.selection = args["--selection"].asString();
 
-    size_t start=options_.start, end=options_.end, stride=options_.stride;
-    if (end == static_cast<size_t>(-1)) {
-        end = file.nsteps();
-    }
-    if (start > end) {
-        throw CFilesError("Can not have 'start' bigger than 'end'.");
-    }
 
+    if (AverageCommand::options().custom_cell) {
+        auto& cell = AverageCommand::options().cell;
+        double L = std::min(cell.a(), std::min(cell.b(), cell.c()));
+        options_.rmax = L/2;
+	}
+
+    histogram = Histogram<double>(options_.npoints, 0, options_.rmax);
     selection_ = Selection(options_.selection);
     if (selection_.size() > 2) {
         throw CFilesError("Can not use a selection with more than two atoms in RDF.");
     }
-
-    for (size_t i=start; i<end; i+=stride) {
-        auto frame = file.read();
-        accumulate(frame);
-    }
-    finish();
-    write(options_.outfile);
-    return 0;
 }
 
-void Rdf::accumulate(const Frame& frame) {
+void Rdf::finish(const Histogram<double>& histogram) {
+    std::ofstream outfile(options_.outfile, std::ios::out);
+    if(outfile.is_open()) {
+        outfile << "# Radial distribution function in trajectory " << AverageCommand::options().trajectory << std::endl;
+        outfile << "# Selection: " << options_.selection << std::endl;
+
+        double dr = histogram.bin_size();
+        for (size_t i=0; i<histogram.size(); i++){
+            outfile << i * dr << "  " << histogram[i] << "\n";
+        }
+    } else {
+        throw CFilesError("Could not open the '" + options_.outfile + "' file.");
+    }
+}
+
+void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     auto positions = frame.positions();
     auto cell = frame.cell();
     size_t npairs = 0;
@@ -145,7 +104,7 @@ void Rdf::accumulate(const Frame& frame) {
 
                 auto rij = norm(cell.wrap(positions[j] - positions[i]));
                 if (rij < options_.rmax){
-                    histogram_.insert_at(rij);
+                    histogram.insert_at(rij);
                     npairs++;
                 }
             }
@@ -160,7 +119,7 @@ void Rdf::accumulate(const Frame& frame) {
     		auto j = match[1];
             auto rij = norm(cell.wrap(positions[j] - positions[i]));
             if (rij < options_.rmax){
-                histogram_.insert_at(rij);
+                histogram.insert_at(rij);
                 npairs++;
             }
     	}
@@ -170,39 +129,12 @@ void Rdf::accumulate(const Frame& frame) {
     double V = cell.volume();
     if (V > 0) V = 1;
 
-    double dr = histogram_.bin_size();
+    double dr = histogram.bin_size();
     double rho = frame.natoms() / V;
     double norm = 1e-6 * 2 * 4 * pi * rho * npairs * dr;
 
-    histogram_.normalize([norm, dr](size_t i, double val){
+    histogram.normalize([norm, dr](size_t i, double val){
         double r = (i + 0.5) * dr;
         return val / (norm * r * r);
     });
-
-    for (size_t i=0; i<histogram_.size(); i++){
-        result_[i] += histogram_[i];
-        histogram_[i] = 0;
-    }
-    nsteps_++;
-}
-
-void Rdf::finish() {
-    for (size_t i=0; i<result_.size(); i++){
-        result_[i] /= nsteps_;
-    }
-}
-
-void Rdf::write(const std::string& filename) {
-    std::ofstream outfile(filename, std::ios::out);
-    if(outfile.is_open()) {
-        outfile << "# Radial distribution function in trajectory " << options_.trajectory << std::endl;
-        outfile << "# Selection: " << options_.selection << std::endl;
-
-        double dr = histogram_.bin_size();
-        for (size_t i=0; i<result_.size(); i++){
-            outfile << i * dr << "  " << result_[i] << "\n";
-        }
-    } else {
-        throw CFilesError("Could not open the '" + filename + "' file.");
-    }
 }

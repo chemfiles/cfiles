@@ -9,19 +9,12 @@
 #ifndef CFILES_RDF_HPP
 #define CFILES_RDF_HPP
 
-#include <vector>
-#include <fstream>
 
-#include <chemfiles.hpp>
+#include "AverageCommand.hpp"
 
-#include "Histogram.hpp"
-#include "Command.hpp"
-
-class Rdf final: public Command {
+class Rdf final: public AverageCommand {
 public:
     struct Options {
-        //! Input trajectory
-        std::string trajectory;
         //! Output data file
         std::string outfile;
         //! Selection for the atoms in radial distribution
@@ -30,41 +23,19 @@ public:
         size_t npoints;
         //! Maximum distance for the histogram
         double rmax;
-        //! First step to use in g(r)
-        size_t start;
-        //! Last step to use in g(r)
-        size_t end;
-        //! Use a step every `stride` steps
-        size_t stride;
-        //! Do we have a custom cell to use?
-        bool custom_cell;
-        //! Unit cell to use
-        chemfiles::UnitCell cell;
-        //! Topology file to use
-        std::string topology;
     };
 
     Rdf(): selection_("all") {}
-    int run(int argc, const char* argv[]) override;
     std::string description() const override;
     std::string help() const override;
 
-private:
-    //! Add the data from a frame to the histogram
-    void accumulate(const chemfiles::Frame& frame);
-    //! Normalize the histogram data
-    void finish();
-    //! Write the histogram data to a file
-    void write(const std::string& filename);
+    void setup(int argc, const char* argv[], Histogram<double>& histogram) override;
+    void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) override;
+    void finish(const Histogram<double>& histogram) override;
 
+private:
     //! Options for this instance of RDF
     Options options_;
-    //! Histogram, for inserting the data at each step
-    Histogram<double> histogram_;
-    //! Result for storing the pre-normalized results
-    std::vector<double> result_;
-    //! Number of pairs found inside the rdf
-    size_t nsteps_ = 0;
     //! Selection for the atoms in the pair
     chemfiles::Selection selection_;
 };

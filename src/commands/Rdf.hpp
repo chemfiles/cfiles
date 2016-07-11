@@ -12,7 +12,7 @@
 #include <vector>
 #include <fstream>
 
-#include "chemfiles.hpp"
+#include <chemfiles.hpp>
 
 #include "Histogram.hpp"
 #include "Command.hpp"

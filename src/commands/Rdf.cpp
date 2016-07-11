@@ -5,18 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-
-#include <iostream>
-
-#include <string>
-
-#include "docopt/docopt.h"
-#include "chemfiles.hpp"
-using namespace chemfiles;
+#include <docopt/docopt.h>
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
+
+using namespace chemfiles;
 
 static const char OPTIONS[] =
 R"(cfiles rdf: compute radial distribution function

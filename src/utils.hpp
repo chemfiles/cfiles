@@ -5,18 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-
-
 #ifndef CFILES_UTILS_HPP
 #define CFILES_UTILS_HPP
 
-#include <vector>
-#include <string>
-#include <sstream>
+#include <chemfiles.hpp>
 
 #include "Errors.hpp"
-#include "chemfiles.hpp"
-
 
 inline std::vector<std::string> split(const std::string &s, char delim) {
     std::stringstream ss(s);

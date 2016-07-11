@@ -5,12 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
+#include <docopt/docopt.h>
 
 #include "Convert.hpp"
 #include "utils.hpp"
 
-#include "docopt/docopt.h"
-#include "chemfiles.hpp"
 using namespace chemfiles;
 
 static const char OPTIONS[] =

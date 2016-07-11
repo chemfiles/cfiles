@@ -10,7 +10,6 @@
 #define CFILES_COMMAND_FACTORY_HPP
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "commands/Command.hpp"

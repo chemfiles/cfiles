@@ -7,16 +7,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
-#pragma once
 #ifndef CFILES_HISTOGRAM_HPP
 #define CFILES_HISTOGRAM_HPP
 
-#include <cstdlib>
-#include <cassert>
 #include <vector>
 #include <numeric>
 #include <functional>
-#include <type_traits>
 
 #define ENABLE_FOR_ARITHMETIC_TYPES \
 template <class U = T, typename = typename std::enable_if<std::is_arithmetic<U>::value>::type>

@@ -13,6 +13,9 @@ def cfiles(*args):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise CfilesError("Process exited with non-zero return code")
+        command = " ".join(command)
+        raise CfilesError(
+            "Process '{}' exited with non-zero return code".format(command)
+        )
 
     return stdout, stderr

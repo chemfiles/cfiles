@@ -14,6 +14,7 @@
 using namespace chemfiles;
 
 const std::string AverageCommand::AVERAGE_OPTIONS = R"(
+  --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --guess-bonds                 guess the bonds in the input
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
@@ -37,6 +38,12 @@ void AverageCommand::parse_options(const std::map<std::string, docopt::value>& a
         options_.topology = args.at("--topology").asString();
     } else {
         options_.topology = "";
+    }
+
+    if (args.at("--format")){
+        options_.format = args.at("--format").asString();
+    } else {
+        options_.format = "";
     }
 
     if (args.at("--cell")) {

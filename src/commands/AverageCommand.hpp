@@ -25,6 +25,8 @@ public:
     struct Options {
         //! Input trajectory
         std::string trajectory;
+        //! Specific format to use with the trajectory
+        std::string format;
         //! First step to use
         size_t start;
         //! Last step to use

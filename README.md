@@ -4,16 +4,18 @@
 [![codecov](https://codecov.io/gh/chemfiles/cfiles/branch/master/graph/badge.svg)](https://codecov.io/gh/chemfiles/cfiles)
 
 `cfiles` is an analysis frontend for the
-[Chemfiles](https://github.com/chemfiles/chemfiles/) library, implementing analysis
-algorithms for post-processing data from molecular or quantum simulations.
+[Chemfiles](https://github.com/chemfiles/chemfiles/) library, implementing
+analysis algorithms for post-processing data from molecular or quantum
+simulations.
 
-This is still in alpha mode, largely untested, created for dog-feeding purpose and as such
-it will surely eat your laundry and do nasty things. Feel free to use it, without any
-guarantee about the result.
+This is still in alpha mode, largely untested, created for dog-feeding purpose
+and as such it will surely eat your laundry and do nasty things. Feel free to
+use it, without any guarantee about the result.
 
 ## Functionalities
 
 * Radial distribution functions;
+* Angles and dihedral angles distributions;
 * Convertion from one file format to another.
 
 ## Get it, build it
@@ -31,5 +33,6 @@ make
 
 You can then copy the `cfiles` executable to some place in your path
 
-**Note:** When using GCC 4.8, `cfiles` rely on the `boost_regex` library, which
-can be installed using your favorite package manager.
+**Note:** When using the C++ standard library from GCC 4.8, `cfiles` rely on
+the `boost_regex` library, which can be installed using your favorite package
+manager.

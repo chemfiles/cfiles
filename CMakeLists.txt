@@ -16,11 +16,9 @@ include(CompilerFlags)
 include_directories(chemfiles/include/)
 include_directories(src/)
 include_directories(SYSTEM external/)
-add_library(docopt STATIC external/docopt/docopt.cpp)
 
 file(GLOB_RECURSE sources src/**.cpp)
 add_executable(cfiles ${sources})
-target_link_libraries(cfiles docopt chemfiles)
 
 try_compile(STD_REGEX_WORKS
     ${PROJECT_BINARY_DIR}
@@ -32,8 +30,11 @@ if(NOT ${STD_REGEX_WORKS})
     find_package(Boost 1.53 REQUIRED COMPONENTS regex)
     include_directories(${Boost_INCLUDE_DIRS})
     target_link_libraries(cfiles ${Boost_LIBRARIES})
-    add_definitions("-DDOCOPT_USES_BOOST_REGEX")
+    add_definitions("-DDOCTOPT_USE_BOOST_REGEX")
 endif()
+
+add_library(docopt STATIC external/docopt/docopt.cpp)
+target_link_libraries(cfiles docopt chemfiles)
 
 install(TARGETS cfiles DESTINATION bin)
 

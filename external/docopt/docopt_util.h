@@ -9,6 +9,19 @@
 #ifndef docopt_docopt_util_h
 #define docopt_docopt_util_h
 
+#if DOCTOPT_USE_BOOST_REGEX
+#include <boost/regex.hpp>
+namespace std {
+    using boost::regex;
+    using boost::sregex_token_iterator;
+}
+#else
+#include <regex>
+#endif
+
+#pragma mark -
+#pragma mark General utility
+
 namespace {
 	bool starts_with(std::string const& str, std::string const& prefix)
 	{
@@ -78,6 +91,17 @@ namespace {
 		for(++iter; iter!=end; ++iter) {
 			ret.append(delim);
 			ret.append(*iter);
+		}
+		return ret;
+	}
+
+	std::vector<std::string> regex_split(std::string const& text, std::regex const& re)
+	{
+		std::vector<std::string> ret;
+		for (auto it = std::sregex_token_iterator(text.begin(), text.end(), re, -1);
+			it != std::sregex_token_iterator();
+			++it) {
+			ret.emplace_back(*it);
 		}
 		return ret;
 	}

@@ -37,6 +37,8 @@ public:
         chemfiles::UnitCell cell;
         //! Topology file to use
         std::string topology;
+        //! Should we try to guess the topology?
+        bool guess_bonds;
     };
 
     //! A strinc containing Doctopt style options for all time-averaged commands.

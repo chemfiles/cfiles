@@ -15,6 +15,7 @@ using namespace chemfiles;
 
 const std::string AverageCommand::AVERAGE_OPTIONS = R"(
   -t <path>, --topology=<path>  alternative topology file for the input
+  --guess-bonds                 guess the bonds in the input
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
                                 using one of the <a:b:c:α:β:γ> or <a:b:c> or <L>
                                 formats. This option set <max> to L/2.
@@ -27,8 +28,12 @@ void AverageCommand::parse_options(const std::map<std::string, docopt::value>& a
     options_.start = stol(args.at("--start").asString());
     options_.end = stol(args.at("--end").asString());
     options_.stride = stol(args.at("--stride").asString());
+    options_.guess_bonds = args.at("--guess-bonds").asBool();
 
     if (args.at("--topology")){
+        if (options_.guess_bonds) {
+            throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
+        }
         options_.topology = args.at("--topology").asString();
     } else {
         options_.topology = "";
@@ -69,6 +74,10 @@ int AverageCommand::run(int argc, const char* argv[]) {
 
         // Accumulate intermediate results in results
         auto frame = file.read();
+        if (options_.guess_bonds) {
+            frame.guess_topology();
+        }
+
         accumulate(frame, histogram_);
 
         for (size_t i=0; i<histogram_.size(); i++){

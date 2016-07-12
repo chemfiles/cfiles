@@ -28,6 +28,7 @@ Options:
   --input-format=<format>       force the input file format to be <format>
   --output-format=<format>      force the output file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
+  --guess-bonds                 guess the bonds in the input
   -c <cell>, --cell=<cell>      alternative unit cell for the input. <cell>
                                 should be formated using one of the
                                 <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
@@ -39,6 +40,7 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     Convert::Options options;
     options.infile = args["<input>"].asString();
     options.outfile = args["<output>"].asString();
+    options.guess_bonds = args.at("--guess-bonds").asBool();
 
     if (args["--input-format"]){
         options.input_format = args["--input-format"].asString();
@@ -53,6 +55,9 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     }
 
     if (args["--topology"]){
+        if (options.guess_bonds) {
+            throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
+        }
         options.topology = args["--topology"].asString();
     } else {
         options.topology = "";

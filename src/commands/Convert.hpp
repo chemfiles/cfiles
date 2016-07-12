@@ -23,6 +23,7 @@ public:
         bool custom_cell;
         chemfiles::UnitCell cell;
         std::string topology;
+        bool guess_bonds;
     };
 
     Convert() {}

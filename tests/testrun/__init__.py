@@ -1,3 +1,3 @@
-# -*- codding: utf8 -*-
+# -*- coding: utf8 -*-
 
 from runner import cfiles

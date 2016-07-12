@@ -1,4 +1,4 @@
-# -*- codding: utf8 -*-
+# -*- coding: utf8 -*-
 from subprocess import Popen, PIPE
 
 

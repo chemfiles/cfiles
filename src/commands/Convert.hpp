@@ -24,6 +24,7 @@ public:
         chemfiles::UnitCell cell;
         std::string topology;
         bool guess_bonds;
+        bool wrap;
     };
 
     Convert() {}

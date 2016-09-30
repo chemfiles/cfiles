@@ -32,6 +32,7 @@ Options:
   -c <cell>, --cell=<cell>      alternative unit cell for the input. <cell>
                                 should be formated using one of the
                                 <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
+  --wrap                        Rewrap the particles inside the unit cell
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
@@ -41,6 +42,7 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     options.infile = args["<input>"].asString();
     options.outfile = args["<output>"].asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
+    options.wrap = args.at("--wrap").asBool();
 
     if (args["--input-format"]){
         options.input_format = args["--input-format"].asString();
@@ -101,6 +103,15 @@ int Convert::run(int argc, const char* argv[]) {
 
         if (options.guess_bonds) {
             frame.guess_topology();
+        }
+
+        if (options.wrap) {
+            auto positions = frame.positions();
+            auto cell = frame.cell();
+
+            for (auto position: positions) {
+                position = cell.wrap(position);
+            }
         }
 
         outfile.write(frame);

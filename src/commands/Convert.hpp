@@ -27,9 +27,9 @@ public:
     };
 
     Convert() {}
-    virtual int run(int argc, const char* argv[]) override;
-    virtual std::string description() const override;
-    virtual std::string help() const override;
+    int run(int argc, const char* argv[]) override;
+    std::string description() const override;
+    std::string help() const override;
 
 private:
     Options options_;

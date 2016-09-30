@@ -14,8 +14,8 @@
 class Help final: public Command {
 public:
     Help() = default;
-    virtual int run(int argc, const char* argv[]) override;
-    virtual std::string description() const override;
+    int run(int argc, const char* argv[]) override;
+    std::string description() const override;
 
     //! List all available commands with the associated description
     void list_commands() const;

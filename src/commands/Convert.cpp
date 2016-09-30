@@ -98,6 +98,11 @@ int Convert::run(int argc, const char* argv[]) {
 
     for (size_t i=0; i<infile.nsteps(); i++) {
         auto frame = infile.read();
+
+        if (options.guess_bonds) {
+            frame.guess_topology();
+        }
+
         outfile.write(frame);
     }
 

@@ -1,10 +1,9 @@
-/* cfiles, an analysis frontend for the Chemfiles library
- * Copyright (C) 2015 Guillaume Fraux
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/
-*/
+// cfiles, an analysis frontend for the Chemfiles library
+// Copyright (C) 2015-2016 Guillaume Fraux
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #ifndef CFILES_COMMAND_FACTORY_HPP
 #define CFILES_COMMAND_FACTORY_HPP
@@ -17,9 +16,9 @@
 
 struct command_creator {
     using command_creator_t = std::unique_ptr<Command>(*)(void);
-    //! Command name
+    /// Command name
     std::string name;
-    //! Command instanciation
+    /// Command instanciation
     command_creator_t create;
 };
 

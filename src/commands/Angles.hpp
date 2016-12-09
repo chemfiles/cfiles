@@ -1,10 +1,9 @@
-/* cfiles, an analysis frontend for the Chemfiles library
- * Copyright (C) 2015 Guillaume Fraux
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/
-*/
+// cfiles, an analysis frontend for the Chemfiles library
+// Copyright (C) 2015-2016 Guillaume Fraux
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #ifndef CFILES_ANGLES_HPP
 #define CFILES_ANGLES_HPP
@@ -14,11 +13,11 @@
 class AngleDistribution final: public AveCommand {
 public:
     struct Options {
-        //! Output data file
+        /// Output data file
         std::string outfile;
-        //! Selection for the atoms in radial distribution
+        /// Selection for the atoms in radial distribution
         std::string selection;
-        //! Number of points in the histogram
+        /// Number of points in the histogram
         size_t npoints;
     };
 
@@ -31,9 +30,9 @@ public:
     void finish(const Histogram<double>& histogram) override;
 
 private:
-    //! Options for this instance of RDF
+    /// Options for this instance of RDF
     Options options_;
-    //! Selection for the atoms in the pair
+    /// Selection for the atoms in the pair
     chemfiles::Selection selection_;
 };
 

@@ -20,7 +20,7 @@ namespace docopt {
 }
 
 /// Base class for time-averaged computations
-class AverageCommand: public Command {
+class AveCommand: public Command {
 public:
     struct Options {
         //! Input trajectory
@@ -47,7 +47,7 @@ public:
     //! It should be added to the command-specific options.
     static const std::string AVERAGE_OPTIONS;
 
-    virtual ~AverageCommand() = default;
+    virtual ~AveCommand() = default;
     int run(int argc, const char* argv[]) override final;
 
     //! Setup the command. This function should call `AverageCommand::parse_options`

@@ -45,15 +45,15 @@ std::string Rdf::help() const {
 }
 
 void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
-    auto options = std::string(OPTIONS) + AverageCommand::AVERAGE_OPTIONS;
+    auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
-    AverageCommand::parse_options(args);
+    AveCommand::parse_options(args);
 
     if (args["--output"]){
         options_.outfile = args["--output"].asString();
     } else {
-        options_.outfile = AverageCommand::options().trajectory + ".rdf";
+        options_.outfile = AveCommand::options().trajectory + ".rdf";
     }
 
     options_.rmax = stod(args["--max"].asString());
@@ -61,8 +61,8 @@ void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
     options_.selection = args["--selection"].asString();
 
 
-    if (AverageCommand::options().custom_cell) {
-        auto& cell = AverageCommand::options().cell;
+    if (AveCommand::options().custom_cell) {
+        auto& cell = AveCommand::options().cell;
         double L = std::min(cell.a(), std::min(cell.b(), cell.c()));
         options_.rmax = L/2;
 	}
@@ -77,7 +77,7 @@ void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
 void Rdf::finish(const Histogram<double>& histogram) {
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
-        outfile << "# Radial distribution function in trajectory " << AverageCommand::options().trajectory << std::endl;
+        outfile << "# Radial distribution function in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = histogram.bin_size();

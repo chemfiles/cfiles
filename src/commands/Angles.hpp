@@ -9,9 +9,9 @@
 #ifndef CFILES_ANGLES_HPP
 #define CFILES_ANGLES_HPP
 
-#include "AverageCommand.hpp"
+#include "AveCommand.hpp"
 
-class AngleDistribution final: public AverageCommand {
+class AngleDistribution final: public AveCommand {
 public:
     struct Options {
         //! Output data file

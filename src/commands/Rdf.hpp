@@ -9,10 +9,9 @@
 #ifndef CFILES_RDF_HPP
 #define CFILES_RDF_HPP
 
+#include "AveCommand.hpp"
 
-#include "AverageCommand.hpp"
-
-class Rdf final: public AverageCommand {
+class Rdf final: public AveCommand {
 public:
     struct Options {
         //! Output data file

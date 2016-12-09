@@ -7,13 +7,13 @@
 */
 #include <docopt/docopt.h>
 
-#include "AverageCommand.hpp"
+#include "AveCommand.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 
 using namespace chemfiles;
 
-const std::string AverageCommand::AVERAGE_OPTIONS = R"(
+const std::string AveCommand::AVERAGE_OPTIONS = R"(
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --guess-bonds                 guess the bonds in the input
@@ -24,7 +24,7 @@ const std::string AverageCommand::AVERAGE_OPTIONS = R"(
   --end=<n>                     last step (-1 for the input end) [default: -1]
   --stride=<n>                  use a step every <n> steps [default: 1])";
 
-void AverageCommand::parse_options(const std::map<std::string, docopt::value>& args) {
+void AveCommand::parse_options(const std::map<std::string, docopt::value>& args) {
     options_.trajectory = args.at("<trajectory>").asString();
     options_.start = stol(args.at("--start").asString());
     options_.end = stol(args.at("--end").asString());
@@ -54,7 +54,7 @@ void AverageCommand::parse_options(const std::map<std::string, docopt::value>& a
     }
 }
 
-int AverageCommand::run(int argc, const char* argv[]) {
+int AveCommand::run(int argc, const char* argv[]) {
     setup(argc, argv, histogram_);
     result_ = std::vector<double>(histogram_.size(), 0);
 

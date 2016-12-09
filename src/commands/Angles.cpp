@@ -46,15 +46,15 @@ std::string AngleDistribution::help() const {
 }
 
 void AngleDistribution::setup(int argc, const char* argv[], Histogram<double>& histogram) {
-    auto options = std::string(OPTIONS) + AverageCommand::AVERAGE_OPTIONS;
+    auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
-    AverageCommand::parse_options(args);
+    AveCommand::parse_options(args);
 
     if (args["--output"]){
         options_.outfile = args["--output"].asString();
     } else {
-        options_.outfile = AverageCommand::options().trajectory + ".ang";
+        options_.outfile = AveCommand::options().trajectory + ".ang";
     }
 
     options_.npoints = stol(args["--points"].asString());
@@ -75,7 +75,7 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
 
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
-        outfile << "# Angles distribution in trajectory " << AverageCommand::options().trajectory << std::endl;
+        outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = histogram.bin_size();

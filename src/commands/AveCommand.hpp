@@ -38,6 +38,8 @@ public:
         chemfiles::UnitCell cell;
         /// Topology file to use
         std::string topology;
+        /// Format to use for the topology file
+        std::string topology_format;
         /// Should we try to guess the topology?
         bool guess_bonds;
     };

@@ -16,6 +16,7 @@ using namespace chemfiles;
 const std::string AveCommand::AVERAGE_OPTIONS = R"(
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
+  --topology-format=<format>    use <format> as format for the topology file
   --guess-bonds                 guess the bonds in the input
   -c <cell>, --cell=<cell>      alternative unit cell. <cell> should be formated
                                 using one of the <a:b:c:α:β:γ> or <a:b:c> or <L>
@@ -31,7 +32,7 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
     options_.stride = stol(args.at("--stride").asString());
     options_.guess_bonds = args.at("--guess-bonds").asBool();
 
-    if (args.at("--topology")){
+    if (args.at("--topology")) {
         if (options_.guess_bonds) {
             throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
         }
@@ -40,10 +41,19 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
         options_.topology = "";
     }
 
-    if (args.at("--format")){
+    if (args.at("--format")) {
         options_.format = args.at("--format").asString();
     } else {
         options_.format = "";
+    }
+
+    if (args.at("--topology-format")) {
+        if (options_.topology == "") {
+            throw CFilesError("Can not use '--topology-format' without a '--topology'");
+        }
+        options_.topology_format = args.at("--topology-format").asString();
+    } else {
+        options_.topology_format = "";
     }
 
     if (args.at("--cell")) {
@@ -65,7 +75,7 @@ int AveCommand::run(int argc, const char* argv[]) {
     }
 
     if (options_.topology != "") {
-        file.set_topology(options_.topology);
+        file.set_topology(options_.topology, options_.topology_format);
     }
 
     size_t start=options_.start, end=options_.end, stride=options_.stride;

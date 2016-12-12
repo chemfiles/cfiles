@@ -102,7 +102,7 @@ void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histog
             auto r21 = cell.wrap(positions[i] - positions[j]);
             auto r23 = cell.wrap(positions[k] - positions[j]);
             auto theta = angle(r21, r23);
-            histogram.insert_at(theta);
+            histogram.insert(theta);
         } else if (match.size() == 4) {
             auto i = match[0];
             auto j = match[1];
@@ -112,7 +112,7 @@ void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histog
             auto r23 = cell.wrap(positions[k] - positions[j]);
             auto r34 = cell.wrap(positions[m] - positions[k]);
             auto phi = dihedral(r12, r23, r34);
-            histogram.insert_at(phi);
+            histogram.insert(phi);
         }
     }
 }

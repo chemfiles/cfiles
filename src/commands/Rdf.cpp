@@ -104,7 +104,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
 
                 auto rij = norm(cell.wrap(positions[j] - positions[i]));
                 if (rij < options_.rmax){
-                    histogram.insert_at(rij);
+                    histogram.insert(rij);
                     npairs++;
                 }
             }
@@ -119,7 +119,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     		auto j = match[1];
             auto rij = norm(cell.wrap(positions[j] - positions[i]));
             if (rij < options_.rmax){
-                histogram.insert_at(rij);
+                histogram.insert(rij);
                 npairs++;
             }
     	}

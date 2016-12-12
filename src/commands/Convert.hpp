@@ -17,13 +17,13 @@ public:
     struct Options {
         std::string infile;
         std::string outfile;
-        std::string input_format;
-        std::string output_format;
-        bool custom_cell;
+        std::string input_format = "";
+        std::string output_format = "";
+        std::string topology = "";
+        bool custom_cell = false;
         chemfiles::UnitCell cell;
-        std::string topology;
-        bool guess_bonds;
-        bool wrap;
+        bool guess_bonds = false;
+        bool wrap = false;
     };
 
     Convert() {}

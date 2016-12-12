@@ -46,14 +46,10 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
 
     if (args["--input-format"]){
         options.input_format = args["--input-format"].asString();
-    } else {
-        options.input_format = "";
     }
 
     if (args["--output-format"]){
         options.output_format = args["--output-format"].asString();
-    } else {
-        options.output_format = "";
     }
 
     if (args["--topology"]){
@@ -61,16 +57,12 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
             throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
         }
         options.topology = args["--topology"].asString();
-    } else {
-        options.topology = "";
     }
 
     if (args["--cell"]) {
-		options.cell = parse_cell(args["--cell"].asString());
         options.custom_cell = true;
-	} else {
-        options.custom_cell = false;
-    }
+		options.cell = parse_cell(args["--cell"].asString());
+	}
 
     return options;
 }

@@ -25,23 +25,23 @@ public:
         /// Input trajectory
         std::string trajectory;
         /// Specific format to use with the trajectory
-        std::string format;
+        std::string format = "";
         /// First step to use
-        size_t start;
+        size_t start = 0;
         /// Last step to use
-        size_t end;
+        size_t end = 0;
         /// Use a step every `stride` steps
-        size_t stride;
+        size_t stride = 1;
         /// Do we have a custom cell to use?
         bool custom_cell;
         /// Unit cell to use
         chemfiles::UnitCell cell;
         /// Topology file to use
-        std::string topology;
+        std::string topology = "";
         /// Format to use for the topology file
-        std::string topology_format;
+        std::string topology_format = "";
         /// Should we try to guess the topology?
-        bool guess_bonds;
+        bool guess_bonds = false;
     };
 
     /// A strinc containing Doctopt style options for all time-averaged commands.

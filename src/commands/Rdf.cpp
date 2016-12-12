@@ -130,6 +130,12 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         n_particles = first_particles.size();
     }
 
+    if (n_particles == 0) {
+        throw CFilesError(
+            "No pair corresponding to the '" + selection_.string() + "' selection found."
+        );
+    }
+
     // Normalize the rdf to be 1 at long distances
     double volume = cell.volume();
     if (volume <= 0) {volume = 1;}

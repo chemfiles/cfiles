@@ -46,5 +46,5 @@ def angles(selection):
 
 if __name__ == '__main__':
     angles("angles: all")
-    angles("angles: name($1) H and name($2) O and name($3) H")
+    angles("angles: name(#1) H and name(#2) O and name(#3) H")
     os.unlink(OUTPUT)

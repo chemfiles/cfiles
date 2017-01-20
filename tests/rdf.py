@@ -88,7 +88,7 @@ def OH_rdf_all():
         "rdf",
         "-c", "15",
         "-p", "150",
-        "-s", "pairs: name($1) O and name($2) H",
+        "-s", "pairs: name(#1) O and name(#2) H",
         TRAJECTORY, "-o", OUTPUT
     )
     assert(out == "")
@@ -105,7 +105,7 @@ def OH_rdf_partial():
         "--start", "50",
         "-c", "15",
         "-p", "150",
-        "-s", "pairs: name($1) O and name($2) H",
+        "-s", "pairs: name(#1) O and name(#2) H",
         TRAJECTORY, "-o", OUTPUT
     )
     assert(out == "")

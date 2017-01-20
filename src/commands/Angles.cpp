@@ -7,6 +7,7 @@
 
 #include <docopt/docopt.h>
 #include <algorithm>
+#include <fstream>
 
 #include "Angles.hpp"
 #include "Errors.hpp"

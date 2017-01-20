@@ -7,6 +7,7 @@
 
 #include <docopt/docopt.h>
 #include <unordered_set>
+#include <fstream>
 
 #include "Rdf.hpp"
 #include "Errors.hpp"

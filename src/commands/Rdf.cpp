@@ -33,7 +33,7 @@ Options:
                                 trajectory file name with the `.rdf` extension.
   -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a
                                 single selection ("name O") or a selection of
-                                two atoms ("pairs: name($1) O and name($2) H")
+                                two atoms ("pairs: name(#1) O and name(#2) H")
                                 [default: all]
   --max=<max>                   maximal distance to use [default: 10]
   -p <n>, --points=<n>          number of points in the histogram [default: 200])";

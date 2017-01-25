@@ -114,6 +114,21 @@ def OH_rdf_partial():
     data = read_rdf(OUTPUT)
     check_oh_rdf(data)
 
+    out, err = cfiles(
+        "rdf",
+        "--start", "50",
+        "-c", "15",
+        "-p", "150",
+        "-s", "pairs: name(#1) H and name(#2) O",
+        TRAJECTORY, "-o", OUTPUT
+    )
+    assert(out == "")
+    assert(err == "")
+
+    data = read_rdf(OUTPUT)
+    check_oh_rdf(data)
+
+
 if __name__ == '__main__':
     oxygen_rdf_all()
     oxygen_rdf_partial()

@@ -94,13 +94,15 @@ void Rdf::finish(const Histogram<double>& histogram) {
 void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     auto positions = frame.positions();
     auto cell = frame.cell();
-    size_t n_particles = 0;
+    size_t n_first = 0;
+    size_t n_second = 0;
 
     if (selection_.size() == 1) {
         // If we have a single atom selection, use it for both atoms of the
         // pairs
         auto matched = selection_.list(frame);
-        n_particles = matched.size();
+        n_first = matched.size();
+        n_second = matched.size();
         for (auto i: matched) {
             for (auto j: matched) {
                 if (i == j) continue;
@@ -116,22 +118,26 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         assert(selection_.size() == 2);
         auto matched = selection_.evaluate(frame);
         std::unordered_set<size_t> first_particles;
+        std::unordered_set<size_t> second_particles;
 
         for (auto match: matched) {
     		auto i = match[0];
-            first_particles.insert(i);
+            auto j = match[1];
 
-    		auto j = match[1];
+            first_particles.insert(i);
+            second_particles.insert(j);
+
             auto rij = norm(cell.wrap(positions[j] - positions[i]));
             if (rij < options_.rmax){
                 histogram.insert(rij);
             }
     	}
 
-        n_particles = first_particles.size();
+        n_first = first_particles.size();
+        n_second = second_particles.size();
     }
 
-    if (n_particles == 0) {
+    if (n_first == 0 || n_second == 0) {
         throw CFilesError(
             "No pair corresponding to the '" + selection_.string() + "' selection found."
         );
@@ -142,10 +148,10 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     if (volume <= 0) {volume = 1;}
 
     double dr = histogram.bin_size();
-    double rho = n_particles * n_particles / volume;
+    double factor = n_first * n_second / volume;
 
-    histogram.normalize([rho, dr](size_t i, double val){
+    histogram.normalize([factor, dr](size_t i, double val){
         double r = (i + 0.5) * dr;
-        return val / (4 * pi * rho * dr * r * r);
+        return val / (4 * pi * factor * dr * r * r);
     });
 }

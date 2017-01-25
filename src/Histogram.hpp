@@ -13,9 +13,9 @@
 #include <numeric>
 #include <functional>
 
-/// Histogram class, for averaging a set of data.
+/// Histogram class
 template <class T>
-class Histogram : private std::vector<T> {
+class Histogram: private std::vector<T> {
     using super = std::vector<T>;
 public:
     using super::size;
@@ -36,7 +36,6 @@ public:
         );
     }
 
-    ~Histogram() = default;
     Histogram(const Histogram&) = default;
     Histogram(Histogram&&) = default;
     Histogram& operator=(const Histogram&) = default;
@@ -64,8 +63,6 @@ public:
 private:
     /// Width of a bin in the Histogram, for arithmetic types only
     double dr_ = 0;
-    /// Number of elements added into this Histogram
-    size_t nadded_ = 0;
 };
 
 #endif

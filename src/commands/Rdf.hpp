@@ -27,7 +27,7 @@ public:
     std::string description() const override;
     std::string help() const override;
 
-    void setup(int argc, const char* argv[], Histogram<double>& histogram) override;
+    Averager<double> setup(int argc, const char* argv[]) override;
     void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) override;
     void finish(const Histogram<double>& histogram) override;
 

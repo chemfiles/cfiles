@@ -46,7 +46,7 @@ std::string AngleDistribution::help() const {
     return OPTIONS;
 }
 
-void AngleDistribution::setup(int argc, const char* argv[], Histogram<double>& histogram) {
+Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
     auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
@@ -63,9 +63,9 @@ void AngleDistribution::setup(int argc, const char* argv[], Histogram<double>& h
 
     selection_ = Selection(options_.selection);
     if (selection_.size() == 3) {
-        histogram = Histogram<double>(options_.npoints, 0, pi);
+        return Averager<double>(options_.npoints, 0, pi);
     } else if (selection_.size() == 4) {
-        histogram = Histogram<double>(options_.npoints, 0, 2*pi);
+        return Averager<double>(options_.npoints, 0, 2*pi);
     } else {
         throw CFilesError("Can not use a selection with less than three atoms in angle distribution.");
     }

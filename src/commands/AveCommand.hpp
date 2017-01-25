@@ -11,7 +11,7 @@
 #include <map>
 #include <chemfiles.hpp>
 
-#include "Histogram.hpp"
+#include "Averager.hpp"
 #include "Command.hpp"
 
 namespace docopt {
@@ -51,8 +51,9 @@ public:
     virtual ~AveCommand() = default;
     int run(int argc, const char* argv[]) override final;
 
-    /// Setup the command. This function should call `AverageCommand::parse_options`
-    virtual void setup(int argc, const char* argv[], Histogram<double>& histogram) = 0;
+    /// Setup the command and the histogram.
+    /// This function MUST call `AverageCommand::parse_options`.
+    virtual Averager<double> setup(int argc, const char* argv[]) = 0;
     /// Add the data from a `frame` to the `histogram`
     virtual void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) = 0;
     /// Finish the run, and write any output
@@ -65,14 +66,10 @@ protected:
     void parse_options(const std::map<std::string, docopt::value>& args);
 
 private:
-    /// Options for this instance of RDF
+    /// Options
     Options options_;
-    /// Histogram, for inserting the data at each step
-    Histogram<double> histogram_;
-    /// Result for storing the pre-normalized results
-    std::vector<double> result_;
-    /// Number of steps for the average
-    size_t nsteps_ = 0;
+    /// Averaging histogram for the data
+    Averager<double> histogram_;
 };
 
 #endif

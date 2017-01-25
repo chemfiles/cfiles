@@ -58,20 +58,19 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
 }
 
 int AveCommand::run(int argc, const char* argv[]) {
-    setup(argc, argv, histogram_);
-    result_ = std::vector<double>(histogram_.size(), 0);
+    histogram_ = setup(argc, argv);
 
     auto file = Trajectory(options_.trajectory);
-
     if (options_.custom_cell) {
         file.set_cell(options_.cell);
     }
-
     if (options_.topology != "") {
         file.set_topology(options_.topology, options_.topology_format);
     }
 
-    size_t start=options_.start, end=options_.end, stride=options_.stride;
+    size_t start = options_.start;
+    size_t end = options_.end;
+    size_t stride = options_.stride;
     if (end == static_cast<size_t>(-1)) {
         end = file.nsteps();
     }
@@ -80,25 +79,14 @@ int AveCommand::run(int argc, const char* argv[]) {
     }
 
     for (size_t i=start; i<end; i+=stride) {
-        nsteps_ += 1;
-
-        // Accumulate intermediate results in results
         auto frame = file.read();
         if (options_.guess_bonds) {
             frame.guess_topology();
         }
-
         accumulate(frame, histogram_);
-
-        for (size_t i=0; i<histogram_.size(); i++){
-            result_[i] += histogram_[i];
-            histogram_[i] = 0;
-        }
+        histogram_.step();
     }
-
-    for (size_t i=0; i<result_.size(); i++){
-        histogram_[i] = result_[i] / nsteps_;
-    }
+    histogram_.average();
 
     finish(histogram_);
     return 0;

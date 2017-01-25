@@ -46,10 +46,9 @@ std::string Rdf::help() const {
     return OPTIONS;
 }
 
-void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
+Averager<double> Rdf::setup(int argc, const char* argv[]) {
     auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
-
     AveCommand::parse_options(args);
 
     if (args["--output"]){
@@ -62,17 +61,17 @@ void Rdf::setup(int argc, const char* argv[], Histogram<double>& histogram) {
     options_.npoints = stol(args["--points"].asString());
     options_.selection = args["--selection"].asString();
 
-
     if (AveCommand::options().custom_cell) {
         auto& cell = AveCommand::options().cell;
         double L = std::min(cell.a(), std::min(cell.b(), cell.c()));
         options_.rmax = L/2;
 	}
 
-    histogram = Histogram<double>(options_.npoints, 0, options_.rmax);
     selection_ = Selection(options_.selection);
     if (selection_.size() > 2) {
         throw CFilesError("Can not use a selection with more than two atoms in RDF.");
+    } else {
+        return Averager<double>(options_.npoints, 0, options_.rmax);
     }
 }
 

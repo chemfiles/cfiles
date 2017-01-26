@@ -14,14 +14,14 @@
 
 using namespace chemfiles;
 
-static const double pi = 3.141592653589793238463;
+static const double PI = 3.141592653589793238463;
 static const char OPTIONS[] =
 R"(cfiles rdf: compute radial distribution function
 
-Compute pair radial distrubution function (often called g(r)). The pairs of
-particles to use can be specified using the chemfiles selection language. It
-is possible to provide an alternative topology or unit cell when this
-information is not present in the trajectory.
+Compute pair radial distrubution function (often called g(r)) and running
+coordination number. The pairs of particles to use can be specified using the
+chemfiles selection language. It is possible to provide an alternative topology
+or unit cell when this information is not present in the trajectory.
 
 Usage:
   cfiles rdf [options] <trajectory>
@@ -71,11 +71,14 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
     if (selection_.size() > 2) {
         throw CFilesError("Can not use a selection with more than two atoms in RDF.");
     } else {
+        coordination_ = Averager<double>(options_.npoints, 0, options_.rmax);
         return Averager<double>(options_.npoints, 0, options_.rmax);
     }
 }
 
 void Rdf::finish(const Histogram<double>& histogram) {
+    coordination_.average();
+
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(!outfile.is_open()) {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");
@@ -83,10 +86,11 @@ void Rdf::finish(const Histogram<double>& histogram) {
 
     outfile << "# Radial distribution function in trajectory " << AveCommand::options().trajectory << std::endl;
     outfile << "# Using selection: " << options_.selection << std::endl;
+    outfile << "# r\tg(r)\tN(r) " << std::endl;
 
     double dr = histogram.bin_size();
     for (size_t i=0; i<histogram.size(); i++){
-        outfile << i * dr << "  " << histogram[i] << "\n";
+        outfile << i * dr << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
     }
 }
 
@@ -151,6 +155,13 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
 
     histogram.normalize([factor, dr](size_t i, double val){
         double r = (i + 0.5) * dr;
-        return val / (4 * pi * factor * dr * r * r);
+        return val / (4 * PI * factor * dr * r * r);
     });
+
+    double rho = (n_first + n_second) / volume;
+    for (size_t i=1; i<histogram.size(); i++){
+        auto r = (i + 0.5) * dr;
+        coordination_[i] = coordination_[i - 1] + 4 * PI * rho * histogram[i] * r * r * dr;
+    }
+    coordination_.step();
 }

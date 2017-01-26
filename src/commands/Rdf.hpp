@@ -36,6 +36,8 @@ private:
     Options options_;
     /// Selection for the atoms in the pair
     chemfiles::Selection selection_;
+    /// Also compute and average coordination numbers
+    Averager<double> coordination_;
 };
 
 #endif

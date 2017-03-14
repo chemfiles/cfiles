@@ -20,6 +20,7 @@ public:
         std::string input_format = "";
         std::string output_format = "";
         std::string topology = "";
+        std::string topology_format = "";
         bool custom_cell = false;
         chemfiles::UnitCell cell;
         bool guess_bonds = false;

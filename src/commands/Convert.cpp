@@ -28,7 +28,7 @@ Examples:
   cfiles convert --cell=28 --guess-bonds water.xyz water.pdb
   cfiles convert butane.pdb butane.nc --wrap
   cfiles convert methane.xyz --cell 15:15:25 --guess-bonds --points=150
-  cfiles convert result.xtc --topology=initial.pdb result.nc
+  cfiles convert result.xtc --topology=initial.mol --topology-format=PDB out.nc
   cfiles convert in.zeo out.mol --input-format=XYZ --output-format=PDB
 
 Options:
@@ -36,6 +36,7 @@ Options:
   --input-format=<format>       force the input file format to be <format>
   --output-format=<format>      force the output file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
+  --topology-format=<format>    use <format> as format for the topology file
   --guess-bonds                 guess the bonds in the input
   -c <cell>, --cell=<cell>      alternative unit cell for the input. <cell>
                                 should be formated using one of the
@@ -67,6 +68,13 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
         options.topology = args["--topology"].asString();
     }
 
+    if (args["--topology-format"]){
+        if (options.topology == "") {
+            throw CFilesError("Useless '--topology-format' without '--topology'");
+        }
+        options.topology_format = args["--topology-format"].asString();
+    }
+
     if (args["--cell"]) {
         options.custom_cell = true;
 		options.cell = parse_cell(args["--cell"].asString());
@@ -91,7 +99,7 @@ int Convert::run(int argc, const char* argv[]) {
     }
 
     if (options.topology != "") {
-        infile.set_topology(options.topology);
+        infile.set_topology(options.topology, options.topology_format);
     }
 
     for (size_t i=0; i<infile.nsteps(); i++) {

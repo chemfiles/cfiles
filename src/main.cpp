@@ -6,38 +6,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include <iostream>
-#include <iterator>
-
-#include "chemfiles.hpp"
 
 #include "CommandFactory.hpp"
 #include "commands/Help.hpp"
-
-static auto CFILES_VERSION = "0.0.1";
-
-static std::string version() {
-    return std::string("version ") + CFILES_VERSION + " (using chemfiles " + CHEMFILES_VERSION + ")";
-}
-
-static void print_usage() {
-    std::cout << "Usage: cfiles subcommand [--options] [args]" << std::endl;
-    std::cout << std::endl;
-
-    auto help = Help();
-    help.list_commands();
-}
+#include "utils.hpp"
 
 int main(int argc, const char* argv[]) {
-    if (argc < 2){
-        std::cout << "cfiles: analysis algorithms for theoretical chemistry" << std::endl;
-        std::cout << version() << std::endl;
-        std::cout << std::endl;
-        print_usage();
-        return EXIT_FAILURE;
-    }
-
     // Check first for version or help flags
-    if (argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
+    if (argc < 2 || argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
         auto command = get_command("help");
         const char* args[] = {""};
         return command->run(1, args);
@@ -53,15 +29,13 @@ int main(int argc, const char* argv[]) {
     };
 
     if (find_in_argv("-V") || find_in_argv("--version")) {
-        std::cout << "cfiles " << version() << std::endl;
+        std::cout << "cfiles " << full_version() << std::endl;
         return EXIT_SUCCESS;
     }
 
     // Error on other flags
     if (argv[1][0] == '-') {
         std::cout << "Unkown flag: " << argv[1] << std::endl;
-        std::cout << std::endl;
-        print_usage();
         return EXIT_FAILURE;
     }
 

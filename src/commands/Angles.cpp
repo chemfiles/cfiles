@@ -17,12 +17,13 @@ using namespace chemfiles;
 
 static const double pi = 3.141592653589793238463;
 static const std::string OPTIONS =
-R"(cfiles angles: angles histograms
+R"(Compute distribution of angles or dihedral angles along a trajectory. The
+angle can be specified using the chemfiles selection language. It is possible
+to provide an alternative unit cell or topology for the trajectory file if they
+are not defined in the trajectory format.
 
-Compute angles distribution along a trajectory. The angle to study can be
-specified using the chemfiles selection language. It is also possible to provide
-an alternative topology or unit cell when this information is not present in the
-trajectory.
+For more information about chemfiles selection language, please see
+http://chemfiles.github.io/chemfiles/latest/selections.html
 
 Usage:
   cfiles angles [options] <trajectory>
@@ -46,11 +47,12 @@ Options:
 
 
 std::string AngleDistribution::description() const {
-    return "compute angles distribution";
+    return "compute angles and dihedral angles distribution";
 }
 
 Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
-    auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
+    auto options = command_header("angles", AngleDistribution().description()) + "\n";
+    options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
     AveCommand::parse_options(args);

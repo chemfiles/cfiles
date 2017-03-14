@@ -11,21 +11,8 @@
 #include <string>
 
 
-/// Basic subcommand for `cfiles`. The only method is `run`, which will be called
-/// with the arguments of the subcommand. If the command is:
-///
-/// ```sh
-/// cfiles sub --here -i -k -lkj positional positional -o positional
-/// ```
-///
-/// Then, the `run` function will be called with
-///
-/// ```
-/// args = [
-///     "sub", "--here", "-i", "-k", "-lkj", "positional", "positional",
-///     "-o", "positional"
-/// ]
-/// ```
+/// Basic subcommand for `cfiles`. The main method is `run`, which will be called
+/// with the arguments of the subcommand.
 class Command {
 public:
     Command() = default;

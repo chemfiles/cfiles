@@ -11,17 +11,20 @@
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
+#include "utils.hpp"
 
 using namespace chemfiles;
 
 static const double PI = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(cfiles rdf: compute radial distribution function
+R"(Compute radial pair distribution function (often denoted g(r)) and running
+coordination number. The pair of particles to use can be specified using the
+chemfiles selection language. It is possible to provide an alternative unit
+cell or topology for the trajectory file if they are not defined in the
+trajectory format.
 
-Compute pair radial distrubution function (often called g(r)) and running
-coordination number. The pairs of particles to use can be specified using the
-chemfiles selection language. It is possible to provide an alternative topology
-or unit cell when this information is not present in the trajectory.
+For more information about chemfiles selection language, please see
+http://chemfiles.github.io/chemfiles/latest/selections.html
 
 Usage:
   cfiles rdf [options] <trajectory>
@@ -50,7 +53,8 @@ std::string Rdf::description() const {
 }
 
 Averager<double> Rdf::setup(int argc, const char* argv[]) {
-    auto options = std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
+    auto options = command_header("rdf", Rdf().description()) + "\n";
+    options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
     AveCommand::parse_options(args);
 

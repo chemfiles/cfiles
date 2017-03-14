@@ -9,16 +9,16 @@
 #include <sstream>
 
 #include "Convert.hpp"
+#include "Errors.hpp"
 #include "utils.hpp"
 
 using namespace chemfiles;
 
 static const char OPTIONS[] =
-R"(cfiles convert: trajectory conversion
-
-Convert trajectories from one format to another, automatically guessing the
-format to use based on the files extension. The '--input-format' and
-'--output-format' can be used to force the format.
+R"(Convert trajectories from one format to another, automatically guessing the
+format to use based on the files extension. It is possible to force a specific
+input or output file format, and to specify an alternative unit cell or topology
+for the input file if they are not defined in the input format.
 
 Usage:
   cfiles convert [options] <input> <output>
@@ -45,7 +45,9 @@ Options:
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
-    auto args = docopt::docopt(OPTIONS, {argv, argv + argc}, true, "");
+    auto options_str = command_header("rdf", Convert().description()) + "\n";
+    options_str += OPTIONS;
+    auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     Convert::Options options;
     options.infile = args["<input>"].asString();

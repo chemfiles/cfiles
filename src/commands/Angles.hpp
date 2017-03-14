@@ -9,6 +9,7 @@
 #define CFILES_ANGLES_HPP
 
 #include "AveCommand.hpp"
+#include "utils.hpp"
 
 class AngleDistribution final: public AveCommand {
 public:

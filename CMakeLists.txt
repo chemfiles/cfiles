@@ -11,6 +11,36 @@ else()
     message(FATAL_ERROR "Missing the chemfiles library. Please run `git submodule update --init`.")
 endif()
 
+find_package(Git QUIET)
+set(CFILES_VERSION 0.1.0)
+
+file(WRITE ${CMAKE_BINARY_DIR}/version.hpp.in
+"\#define CFILES_VERSION \"\${CFILES_VERSION}\"\n"
+)
+file(WRITE ${CMAKE_BINARY_DIR}/version.cmake
+"
+cmake_policy(SET CMP0012 NEW)
+set(CFILES_VERSION ${CFILES_VERSION})
+if(${GIT_FOUND})
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --tags --always --dirty
+        OUTPUT_VARIABLE GIT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if (NOT \"\${GIT_VERSION}\" STREQUAL \"${CFILES_VERSION}\")
+        set(CFILES_VERSION ${CFILES_VERSION}-\${GIT_VERSION})
+    endif()
+endif()
+configure_file(\${SRC} \${DST})
+")
+include_directories(${CMAKE_BINARY_DIR})
+
+add_custom_target(version
+    ${CMAKE_COMMAND} -D SRC=${CMAKE_BINARY_DIR}/version.hpp.in
+                     -D DST=${CMAKE_BINARY_DIR}/version.hpp
+                     -P ${CMAKE_BINARY_DIR}/version.cmake
+)
+
 include(CompilerFlags)
 
 include_directories(chemfiles/include/)
@@ -35,6 +65,11 @@ endif()
 
 add_library(docopt STATIC external/docopt/docopt.cpp)
 target_link_libraries(cfiles docopt chemfiles)
+add_dependencies(cfiles version)
+set_source_files_properties(
+    src/utils.cpp
+    PROPERTIES OBJECT_DEPENDS ${CMAKE_BINARY_DIR}/version.hpp
+)
 
 install(TARGETS cfiles DESTINATION bin)
 

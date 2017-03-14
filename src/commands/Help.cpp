@@ -6,8 +6,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include <iostream>
+#include <chemfiles.h>
+
 #include "Help.hpp"
 #include "CommandFactory.hpp"
+#include "utils.hpp"
 
 std::string Help::description() const{
     return "get help about subcommands";
@@ -15,8 +18,14 @@ std::string Help::description() const{
 
 int Help::run(int argc, const char* argv[]){
     if (argc == 1) {
-        std::cout << "Use 'cfiles help <subcommand>' to get help about a specific subcommand." ;
-        std::cout << std::endl << std::endl;
+        std::cout << "cfiles: analysis algorithms for theoretical chemistry" << std::endl;
+        std::cout << full_version() << std::endl;
+        std::cout << "Guillaume Fraux <guillaume@fraux.fr>" << std::endl << std::endl;
+
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  cfiles <command> [--options] [args]" << std::endl << std::endl;
+
+        std::cout << "Use 'cfiles help <command>' to get help about a specific command." << std::endl << std::endl;
         list_commands();
     } else {
         about(argv[1]);
@@ -26,7 +35,7 @@ int Help::run(int argc, const char* argv[]){
 
 void Help::list_commands() const {
     const size_t command_width = 10;
-    std::cout << "Available subcommands:" << std::endl;
+    std::cout << "Available commands:" << std::endl;
     for (auto& command: all_commands()) {
         auto name = command.name;
         auto description = command.create()->description();

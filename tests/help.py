@@ -6,19 +6,19 @@ def help_flag():
     stdout, stderr = cfiles("--help")
 
     assert(stderr == "")
-    assert("help <subcommand>" in stdout)
+    assert("help <command>" in stdout)
 
     stdout, stderr = cfiles("-h")
 
     assert(stderr == "")
-    assert("help <subcommand>" in stdout)
+    assert("help <command>" in stdout)
 
 
 def help_command():
     stdout, stderr = cfiles("help")
 
     assert(stderr == "")
-    assert("help <subcommand>" in stdout)
+    assert("help <command>" in stdout)
 
 
 if __name__ == '__main__':

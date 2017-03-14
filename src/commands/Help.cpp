@@ -10,7 +10,7 @@
 #include "CommandFactory.hpp"
 
 std::string Help::description() const{
-    return "Get help about subcommands.";
+    return "get help about subcommands";
 }
 
 int Help::run(int argc, const char* argv[]){
@@ -37,5 +37,6 @@ void Help::list_commands() const {
 
 void Help::about(const std::string& name) const {
     auto command = get_command(name);
-    std::cout << command->help() << std::endl;
+    const char* argv[3] = {"cfiles", name.c_str(), "--help"};
+    std::cout << command->run(3, argv) << std::endl;
 }

@@ -70,11 +70,7 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
 
 
 std::string Convert::description() const {
-    return "Convert trajectories between formats";
-}
-
-std::string Convert::help() const {
-    return OPTIONS;
+    return "convert trajectories between formats";
 }
 
 int Convert::run(int argc, const char* argv[]) {

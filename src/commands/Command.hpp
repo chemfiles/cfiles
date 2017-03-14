@@ -30,15 +30,13 @@ class Command {
 public:
     Command() = default;
     virtual ~Command() = default;
+
     /// Run the command, with the arguments array `argv`, containing `argc`
-    /// strings.
+    /// strings. This should output help to the standard output when `argv`
+    /// contains the string `"--help"`.
     virtual int run(int argc, const char* argv[]) = 0;
     /// Output a description of the command
     virtual std::string description() const = 0;
-    /// Get the detailed help of the command
-    virtual std::string help() const {
-        return description();
-    }
 };
 
 #endif

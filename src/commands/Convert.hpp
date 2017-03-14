@@ -29,8 +29,6 @@ public:
     Convert() {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
-    std::string help() const override;
-
 private:
     Options options_;
 };

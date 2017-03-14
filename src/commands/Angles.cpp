@@ -39,11 +39,7 @@ Options:
 
 
 std::string AngleDistribution::description() const {
-    return "Compute angles distribution";
-}
-
-std::string AngleDistribution::help() const {
-    return OPTIONS;
+    return "compute angles distribution";
 }
 
 Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {

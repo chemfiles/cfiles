@@ -39,11 +39,7 @@ Options:
   -p <n>, --points=<n>          number of points in the histogram [default: 200])";
 
 std::string Rdf::description() const {
-    return "Compute radial distribution functions";
-}
-
-std::string Rdf::help() const {
-    return OPTIONS;
+    return "compute radial distribution functions";
 }
 
 Averager<double> Rdf::setup(int argc, const char* argv[]) {

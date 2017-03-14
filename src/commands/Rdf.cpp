@@ -27,6 +27,13 @@ Usage:
   cfiles rdf [options] <trajectory>
   cfiles rdf (-h | --help)
 
+Examples:
+  cfiles rdf water.tng -s "name O" --max=8.5 --output=rdf-O-O.dat
+  cfiles rdf butane.tng -s "pairs: name(#1) C and name(#2) H"
+  cfiles rdf methane.xyz --cell 15:15:25 --guess-bonds --points=150
+  cfiles rdf result.xtc --topology=initial.mol --topology-format=PDB
+  cfiles rdf simulation.pdb --start=10000 --stride=100 -o partial-rdf.dat
+
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the

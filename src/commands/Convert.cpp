@@ -24,6 +24,13 @@ Usage:
   cfiles convert [options] <input> <output>
   cfiles convert (-h | --help)
 
+Examples:
+  cfiles convert --cell=28 --guess-bonds water.xyz water.pdb
+  cfiles convert butane.pdb butane.nc --wrap
+  cfiles convert methane.xyz --cell 15:15:25 --guess-bonds --points=150
+  cfiles convert result.xtc --topology=initial.pdb result.nc
+  cfiles convert in.zeo out.mol --input-format=XYZ --output-format=PDB
+
 Options:
   -h --help                     show this help
   --input-format=<format>       force the input file format to be <format>

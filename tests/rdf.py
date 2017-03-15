@@ -81,7 +81,7 @@ def oxygen_rdf_partial():
     '''Oxygen rdf for the second half of the trajectory'''
     out, err = cfiles(
         "rdf",
-        "--start", "50",
+        "--steps", "50:",
         "-c", "15",          # Set cell
         "-p", "150",         # Use 150 points in the histogram
         "-s", "name O",      # Compute rdf between O
@@ -111,10 +111,10 @@ def OH_rdf_all():
 
 
 def OH_rdf_partial():
-    '''Oxygen-Hydrogen rdf for the second half of the trajectory'''
+    '''Oxygen-Hydrogen rdf for half of the trajectory'''
     out, err = cfiles(
         "rdf",
-        "--start", "50",
+        "--steps", "::2",
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) O and name(#2) H",
@@ -128,7 +128,7 @@ def OH_rdf_partial():
 
     out, err = cfiles(
         "rdf",
-        "--start", "50",
+        "--steps", ":50",
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) H and name(#2) O",

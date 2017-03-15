@@ -34,7 +34,7 @@ Examples:
   cfiles angles butane.tng -s "dihedrals: name(#2) C and name(#3) C"
   cfiles angles methane.xyz --cell 15:15:25 --guess-bonds --points=150
   cfiles angles result.xtc --topology=initial.mol --topology-format=PDB
-  cfiles angles simulation.pdb --start=10000 --stride=100 -o partial-angles.dat
+  cfiles angles simulation.pdb --steps=:1000:5 -o partial-angles.dat
 
 Options:
   -h --help                     show this help

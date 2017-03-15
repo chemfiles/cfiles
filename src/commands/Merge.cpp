@@ -33,9 +33,10 @@ Options:
   --input-format=<formats>      comma separated list of formats to use for the
                                 input files
   --output-format=<format>      force the output file format to be <format>
-  -c <cell>, --cell=<cell>      alternative unit cell for the output trajectory.
-                                <cell> should be formated using one of the
-                                <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
+  -c <cell>, --cell=<cell>      alternative unit cell. <cell> format is one of
+                                <a:b:c:α:β:γ> or <a:b:c> or <a>. 'a', 'b' and
+                                'c' are in angstroms, 'α', 'β', and 'γ' are in
+                                degrees.
   )";
 
 static Merge::Options parse_options(int argc, const char* argv[]) {

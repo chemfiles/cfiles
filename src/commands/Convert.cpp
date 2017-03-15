@@ -38,10 +38,11 @@ Options:
   -t <path>, --topology=<path>  alternative topology file for the input
   --topology-format=<format>    use <format> as format for the topology file
   --guess-bonds                 guess the bonds in the input
-  -c <cell>, --cell=<cell>      alternative unit cell for the input. <cell>
-                                should be formated using one of the
-                                <a:b:c:α:β:γ> or <a:b:c> or <L> formats.
-  --wrap                        Rewrap the particles inside the unit cell
+  -c <cell>, --cell=<cell>      alternative unit cell. <cell> format is one of
+                                <a:b:c:α:β:γ> or <a:b:c> or <a>. 'a', 'b' and
+                                'c' are in angstroms, 'α', 'β', and 'γ' are in
+                                degrees.
+  --wrap                        rewrap the particles inside the unit cell
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {

@@ -13,6 +13,7 @@
 
 #include "Averager.hpp"
 #include "Command.hpp"
+#include "utils.hpp"
 
 namespace docopt {
     struct value;
@@ -26,12 +27,8 @@ public:
         std::string trajectory;
         /// Specific format to use with the trajectory
         std::string format = "";
-        /// First step to use
-        size_t start = 0;
-        /// Last step to use
-        size_t end = 0;
-        /// Use a step every `stride` steps
-        size_t stride = 1;
+        /// Specific steps to use from the trajectory
+        steps_range steps;
         /// Do we have a custom cell to use?
         bool custom_cell;
         /// Unit cell to use

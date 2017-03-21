@@ -42,6 +42,9 @@ Options:
                                 <a:b:c:α:β:γ> or <a:b:c> or <a>. 'a', 'b' and
                                 'c' are in angstroms, 'α', 'β', and 'γ' are in
                                 degrees.
+  --steps=<steps>               steps to use from the input. <steps> format
+                                is <start>:<end>[:<stride>] with <start>, <end>
+                                and <stride> optional.
   --wrap                        rewrap the particles inside the unit cell
 )";
 
@@ -55,6 +58,10 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     options.outfile = args["<output>"].asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
     options.wrap = args.at("--wrap").asBool();
+
+    if (args.at("--steps")) {
+        options.steps = steps_range::parse(args.at("--steps").asString());
+    }
 
     if (args["--input-format"]){
         options.input_format = args["--input-format"].asString();

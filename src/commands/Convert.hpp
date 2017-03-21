@@ -11,6 +11,7 @@
 #include <chemfiles.hpp>
 
 #include "Command.hpp"
+#include "utils.hpp"
 
 class Convert final: public Command {
 public:
@@ -25,6 +26,7 @@ public:
         chemfiles::UnitCell cell;
         bool guess_bonds = false;
         bool wrap = false;
+        steps_range steps;
     };
 
     Convert() {}

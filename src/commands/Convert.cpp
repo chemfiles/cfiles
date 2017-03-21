@@ -44,7 +44,9 @@ Options:
                                 degrees.
   --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional.
+                                and <stride> optional. Default is to use all
+                                steps from the input; starting at 0, ending at
+                                the last step, and with a stride of 1.
   --wrap                        rewrap the particles inside the unit cell
 )";
 

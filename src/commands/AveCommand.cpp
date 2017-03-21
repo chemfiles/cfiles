@@ -25,7 +25,9 @@ const std::string AveCommand::AVERAGE_OPTIONS = R"(
                                 degrees.
   --steps=<steps>               steps to use from the trajectory. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional.)";
+                                and <stride> optional. Default is to use all
+                                steps from the trajectory; starting at 0, ending
+                                at the last step, and with a stride of 1.)";
 
 void AveCommand::parse_options(const std::map<std::string, docopt::value>& args) {
     options_.trajectory = args.at("<trajectory>").asString();

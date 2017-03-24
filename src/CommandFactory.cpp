@@ -7,7 +7,6 @@
 
 #include "CommandFactory.hpp"
 
-#include "commands/Help.hpp"
 #include "commands/Angles.hpp"
 #include "commands/Convert.hpp"
 #include "commands/Merge.hpp"
@@ -15,7 +14,6 @@
 
 const std::vector<command_creator>& all_commands() {
     static std::vector<command_creator> commands = {
-        {"help", [](){return std::unique_ptr<Command>(new Help());}},
         {"angles", [](){return std::unique_ptr<Command>(new AngleDistribution());}},
         {"convert", [](){return std::unique_ptr<Command>(new Convert());}},
         {"merge", [](){return std::unique_ptr<Command>(new Merge());}},

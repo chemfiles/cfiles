@@ -114,8 +114,11 @@ int Convert::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
-    for (size_t i=0; i<infile.nsteps(); i++) {
-        auto frame = infile.read();
+    for (auto step: options.steps) {
+        if (step >= infile.nsteps()) {
+            break;
+        }
+        auto frame = infile.read_step(step);
 
         if (options.guess_bonds) {
             frame.guess_topology();
@@ -125,7 +128,7 @@ int Convert::run(int argc, const char* argv[]) {
             auto positions = frame.positions();
             auto cell = frame.cell();
 
-            for (auto position: positions) {
+            for (auto& position: positions) {
                 position = cell.wrap(position);
             }
         }

@@ -11,6 +11,7 @@
 #include "commands/Convert.hpp"
 #include "commands/Merge.hpp"
 #include "commands/Rdf.hpp"
+#include "commands/HBonds.hpp"
 
 const std::vector<command_creator>& all_commands() {
     static std::vector<command_creator> commands = {
@@ -18,6 +19,7 @@ const std::vector<command_creator>& all_commands() {
         {"convert", [](){return std::unique_ptr<Command>(new Convert());}},
         {"merge", [](){return std::unique_ptr<Command>(new Merge());}},
         {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
+        {"hbonds", [](){return std::unique_ptr<Command>(new HBonds());}},
     };
     return commands;
 }

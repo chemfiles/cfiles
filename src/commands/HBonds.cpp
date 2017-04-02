@@ -14,14 +14,18 @@
 
 using namespace chemfiles;
 
+static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
 R"(Compute list of hydrogen bonds along a trajectory. A selection can be specified using the 
 chemfiles selection language. It is possible to provide an alternative unit cell or topology 
 for the trajectory file if they are not defined in the trajectory format. Hydrogen bonds criteria
 can be specified (donor-acceptor distance and donor-acceptor-H angle)
 
+For more information about chemfiles selection language, please see
+http://chemfiles.github.io/chemfiles/latest/selections.html
+
 Usage:
-  cfiles hbonds [options] <input> <output>
+  cfiles hbonds [options] <trajectory>
   cfiles hbonds (-h | --help)
 
 Examples:
@@ -33,8 +37,9 @@ Examples:
 
 Options:
   -h --help                     show this help
-  --input-format=<format>       force the input file format to be <format>
-  --output-format=<format>      force the output file format to be <format>
+  -o <file>, --output=<file>    write result to <file>. This default to the 
+                                trajectory file name with the `.hb` extension.
+  --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --topology-format=<format>    use <format> as format for the topology file
   --guess-bonds                 guess the bonds in the input
@@ -47,11 +52,18 @@ Options:
                                 and <stride> optional. Default is to use all
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
-  --wrap                        rewrap the particles inside the unit cell
+  -s <sel>, --selection=<sel>   selection to use for the atoms. This must be a
+                                selection of size 3 (for angles) or 4 (for
+                                dihedral angles) [default: angles: all]
+  -p <par>, --parameters=<par>  parameters to use for the hydrogen bond. <par>
+                                format is <d:α> where 'd' is the donor-acceptor 
+                                maximum distance in angstroms and 'α' is the
+                                donor-acceptor-hydrogen maximum angle in degrees.
+                                [default: 3.0:30.0]
 )";
 
 static HBonds::Options parse_options(int argc, const char* argv[]) {
-    auto options_str = command_header("rdf", HBonds().description()) + "\n";
+    auto options_str = command_header("hbonds", HBonds().description()) + "\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 

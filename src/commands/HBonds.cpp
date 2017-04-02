@@ -7,7 +7,7 @@
 
 #include <docopt/docopt.h>
 #include <sstream>
-#include <iostream>
+#include <fstream>
 
 #include "HBonds.hpp"
 #include "Errors.hpp"
@@ -128,8 +128,14 @@ std::string HBonds::description() const {
 int HBonds::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
-/*    auto infile = Trajectory(options.infile, 'r', options.input_format);
-    auto outfile = Trajectory(options.outfile, 'w', options.output_format);
+    auto infile = Trajectory(options.trajectory, 'r', options.format);
+    std::ofstream outfile(options.outfile, std::ios::out);
+    if (outfile.is_open()) {
+        outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
+        outfile << "# Selection: " << options.selection << std::endl;
+    } else {
+        throw CFilesError("Could not open the '" + options.outfile + "' file.");
+    }
 
     if (options.custom_cell) {
         infile.set_cell(options.cell);
@@ -139,24 +145,16 @@ int HBonds::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
-    for (size_t i=0; i<infile.nsteps(); i++) {
-        auto frame = infile.read();
-
+    for (auto step: options.steps) {
+        if (step >= infile.nsteps()) {
+            break;
+        }
+        auto frame = infile.read_step(step);
         if (options.guess_bonds) {
             frame.guess_topology();
         }
-
-        if (options.wrap) {
-            auto positions = frame.positions();
-            auto cell = frame.cell();
-
-            for (auto position: positions) {
-                position = cell.wrap(position);
-            }
-        }
-
-        outfile.write(frame);
+        outfile << "# Frame: " << step << std::endl;        
     }
-*/
+
     return 0;
 }

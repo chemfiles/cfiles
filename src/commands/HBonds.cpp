@@ -12,6 +12,7 @@
 #include "HBonds.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
+#include "geometry.hpp"
 
 using namespace chemfiles;
 
@@ -71,6 +72,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     HBonds::Options options;
     options.trajectory = args["<trajectory>"].asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
+    options.selection = args["--selection"].asString();
 
     if (args["--output"]){
         options.outfile = args["--output"].asString();
@@ -133,6 +135,9 @@ int HBonds::run(int argc, const char* argv[]) {
     if (outfile.is_open()) {
         outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
         outfile << "# Selection: " << options.selection << std::endl;
+        outfile << "# Criteria:" << std::endl;
+        outfile << "# donor-acceptor distance < " << options.parameters[0] << " angstroms" << std::endl;
+        outfile << "# donor-acceptor-H angle < " << options.parameters[1] << " degrees" << std::endl;
     } else {
         throw CFilesError("Could not open the '" + options.outfile + "' file.");
     }
@@ -153,7 +158,32 @@ int HBonds::run(int argc, const char* argv[]) {
         if (options.guess_bonds) {
             frame.guess_topology();
         }
+
         outfile << "# Frame: " << step << std::endl;        
+
+        auto positions = frame.positions();
+        auto cell = frame.cell();
+
+        auto matched = selectionAcceptor_.evaluate(frame);
+        outfile << matched.size() << std::endl;
+        for (auto match: matched) {
+            outfile << "entre dans match" << std::endl;
+            assert(match.size() == 2);
+
+            auto acceptor = match[0];
+            auto hydrogen = match[1];
+            auto donors = selectionDonor_.evaluate(frame);
+            for (auto donor: donors) {
+                auto rad = cell.wrap(positions[donor[0]] - positions[acceptor]);
+                auto distance = norm(rad); 
+                auto rah = cell.wrap(positions[hydrogen] - positions[acceptor]);
+                auto theta = angle(rad, rah)*pi/180;
+                outfile << distance << "    " << theta << std::endl;
+                if (distance < options.parameters[0] && theta < options.parameters[1]) {
+                    outfile << "LH " << distance << "    " << theta << std::endl;
+                }
+            }
+        }
     }
 
     return 0;

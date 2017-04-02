@@ -27,7 +27,7 @@ std::vector<std::string> split(const std::string& string, char delimiter);
 /// Parse an unit cell string
 chemfiles::UnitCell parse_cell(const std::string& string);
 
-/// Range of steps to use form a trajectory
+/// Range of steps to use from a trajectory
 class steps_range {
 public:
     class iterator {

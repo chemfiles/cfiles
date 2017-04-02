@@ -17,14 +17,15 @@ class HBonds final: public Command {
 public:
     struct Options {
         /// Input trajectory
-        std::string infile;
+        std::string trajectory;
 	/// Output
 	std::string outfile;
         /// Specific format to use with the trajectory
-        std::string input_format = "";
-        std::string output_format = "";
+        std::string format = "";
         /// Specific steps to use from the trajectory
         steps_range steps;
+	/// Selection for the donor-acceptor
+	std::string selection;
         /// Do we have a custom cell to use?
         bool custom_cell = false;
         /// Unit cell to use
@@ -35,7 +36,10 @@ public:
         std::string topology_format = "";
         /// Should we try to guess the topology?
         bool guess_bonds = false;
-	bool wrap = false;
+	/// Parameter for donor-acceptor max distance (in angstroms)
+	double distance = 3.0;
+	/// Parameter for donor-acceptor-hydrogen max angle (in degrees)
+	double angle = 30;
     };
 
     HBonds() {}

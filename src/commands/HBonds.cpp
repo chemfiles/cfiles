@@ -164,21 +164,22 @@ int HBonds::run(int argc, const char* argv[]) {
         auto positions = frame.positions();
         auto cell = frame.cell();
 
+outfile << selectionAcceptor_.size() << std::endl;
         auto matched = selectionAcceptor_.evaluate(frame);
-        outfile << matched.size() << std::endl;
+outfile << matched.size() << std::endl;
         for (auto match: matched) {
-            outfile << "entre dans match" << std::endl;
+outfile << "entre dans match" << std::endl;
             assert(match.size() == 2);
 
             auto acceptor = match[0];
             auto hydrogen = match[1];
-            auto donors = selectionDonor_.evaluate(frame);
+            auto donors = selectionDonor_.list(frame);
             for (auto donor: donors) {
-                auto rad = cell.wrap(positions[donor[0]] - positions[acceptor]);
+                auto rad = cell.wrap(positions[donor] - positions[acceptor]);
                 auto distance = norm(rad); 
                 auto rah = cell.wrap(positions[hydrogen] - positions[acceptor]);
                 auto theta = angle(rad, rah)*pi/180;
-                outfile << distance << "    " << theta << std::endl;
+outfile << distance << "    " << theta << std::endl;
                 if (distance < options.parameters[0] && theta < options.parameters[1]) {
                     outfile << "LH " << distance << "    " << theta << std::endl;
                 }

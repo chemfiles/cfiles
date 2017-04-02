@@ -7,6 +7,7 @@
 
 #include <docopt/docopt.h>
 #include <sstream>
+#include <iostream>
 
 #include "HBonds.hpp"
 #include "Errors.hpp"
@@ -68,21 +69,21 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     HBonds::Options options;
-    options.infile = args["<input>"].asString();
-    options.outfile = args["<output>"].asString();
+    options.trajectory = args["<trajectory>"].asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
-    options.wrap = args.at("--wrap").asBool();
+
+    if (args["--output"]){
+        options.outfile = args["--output"].asString();
+    } else {
+        options.outfile = options.trajectory + ".hb";
+    }
 
     if (args.at("--steps")) {
         options.steps = steps_range::parse(args.at("--steps").asString());
     }
 
-    if (args["--input-format"]){
-        options.input_format = args["--input-format"].asString();
-    }
-
-    if (args["--output-format"]){
-        options.output_format = args["--output-format"].asString();
+    if (args["--format"]){
+        options.format = args["--format"].asString();
     }
 
     if (args["--topology"]){
@@ -101,8 +102,20 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 
     if (args["--cell"]) {
         options.custom_cell = true;
-		options.cell = parse_cell(args["--cell"].asString());
+	options.cell = parse_cell(args["--cell"].asString());
 	}
+
+    if (args["--parameters"]) {
+	auto splitted = split(args["--parameters"].asString(), ':');
+	if (splitted.size() == 2) {
+	    options.parameters[0] = stod(splitted[0]);
+	    options.parameters[1] = stod(splitted[1]);
+	} else {
+            throw CFilesError(
+                "custom parameters should be specified as 'd:α'"
+            );
+    	}
+    }	
 
     return options;
 }
@@ -115,7 +128,7 @@ std::string HBonds::description() const {
 int HBonds::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
-    auto infile = Trajectory(options.infile, 'r', options.input_format);
+/*    auto infile = Trajectory(options.infile, 'r', options.input_format);
     auto outfile = Trajectory(options.outfile, 'w', options.output_format);
 
     if (options.custom_cell) {
@@ -144,6 +157,6 @@ int HBonds::run(int argc, const char* argv[]) {
 
         outfile.write(frame);
     }
-
+*/
     return 0;
 }

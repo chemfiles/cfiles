@@ -36,10 +36,9 @@ public:
         std::string topology_format = "";
         /// Should we try to guess the topology?
         bool guess_bonds = false;
-	/// Parameter for donor-acceptor max distance (in angstroms)
-	double distance = 3.0;
-	/// Parameter for donor-acceptor-hydrogen max angle (in degrees)
-	double angle = 30;
+	/// Parameters for donor-acceptor max distance (in angstroms)
+	/// and for donor-acceptor-hydrogen max angle (in degrees)
+	double parameters[2] = {3.0, 30.0};
     };
 
     HBonds() {}

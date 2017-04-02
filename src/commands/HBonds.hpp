@@ -41,12 +41,14 @@ public:
 	double parameters[2] = {3.0, 30.0};
     };
 
-    HBonds() {}
+    HBonds(): selectionAcceptor_("bonds: type(#2) == H"), selectionDonor_("atoms: all") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 
 private:
     Options options_;
+    chemfiles::Selection selectionAcceptor_;
+    chemfiles::Selection selectionDonor_;
 };
 
 #endif

@@ -20,7 +20,7 @@ def read_data(path):
 def check_angles(data):
     # Check the maximal value
     max_value = max(data, key=lambda u: u[1])
-    assert(max_value[0] == 1.82212)  # 104.4° in rad
+    assert(max_value[0] == 104.4)  # 1.82212 rad in °
     assert(max_value[1] == 1)
 
     # Check that other values are roughlty zero

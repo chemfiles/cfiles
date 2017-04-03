@@ -51,7 +51,7 @@ Options:
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
-    auto options_str = command_header("rdf", Convert().description()) + "\n";
+    auto options_str = command_header("convert", Convert().description()) + "\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 

@@ -56,10 +56,10 @@ Options:
                                 the last step, and with a stride of 1.
   --selection_acceptor=<sel>    selection to use for the acceptors. This must be a
                                 selection of size 2 and type bonds.
-                                [default: "bonds: type(#2) == H"]
+                                [default: bonds: type(#2) == H]
   --selection_donor=<sel>       selection to use for the donors. This must be a
                                 selection of size 1.
-                                [default: "atoms: not type H"]
+                                [default: atoms: not type H]
   -p <par>, --parameters=<par>  parameters to use for the hydrogen bond. <par>
                                 format is <d:α> where 'd' is the donor-acceptor 
                                 maximum distance in angstroms and 'α' is the
@@ -75,6 +75,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     HBonds::Options options;
     options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
+
     options.selectionAcceptor = args.at("--selection_acceptor").asString();
     options.selectionDonor = args.at("--selection_donor").asString();
 
@@ -136,6 +137,16 @@ std::string HBonds::description() const {
 int HBonds::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
+    selectionAcceptor_ = Selection(options.selectionAcceptor);
+    if (selectionAcceptor_.size() != 2) {
+        throw CFilesError("Can not use a selection for acceptors with size different than 2.");
+    }
+
+    selectionDonor_ = Selection(options.selectionDonor);
+    if (selectionDonor_.size() != 1) {
+        throw CFilesError("Can not use a selection for donors with size larger than 1.");
+    }
+
     auto infile = Trajectory(options.trajectory, 'r', options.format);
     std::ofstream outfile(options.outfile, std::ios::out);
     if (outfile.is_open()) {
@@ -178,7 +189,7 @@ int HBonds::run(int argc, const char* argv[]) {
             auto hydrogen = match[1];
             auto donors = selectionDonor_.list(frame);
             for (auto donor: donors) {
-                if (donor != acceptor) {
+                if (donor != acceptor && frame.topology()[donor].type() != "H") {
                     auto r_ad = cell.wrap(positions[donor] - positions[acceptor]);
                     auto distance = norm(r_ad); 
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);

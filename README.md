@@ -36,3 +36,39 @@ You can then copy the `cfiles` executable to some place in your path
 **Note:** When using the C++ standard library from GCC 4.8, `cfiles` rely on
 the `boost_regex` library, which can be installed using your favorite package
 manager.
+
+## Contributing
+
+You are welcome to contribute to cfiles, whatever your skill level. You can help
+with new analysis algorithms, improving existing ones, adding or improving
+documentation, *etc.* If you plan adding new code, please open an [issue] about
+it for discussion.
+
+Don't forget to run the tests when changing the code; and to add new tests when
+adding new algorithms. The tests are Python scripts in the `tests` directory,
+checking the output of the algorithms.
+
+```bash
+cd cfiles/build
+ctest
+```
+
+Here is a short check list to contribute to cfiles. If there is anything you
+don't understand, or if you have any question, please ask! You can reach me on
+github issues, by email, or in the [gitter] chat.
+
+- [ ] Fork cfiles;
+- [ ] Create a local branch;
+- [ ] Add code / correct typos / ...;
+    - [ ] Add new tests with your code;
+    - [ ] Add documentation for your code;
+- [ ] Check that the tests still pass;
+- [ ] Push to Github;
+- [ ] Create a Pull-Request;
+- [ ] Discuss your changes with the reviewers;
+- [ ] Have your code merged;
+- [ ] Celebrate! :tada: :cake: :tada:
+
+
+[gitter]: https://gitter.im/chemfiles/chemfiles
+[issue]: https://github.com/chemfiles/cfiles/issues

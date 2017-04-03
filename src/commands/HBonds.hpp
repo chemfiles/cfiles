@@ -25,7 +25,8 @@ public:
         /// Specific steps to use from the trajectory
         steps_range steps;
 	/// Selection for the donor-acceptor
-	std::string selection;
+	std::string selectionAcceptor;
+	std::string selectionDonor;
         /// Do we have a custom cell to use?
         bool custom_cell = false;
         /// Unit cell to use
@@ -42,7 +43,7 @@ public:
 	double angle_parameter = 0.0;
     };
 
-    HBonds(): selectionAcceptor_("bonds: type(#2) == H"), selectionDonor_("atoms: all") {}
+    HBonds(): selectionAcceptor_("bonds: type(#2) == H"), selectionDonor_("atoms: not type H") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 

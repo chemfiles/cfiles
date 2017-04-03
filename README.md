@@ -1,22 +1,24 @@
-# cfiles, multi-formats analysis tools for chemistry
+# cfiles, tools for chemistry files analysis
 
 [![Build Status](https://travis-ci.org/chemfiles/cfiles.svg?branch=master)](https://travis-ci.org/chemfiles/cfiles)
 [![codecov](https://codecov.io/gh/chemfiles/cfiles/branch/master/graph/badge.svg)](https://codecov.io/gh/chemfiles/cfiles)
 
-`cfiles` is an analysis frontend for the
-[Chemfiles](https://github.com/chemfiles/chemfiles/) library, implementing
-analysis algorithms for post-processing data from molecular or quantum
-simulations.
+`cfiles` is a collection of post-processing algorithms for molecular or quantum
+chemical simulations. It offer both data managing capacities and analysis of
+simulation output. `cfiles` is implemented using the [chemfiles] library for
+reading and writing trajectory data.
 
-This is still in alpha mode, largely untested, created for dog-feeding purpose
-and as such it will surely eat your laundry and do nasty things. Feel free to
-use it, without any guarantee about the result.
+## Capacities
 
-## Functionalities
+### Analysis algorithms
 
 * Radial distribution functions;
-* Angles and dihedral angles distributions;
-* Convertion from one file format to another.
+* Angles and dihedral angles distributions.
+
+### Data management
+
+* Convert from one file format to another;
+* Merge multiple trajectories in one file.
 
 ## Get it, build it
 
@@ -72,3 +74,4 @@ github issues, by email, or in the [gitter] chat.
 
 [gitter]: https://gitter.im/chemfiles/chemfiles
 [issue]: https://github.com/chemfiles/cfiles/issues
+[chemfiles]: https://chemfiles.org/

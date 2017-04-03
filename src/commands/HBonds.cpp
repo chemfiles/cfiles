@@ -70,48 +70,50 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     HBonds::Options options;
-    options.trajectory = args["<trajectory>"].asString();
+    options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
-    options.selection = args["--selection"].asString();
+    options.selection = args.at("--selection").asString();
 
-    if (args["--output"]){
-        options.outfile = args["--output"].asString();
+    if (args.at("--output")){
+        options.outfile = args.at("--output").asString();
     } else {
-        options.outfile = options.trajectory + ".hb";
+        options.outfile = options.trajectory + "_hb.dat";
     }
 
     if (args.at("--steps")) {
         options.steps = steps_range::parse(args.at("--steps").asString());
     }
 
-    if (args["--format"]){
-        options.format = args["--format"].asString();
+    if (args.at("--format")){
+        options.format = args.at("--format").asString();
     }
 
-    if (args["--topology"]){
+    if (args.at("--topology")){
         if (options.guess_bonds) {
             throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
         }
-        options.topology = args["--topology"].asString();
+        options.topology = args.at("--topology").asString();
     }
 
-    if (args["--topology-format"]){
+    if (args.at("--topology-format")){
         if (options.topology == "") {
             throw CFilesError("Useless '--topology-format' without '--topology'");
         }
-        options.topology_format = args["--topology-format"].asString();
+        options.topology_format = args.at("--topology-format").asString();
     }
 
-    if (args["--cell"]) {
+    if (args.at("--cell")) {
         options.custom_cell = true;
-	options.cell = parse_cell(args["--cell"].asString());
+	options.cell = parse_cell(args.at("--cell").asString());
 	}
 
-    if (args["--parameters"]) {
-	auto splitted = split(args["--parameters"].asString(), ':');
+    options.distance_parameter = 3.0;
+    options.angle_parameter = 30.0;
+    if (args.at("--parameters")) {
+	auto splitted = split(args.at("--parameters").asString(), ':');
 	if (splitted.size() == 2) {
-	    options.parameters[0] = stod(splitted[0]);
-	    options.parameters[1] = stod(splitted[1]);
+	    options.distance_parameter = stod(splitted[0]);
+	    options.angle_parameter = stod(splitted[1])*pi/180;
 	} else {
             throw CFilesError(
                 "custom parameters should be specified as 'd:α'"
@@ -136,8 +138,8 @@ int HBonds::run(int argc, const char* argv[]) {
         outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
         outfile << "# Selection: " << options.selection << std::endl;
         outfile << "# Criteria:" << std::endl;
-        outfile << "# donor-acceptor distance < " << options.parameters[0] << " angstroms" << std::endl;
-        outfile << "# donor-acceptor-H angle < " << options.parameters[1] << " degrees" << std::endl;
+        outfile << "# donor-acceptor distance < " << options.distance_parameter << " angstroms" << std::endl;
+        outfile << "# donor-acceptor-H angle < " << options.angle_parameter*180/pi << " degrees" << std::endl;
     } else {
         throw CFilesError("Could not open the '" + options.outfile + "' file.");
     }
@@ -164,24 +166,22 @@ int HBonds::run(int argc, const char* argv[]) {
         auto positions = frame.positions();
         auto cell = frame.cell();
 
-outfile << selectionAcceptor_.size() << std::endl;
         auto matched = selectionAcceptor_.evaluate(frame);
-outfile << matched.size() << std::endl;
         for (auto match: matched) {
-outfile << "entre dans match" << std::endl;
             assert(match.size() == 2);
 
             auto acceptor = match[0];
             auto hydrogen = match[1];
             auto donors = selectionDonor_.list(frame);
             for (auto donor: donors) {
-                auto rad = cell.wrap(positions[donor] - positions[acceptor]);
-                auto distance = norm(rad); 
-                auto rah = cell.wrap(positions[hydrogen] - positions[acceptor]);
-                auto theta = angle(rad, rah)*pi/180;
-outfile << distance << "    " << theta << std::endl;
-                if (distance < options.parameters[0] && theta < options.parameters[1]) {
-                    outfile << "LH " << distance << "    " << theta << std::endl;
+                if (donor != acceptor && donor != hydrogen && frame.topology()[donor].type()!="H") {
+                    auto r_ad = cell.wrap(positions[donor] - positions[acceptor]);
+                    auto distance = norm(r_ad); 
+                    auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);
+                    auto theta = angle(r_ad, r_ah);
+                    if (distance < options.distance_parameter && theta < options.angle_parameter) {
+                        outfile << frame.topology()[donor].type() << donor << "   " << frame.topology()[acceptor].type() << acceptor << "   " << frame.topology()[hydrogen].type() << hydrogen << "  : " << distance << "    " << theta*180/pi << std::endl;
+                    }
                 }
             }
         }

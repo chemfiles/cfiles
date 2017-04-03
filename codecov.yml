@@ -1,3 +1,8 @@
 coverage:
   ignore:
   - external/*
+  status:
+    project: true
+    patch: off
+
+comment: off

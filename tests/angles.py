@@ -25,7 +25,7 @@ def check_angles(data):
 
     # Check that other values are roughlty zero
     for (theta, value) in data:
-        if (theta != 1.82212):
+        if (theta != 104.4):
             assert(abs(value) < 0.02)
 
 

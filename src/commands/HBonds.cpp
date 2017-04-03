@@ -54,9 +54,12 @@ Options:
                                 and <stride> optional. Default is to use all
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
-  -s <sel>, --selection=<sel>   selection to use for the atoms. This must be a
-                                selection of size 3 (for angles) or 4 (for
-                                dihedral angles) [default: angles: all]
+  --selection_acceptor=<sel>    selection to use for the acceptors. This must be a
+                                selection of size 2 and type bonds.
+                                [default: "bonds: type(#2) == H"]
+  --selection_donor=<sel>       selection to use for the donors. This must be a
+                                selection of size 1.
+                                [default: "atoms: not type H"]
   -p <par>, --parameters=<par>  parameters to use for the hydrogen bond. <par>
                                 format is <d:α> where 'd' is the donor-acceptor 
                                 maximum distance in angstroms and 'α' is the
@@ -72,7 +75,8 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     HBonds::Options options;
     options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
-    options.selection = args.at("--selection").asString();
+    options.selectionAcceptor = args.at("--selection_acceptor").asString();
+    options.selectionDonor = args.at("--selection_donor").asString();
 
     if (args.at("--output")){
         options.outfile = args.at("--output").asString();
@@ -136,7 +140,7 @@ int HBonds::run(int argc, const char* argv[]) {
     std::ofstream outfile(options.outfile, std::ios::out);
     if (outfile.is_open()) {
         outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
-        outfile << "# Selection: " << options.selection << std::endl;
+        outfile << "# Selection: acceptors: " << options.selectionAcceptor << " and donors: " << options.selectionDonor << std::endl;
         outfile << "# Criteria:" << std::endl;
         outfile << "# donor-acceptor distance < " << options.distance_parameter << " angstroms" << std::endl;
         outfile << "# donor-acceptor-H angle < " << options.angle_parameter*180/pi << " degrees" << std::endl;
@@ -174,7 +178,7 @@ int HBonds::run(int argc, const char* argv[]) {
             auto hydrogen = match[1];
             auto donors = selectionDonor_.list(frame);
             for (auto donor: donors) {
-                if (donor != acceptor && donor != hydrogen && frame.topology()[donor].type()!="H") {
+                if (donor != acceptor) {
                     auto r_ad = cell.wrap(positions[donor] - positions[acceptor]);
                     auto distance = norm(r_ad); 
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);

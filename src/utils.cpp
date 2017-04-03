@@ -20,7 +20,6 @@ std::string full_version() {
 
 std::string command_header(std::string name, std::string description) {
     auto header = std::string("cfiles ") + name + " (" + CFILES_VERSION + "): " + description + "\n";
-    header += "Guillaume Fraux <guillaume@fraux.fr>\n";
     return header;
 }
 

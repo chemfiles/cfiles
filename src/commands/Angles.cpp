@@ -51,7 +51,8 @@ std::string AngleDistribution::description() const {
 }
 
 Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
-    auto options = command_header("angles", AngleDistribution().description()) + "\n";
+    auto options = command_header("angles", AngleDistribution().description());
+    options += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 

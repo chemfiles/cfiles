@@ -51,7 +51,8 @@ Options:
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
-    auto options_str = command_header("convert", Convert().description()) + "\n";
+    auto options_str = command_header("convert", Convert().description());
+    options_str += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 

@@ -40,7 +40,8 @@ Options:
   )";
 
 static Merge::Options parse_options(int argc, const char* argv[]) {
-    auto options_str = command_header("merge", Merge().description()) + "\n";
+    auto options_str = command_header("merge", Merge().description());
+    options_str += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 

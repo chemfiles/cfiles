@@ -82,7 +82,6 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
 
     if (max == 0) {
         throw CFilesError("No angle corresponding to the '" + selection_.string() + "' selection found.");
-        max = 1;
     }
 
     std::ofstream outfile(options_.outfile, std::ios::out);

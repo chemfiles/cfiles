@@ -80,6 +80,11 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
 void AngleDistribution::finish(const Histogram<double>& histogram) {
     auto max = *std::max_element(histogram.begin(), histogram.end());
 
+    if (max == 0) {
+        throw CFilesError("No angle corresponding to the '" + selection_.string() + "' selection found.");
+        max = 1;
+    }
+
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;

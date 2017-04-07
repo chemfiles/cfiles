@@ -28,18 +28,16 @@ The criteria used depend on a maximum donor-acceptor distance and a maximum dono
 Hydrogen bonds criteria can be specified.
 
 For more information about chemfiles selection language, please see
-http://chemfiles.github.io/chemfiles/latest/selections.html
+http://chemfiles.org/chemfiles/latest/selections.html
 
 Usage:
   cfiles hbonds [options] <trajectory>
   cfiles hbonds (-h | --help)
 
 Examples:
-  cfiles hbonds --cell=28 --guess-bonds water.xyz water.pdb
-  cfiles hbonds butane.pdb butane.nc --wrap
-  cfiles hbonds methane.xyz --cell 15:15:25 --guess-bonds --points=150
-  cfiles hbonds result.xtc --topology=initial.mol --topology-format=PDB out.nc
-  cfiles hbonds in.zeo out.mol --input-format=XYZ --output-format=PDB
+  cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds 
+  cfiles hbonds in.pdb --selection_acceptor=="bonds: type(#1) == O and type(#2) == H"
+  cfiles hbonds protein.pdb --selection_donor=="atoms: type N" -p 2.5:20.0
 
 Options:
   -h --help                     show this help
@@ -59,7 +57,8 @@ Options:
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
   --selection_acceptor=<sel>    selection to use for the acceptors. This must be a
-                                selection of size 2 and type bonds.
+                                selection of size 2 and type bonds The second atom
+				should be the hydrogen atom.
                                 [default: bonds: type(#2) == H]
   --selection_donor=<sel>       selection to use for the donors. This must be a
                                 selection of size 1.

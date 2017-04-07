@@ -18,10 +18,14 @@ using namespace chemfiles;
 
 static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(Compute list of hydrogen bonds along a trajectory. A selection can be specified using the 
-chemfiles selection language. It is possible to provide an alternative unit cell or topology 
-for the trajectory file if they are not defined in the trajectory format. Hydrogen bonds criteria
-can be specified (donor-acceptor distance and donor-acceptor-H angle)
+R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor and donor atoms 
+can be specified using the chemfiles selection language. It is possible to provide an alternative 
+unit cell or topology for the trajectory file if they are not defined in the trajectory format. 
+Hydrogen bonds are defined as electrostatic attraction between two polar groups: the acceptor group 
+is a hydrogen atom covalently bound to an electronegative atom (usually O, N, F) while 
+the donor group is another highly electronegative atom. 
+The criteria used depend on a maximum donor-acceptor distance and a maximum donor-acceptor-H angle.
+Hydrogen bonds criteria can be specified.
 
 For more information about chemfiles selection language, please see
 http://chemfiles.github.io/chemfiles/latest/selections.html

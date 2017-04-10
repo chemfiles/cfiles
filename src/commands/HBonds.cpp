@@ -81,8 +81,8 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
 
-    options.selectionAcceptor = args.at("--acceptors").asString();
-    options.selectionDonor = args.at("--donors").asString();
+    options.selection_acceptor = args.at("--acceptors").asString();
+    options.selection_donor = args.at("--donors").asString();
 
     if (args.at("--output")){
         options.outfile = args.at("--output").asString();
@@ -145,18 +145,18 @@ std::string HBonds::description() const {
 int HBonds::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
-    selectionAcceptor_ = Selection(options.selectionAcceptor);
-    if (selectionAcceptor_.size() != 2) {
+    selection_acceptor_ = Selection(options.selection_acceptor);
+    if (selection_acceptor_.size() != 2) {
         throw CFilesError("Can not use a selection for acceptors with size different than 2.");
     }
 
-    auto selection_string = split(selectionAcceptor_.string(),':');
+    auto selection_string = split(selection_acceptor_.string(),':');
     if (selection_string[0] != "bonds") {
         throw CFilesError("'Bonds' type selection compulsory for acceptors.");
     }
 
-    selectionDonor_ = Selection(options.selectionDonor);
-    if (selectionDonor_.size() != 1) {
+    selection_donor_ = Selection(options.selection_donor);
+    if (selection_donor_.size() != 1) {
         throw CFilesError("Can not use a selection for donors with size larger than 1.");
     }
 
@@ -164,7 +164,8 @@ int HBonds::run(int argc, const char* argv[]) {
     std::ofstream outfile(options.outfile, std::ios::out);
     if (outfile.is_open()) {
         outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
-        outfile << "# Selection: acceptors: " << options.selectionAcceptor << " and donors: " << options.selectionDonor << std::endl;
+        outfile << "# Selection: acceptors: " << options.selection_acceptor;
+        outfile << " and donors: " << options.selection_donor << std::endl;
         outfile << "# Criteria:" << std::endl;
         outfile << "# donor-acceptor distance < " << options.distance << " angstroms" << std::endl;
         outfile << "# donor-acceptor-H angle < " << options.angle*180/pi << " degrees" << std::endl;
@@ -194,7 +195,7 @@ int HBonds::run(int argc, const char* argv[]) {
         auto positions = frame.positions();
         auto cell = frame.cell();
 
-        auto matched = selectionAcceptor_.evaluate(frame);
+        auto matched = selection_acceptor_.evaluate(frame);
         for (auto match: matched) {
             assert(match.size() == 2);
 
@@ -208,7 +209,7 @@ int HBonds::run(int argc, const char* argv[]) {
             else if (frame.topology()[match[1]].type() != "H") {
                 throw CFilesError("Invalid acceptors selection: there is no hydrogen atom.");
             }
-            auto donors = selectionDonor_.list(frame);
+            auto donors = selection_donor_.list(frame);
             for (auto donor: donors) {
                 if (donor != acceptor && frame.topology()[donor].type() != "H") {
                     auto r_ad = cell.wrap(positions[donor] - positions[acceptor]);
@@ -218,8 +219,8 @@ int HBonds::run(int argc, const char* argv[]) {
                     if (distance < options.distance && theta < options.angle) {
                         outfile << frame.topology()[donor].type() << donor << "   ";
                         outfile << frame.topology()[acceptor].type() << acceptor << "   ";
-                        outfile << frame.topology()[hydrogen].type() << hydrogen << "  : " 
-                        outfile << distance << "    " 
+                        outfile << frame.topology()[hydrogen].type() << hydrogen << "  : ";
+                        outfile << distance << "    "; 
                         outfile << theta*180/pi << std::endl;
                     }
                 }

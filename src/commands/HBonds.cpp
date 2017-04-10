@@ -36,8 +36,8 @@ Usage:
 
 Examples:
   cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds 
-  cfiles hbonds in.pdb --selection_acceptor=="bonds: type(#1) == O and type(#2) == H"
-  cfiles hbonds protein.pdb --selection_donor=="atoms: type N" -p 2.5:20.0
+  cfiles hbonds in.pdb --acceptors=="bonds: type(#1) == O and type(#2) == H"
+  cfiles hbonds protein.pdb --donors=="atoms: type N" -p 2.5:20.0
 
 Options:
   -h --help                     show this help
@@ -56,18 +56,19 @@ Options:
                                 and <stride> optional. Default is to use all
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
-  --selection_acceptor=<sel>    selection to use for the acceptors. This must be a
+  --acceptors=<sel>             selection to use for the acceptors. This must be a
                                 selection of size 2 and type bonds The second atom
 				should be the hydrogen atom.
                                 [default: bonds: type(#2) == H]
-  --selection_donor=<sel>       selection to use for the donors. This must be a
+  --donors=<sel>                selection to use for the donors. This must be a
                                 selection of size 1.
-                                [default: atoms: not type H]
-  -p <par>, --parameters=<par>  parameters to use for the hydrogen bond. <par>
-                                format is <d:α> where 'd' is the donor-acceptor 
-                                maximum distance in angstroms and 'α' is the
-                                donor-acceptor-hydrogen maximum angle in degrees.
-                                [default: 3.0:30.0]
+                                [default: atoms: type O or type N or type F]
+  --distance=<dist>             distance criterion to use for the hydrogen bond detection.
+                                'dist' is the donor-acceptor maximum distance in angstroms.
+                                [default: 3.0]
+  --angle=<angle>               angle criterion to use for the hydrogen bond detection.
+                                'angle' is the donor-acceptor-hydrogen maximum angle in degrees.
+                                [default: 30.0]
 )";
 
 static HBonds::Options parse_options(int argc, const char* argv[]) {
@@ -79,8 +80,8 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
 
-    options.selectionAcceptor = args.at("--selection_acceptor").asString();
-    options.selectionDonor = args.at("--selection_donor").asString();
+    options.selectionAcceptor = args.at("--acceptors").asString();
+    options.selectionDonor = args.at("--donors").asString();
 
     if (args.at("--output")){
         options.outfile = args.at("--output").asString();
@@ -115,18 +116,13 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 	options.cell = parse_cell(args.at("--cell").asString());
 	}
 
-    options.distance_parameter = 3.0;
-    options.angle_parameter = 30.0;
-    if (args.at("--parameters")) {
-	auto splitted = split(args.at("--parameters").asString(), ':');
-	if (splitted.size() == 2) {
-	    options.distance_parameter = stod(splitted[0]);
-	    options.angle_parameter = stod(splitted[1])*pi/180;
-	} else {
-            throw CFilesError(
-                "custom parameters should be specified as 'd:α'"
-            );
-    	}
+    options.distance = 3.0;
+    options.angle = 30.0;
+    if (args.at("--distance")) {
+        options.distance = std::stod(args.at("--distance").asString());
+    }	
+    if (args.at("--angle")) {
+        options.angle = std::stod(args.at("--angle").asString())*pi/180;
     }	
 
     return options;
@@ -156,8 +152,8 @@ int HBonds::run(int argc, const char* argv[]) {
         outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
         outfile << "# Selection: acceptors: " << options.selectionAcceptor << " and donors: " << options.selectionDonor << std::endl;
         outfile << "# Criteria:" << std::endl;
-        outfile << "# donor-acceptor distance < " << options.distance_parameter << " angstroms" << std::endl;
-        outfile << "# donor-acceptor-H angle < " << options.angle_parameter*180/pi << " degrees" << std::endl;
+        outfile << "# donor-acceptor distance < " << options.distance << " angstroms" << std::endl;
+        outfile << "# donor-acceptor-H angle < " << options.angle*180/pi << " degrees" << std::endl;
     } else {
         throw CFilesError("Could not open the '" + options.outfile + "' file.");
     }
@@ -197,7 +193,7 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto distance = norm(r_ad); 
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);
                     auto theta = angle(r_ad, r_ah);
-                    if (distance < options.distance_parameter && theta < options.angle_parameter) {
+                    if (distance < options.distance && theta < options.angle) {
                         outfile << frame.topology()[donor].type() << donor << "   " << frame.topology()[acceptor].type() << acceptor << "   " << frame.topology()[hydrogen].type() << hydrogen << "  : " << distance << "    " << theta*180/pi << std::endl;
                     }
                 }

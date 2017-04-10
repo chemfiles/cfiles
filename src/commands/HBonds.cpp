@@ -193,8 +193,17 @@ int HBonds::run(int argc, const char* argv[]) {
         for (auto match: matched) {
             assert(match.size() == 2);
 
-            auto acceptor = match[0];
-            auto hydrogen = match[1];
+            if (frame.topology()[match[0]].type() == "H") {
+                auto acceptor = match[1];
+                auto hydrogen = match[0];
+            }
+            else if (frame.topology()[match[1]].type() == "H") {
+                auto acceptor = match[0];
+                auto hydrogen = match[1];
+            }
+            else {
+                throw CFilesError("Invalid acceptors selection: there is no hydrogen atom.");
+            }
             auto donors = selectionDonor_.list(frame);
             for (auto donor: donors) {
                 if (donor != acceptor && frame.topology()[donor].type() != "H") {

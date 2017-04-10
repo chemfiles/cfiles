@@ -150,6 +150,11 @@ int HBonds::run(int argc, const char* argv[]) {
         throw CFilesError("Can not use a selection for acceptors with size different than 2.");
     }
 
+    auto selection_string = split(selectionAcceptor_.string(),':');
+    if (selection_string[0] != "bonds") {
+        throw CFilesError("'Bonds' type selection compulsory for acceptors.");
+    }
+
     selectionDonor_ = Selection(options.selectionDonor);
     if (selectionDonor_.size() != 1) {
         throw CFilesError("Can not use a selection for donors with size larger than 1.");
@@ -193,15 +198,14 @@ int HBonds::run(int argc, const char* argv[]) {
         for (auto match: matched) {
             assert(match.size() == 2);
 
+            auto acceptor = match[0];
+            auto hydrogen = match[1];
+
             if (frame.topology()[match[0]].type() == "H") {
                 auto acceptor = match[1];
                 auto hydrogen = match[0];
             }
-            else if (frame.topology()[match[1]].type() == "H") {
-                auto acceptor = match[0];
-                auto hydrogen = match[1];
-            }
-            else {
+            else if (frame.topology()[match[1]].type() != "H") {
                 throw CFilesError("Invalid acceptors selection: there is no hydrogen atom.");
             }
             auto donors = selectionDonor_.list(frame);

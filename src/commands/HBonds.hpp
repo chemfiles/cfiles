@@ -43,7 +43,7 @@ public:
 	double angle = 0.0;
     };
 
-    HBonds(): selection_acceptor_("bonds: type(#2) == H"), selection_donor_("type O or type N or type F") {}
+    HBonds(): selection_acceptor_("bonds: none"), selection_donor_("atoms: none") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 

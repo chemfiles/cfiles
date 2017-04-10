@@ -73,6 +73,7 @@ Options:
 
 static HBonds::Options parse_options(int argc, const char* argv[]) {
     auto options_str = command_header("hbonds", HBonds().description()) + "\n";
+    options_str += "Laura Scalfi <laura.scalfi@ens.fr>\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 

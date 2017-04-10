@@ -42,7 +42,7 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the 
-                                trajectory file name with the `.hb` extension.
+                                trajectory file name with the `_hb.dat` extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --topology-format=<format>    use <format> as format for the topology file
@@ -114,7 +114,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--cell")) {
         options.custom_cell = true;
-	options.cell = parse_cell(args.at("--cell").asString());
+        options.cell = parse_cell(args.at("--cell").asString());
 	}
 
     options.distance = 3.0;

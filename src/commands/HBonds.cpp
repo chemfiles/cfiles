@@ -216,7 +216,11 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);
                     auto theta = angle(r_ad, r_ah);
                     if (distance < options.distance && theta < options.angle) {
-                        outfile << frame.topology()[donor].type() << donor << "   " << frame.topology()[acceptor].type() << acceptor << "   " << frame.topology()[hydrogen].type() << hydrogen << "  : " << distance << "    " << theta*180/pi << std::endl;
+                        outfile << frame.topology()[donor].type() << donor << "   ";
+                        outfile << frame.topology()[acceptor].type() << acceptor << "   ";
+                        outfile << frame.topology()[hydrogen].type() << hydrogen << "  : " 
+                        outfile << distance << "    " 
+                        outfile << theta*180/pi << std::endl;
                     }
                 }
             }

@@ -38,12 +38,12 @@ public:
         /// Should we try to guess the topology?
         bool guess_bonds = false;
 	/// Parameters for donor-acceptor max distance (in angstroms)
-	double distance_parameter = 0.0;
+	double distance = 0.0;
 	/// and for donor-acceptor-hydrogen max angle (in degrees)
-	double angle_parameter = 0.0;
+	double angle = 0.0;
     };
 
-    HBonds(): selectionAcceptor_("bonds: type(#2) == H"), selectionDonor_("not type H") {}
+    HBonds(): selectionAcceptor_("bonds: type(#2) == H"), selectionDonor_("type O or type N or type F") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 

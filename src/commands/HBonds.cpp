@@ -191,6 +191,7 @@ int HBonds::run(int argc, const char* argv[]) {
         }
 
         outfile << "# Frame: " << step << std::endl;        
+        outfile << "# Donor   Acceptor   Hydrogen  : Distance D-A    Angle D-A-H" << std::endl;
 
         auto positions = frame.positions();
         auto cell = frame.cell();

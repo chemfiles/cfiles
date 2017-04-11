@@ -75,10 +75,11 @@ github issues, by email, or in the [gitter] chat.
 ## Contributors and license
 
 cfiles was created and is maintained by Guillaume Fraux, and put to your
-disposition under the terms of the Mozilla Public License v2.0. By contributing
-to cfiles, you agree to distribute your contributions under the same license.
+disposition under the terms of the [3 clauses BSD license](LICENSE). By
+contributing to cfiles, you agree to distribute your contributions under the
+same license.
 
-All the contributors to cfiles are listed in the [AUTHORS](AUTHORS) file.
+All the contributors to chemfiles are listed in the [AUTHORS](AUTHORS) file.
 Many thanks to all of them!
 
 

@@ -37,7 +37,7 @@ Usage:
 Examples:
   cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds 
   cfiles hbonds in.pdb --acceptors=="bonds: type(#1) == O and type(#2) == H"
-  cfiles hbonds protein.pdb --donors=="atoms: type N" -p 2.5:20.0
+  cfiles hbonds protein.pdb --donors=="atoms: type N" --angle 20.0
 
 Options:
   -h --help                     show this help

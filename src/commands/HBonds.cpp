@@ -206,7 +206,7 @@ int HBonds::run(int argc, const char* argv[]) {
                 acceptor = match[1];
                 hydrogen = match[0];
             }
-            else if (frame.topology()[match[1]].type() != "H") {
+            else if (frame.topology()[match[1]].type() == "H") {
                 acceptor = match[0];
                 hydrogen = match[1];
             }

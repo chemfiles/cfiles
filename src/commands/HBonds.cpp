@@ -191,7 +191,7 @@ int HBonds::run(int argc, const char* argv[]) {
         }
 
         outfile << "# Frame: " << step << std::endl;        
-        outfile << "# Donor   Acceptor   Hydrogen  : Distance D-A    Angle D-A-H" << std::endl;
+        outfile << "# Donor (name index)   Acceptor (name index)   Hydrogen (name index)  : Distance D-A    Angle D-A-H" << std::endl;
 
         auto positions = frame.positions();
         auto cell = frame.cell();
@@ -206,12 +206,10 @@ int HBonds::run(int argc, const char* argv[]) {
             if (frame.topology()[match[0]].type() == "H") {
                 acceptor = match[1];
                 hydrogen = match[0];
-            }
-            else if (frame.topology()[match[1]].type() == "H") {
+            } else if (frame.topology()[match[1]].type() == "H") {
                 acceptor = match[0];
                 hydrogen = match[1];
-            }
-            else
+            } else
             {
                 throw CFilesError("Invalid acceptors selection: there is no hydrogen atom.");
             }
@@ -224,9 +222,9 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);
                     auto theta = angle(r_ad, r_ah);
                     if (distance < options.distance && theta < options.angle) {
-                        outfile << frame.topology()[donor].type() << donor << "   ";
-                        outfile << frame.topology()[acceptor].type() << acceptor << "   ";
-                        outfile << frame.topology()[hydrogen].type() << hydrogen << "  : ";
+                        outfile << frame.topology()[donor].name() << " " << donor << "   ";
+                        outfile << frame.topology()[acceptor].name() << " " << acceptor << "   ";
+                        outfile << frame.topology()[hydrogen].name() << " " << hydrogen << "  : ";
                         outfile << distance << "    "; 
                         outfile << theta*180/pi << std::endl;
                     }

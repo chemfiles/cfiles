@@ -65,8 +65,8 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + ".rdf";
     }
 
-    options_.rmax = stod(args["--max"].asString());
-    options_.npoints = stol(args["--points"].asString());
+    options_.rmax = string2double(args["--max"].asString());
+    options_.npoints = string2long(args["--points"].asString());
     options_.selection = args["--selection"].asString();
 
     if (AveCommand::options().custom_cell) {

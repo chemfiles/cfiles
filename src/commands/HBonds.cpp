@@ -120,18 +120,10 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     options.distance = 3.0;
     options.angle = 30.0;
     if (args.at("--distance")) {
-        try {
-            options.distance = std::stod(args.at("--distance").asString());
-        } catch(std::invalid_argument) {
-            throw CFilesError("Invalid argument for distance criterion");
-        }
+        options.distance = string2double(args.at("--distance").asString());
     }	
     if (args.at("--angle")) {
-        try {
-            options.angle = std::stod(args.at("--angle").asString())*pi/180;
-        } catch(std::invalid_argument) {
-            throw CFilesError("Invalid argument for angle criterion");
-        }
+        options.angle = string2double(args.at("--angle").asString())*pi/180;
     }	
 
     return options;

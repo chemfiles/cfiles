@@ -60,7 +60,7 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + ".ang";
     }
 
-    options_.npoints = stol(args["--points"].asString());
+    options_.npoints = string2long(args["--points"].asString());
     options_.selection = args["--selection"].asString();
 
     selection_ = Selection(options_.selection);

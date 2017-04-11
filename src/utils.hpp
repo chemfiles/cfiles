@@ -11,6 +11,12 @@ namespace chemfiles {
     class UnitCell;
 }
 
+/// Convert a string to double
+double string2double(const std::string& string);
+
+/// Convert a string to long
+long string2long(const std::string& string);
+
 /// Get a string describing the full version of cfiles
 std::string full_version();
 

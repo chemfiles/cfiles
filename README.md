@@ -13,7 +13,8 @@ reading and writing trajectory data.
 ### Analysis algorithms
 
 * Radial distribution functions;
-* Angles and dihedral angles distributions.
+* Angles and dihedral angles distributions;
+* Hydrogen bonds detection.
 
 ### Data management
 

@@ -1,9 +1,5 @@
 // cfiles, an analysis frontend for the Chemfiles library
-// Copyright (C) 2015-2016 Guillaume Fraux
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
+// Copyright (C) Guillaume Fraux and contributors -- BSD license
 
 #include <docopt/docopt.h>
 #include <sstream>
@@ -18,12 +14,12 @@ using namespace chemfiles;
 
 static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor and donor atoms 
-can be specified using the chemfiles selection language. It is possible to provide an alternative 
-unit cell or topology for the trajectory file if they are not defined in the trajectory format. 
-Hydrogen bonds are defined as electrostatic attraction between two polar groups: the acceptor group 
-is a hydrogen atom covalently bound to an electronegative atom (usually O, N, F) while 
-the donor group is another highly electronegative atom. 
+R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor and donor atoms
+can be specified using the chemfiles selection language. It is possible to provide an alternative
+unit cell or topology for the trajectory file if they are not defined in the trajectory format.
+Hydrogen bonds are defined as electrostatic attraction between two polar groups: the acceptor group
+is a hydrogen atom covalently bound to an electronegative atom (usually O, N, F) while
+the donor group is another highly electronegative atom.
 The criteria used depend on a maximum donor-acceptor distance and a maximum donor-acceptor-H angle.
 Hydrogen bonds criteria can be specified.
 
@@ -35,13 +31,13 @@ Usage:
   cfiles hbonds (-h | --help)
 
 Examples:
-  cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds 
+  cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds
   cfiles hbonds in.pdb --acceptors=="bonds: type(#1) == O and type(#2) == H"
   cfiles hbonds protein.pdb --donors=="atoms: type N" --angle 20.0
 
 Options:
   -h --help                     show this help
-  -o <file>, --output=<file>    write result to <file>. This default to the 
+  -o <file>, --output=<file>    write result to <file>. This default to the
                                 trajectory file name with the `_hb.dat` extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
@@ -123,7 +119,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
         options.distance = string2double(args.at("--distance").asString());
     }	
     if (args.at("--angle")) {
-        options.angle = string2double(args.at("--angle").asString())*pi/180;
+        options.angle = string2double(args.at("--angle").asString()) * pi / 180.0;
     }	
 
     return options;
@@ -182,7 +178,7 @@ int HBonds::run(int argc, const char* argv[]) {
             frame.guess_topology();
         }
 
-        outfile << "# Frame: " << step << std::endl;        
+        outfile << "# Frame: " << step << std::endl;
         outfile << "# Donor (name index)   Acceptor (name index)   Hydrogen (name index)  : Distance D-A    Angle D-A-H" << std::endl;
 
         auto positions = frame.positions();
@@ -210,14 +206,14 @@ int HBonds::run(int argc, const char* argv[]) {
             for (auto donor: donors) {
                 if (donor != acceptor && frame.topology()[donor].type() != "H") {
                     auto r_ad = cell.wrap(positions[donor] - positions[acceptor]);
-                    auto distance = norm(r_ad); 
+                    auto distance = norm(r_ad);
                     auto r_ah = cell.wrap(positions[hydrogen] - positions[acceptor]);
                     auto theta = angle(r_ad, r_ah);
                     if (distance < options.distance && theta < options.angle) {
                         outfile << frame.topology()[donor].name() << " " << donor << "   ";
                         outfile << frame.topology()[acceptor].name() << " " << acceptor << "   ";
                         outfile << frame.topology()[hydrogen].name() << " " << hydrogen << "  : ";
-                        outfile << distance << "    "; 
+                        outfile << distance << "    ";
                         outfile << theta*180/pi << std::endl;
                     }
                 }

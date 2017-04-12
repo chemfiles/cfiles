@@ -35,11 +35,11 @@ public:
         bool guess_bonds = false;
 	/// Parameters for donor-acceptor max distance (in angstroms)
 	double distance = 0.0;
-	/// and for donor-acceptor-hydrogen max angle (in degrees)
+	/// and for acceptor-donor-hydrogen max angle (in degrees)
 	double angle = 0.0;
     };
 
-    HBonds(): selection_acceptor_("bonds: none"), selection_donor_("atoms: none") {}
+    HBonds(): selection_donor_("bonds: none"), selection_acceptor_("atoms: none") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 

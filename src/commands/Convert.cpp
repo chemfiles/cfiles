@@ -3,6 +3,7 @@
 
 #include <docopt/docopt.h>
 #include <sstream>
+#include <set>
 
 #include "Convert.hpp"
 #include "Errors.hpp"
@@ -15,6 +16,11 @@ R"(Convert trajectories from one format to another, automatically guessing the
 format to use based on the files extension. It is possible to force a specific
 input or output file format, and to specify an alternative unit cell or topology
 for the input file if they are not defined in the input format.
+One may write only a part of the input file by defining a selection using 
+the chemfiles selection language.
+
+For more information about chemfiles selection language, please see
+http://chemfiles.org/chemfiles/latest/selections.html
 
 Usage:
   cfiles convert [options] <input> <output>
@@ -44,6 +50,8 @@ Options:
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
   --wrap                        rewrap the particles inside the unit cell
+  -s <sel>, --selection=<sel>   selection to use for the output file
+                                [default: atoms: all]
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
@@ -53,40 +61,41 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     Convert::Options options;
-    options.infile = args["<input>"].asString();
-    options.outfile = args["<output>"].asString();
+    options.infile = args.at("<input>").asString();
+    options.outfile = args.at("<output>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
     options.wrap = args.at("--wrap").asBool();
+    options.selection = args.at("--selection").asString();
 
     if (args.at("--steps")) {
         options.steps = steps_range::parse(args.at("--steps").asString());
     }
 
-    if (args["--input-format"]){
-        options.input_format = args["--input-format"].asString();
+    if (args.at("--input-format")){
+        options.input_format = args.at("--input-format").asString();
     }
 
-    if (args["--output-format"]){
-        options.output_format = args["--output-format"].asString();
+    if (args.at("--output-format")){
+        options.output_format = args.at("--output-format").asString();
     }
 
-    if (args["--topology"]){
+    if (args.at("--topology")){
         if (options.guess_bonds) {
             throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
         }
-        options.topology = args["--topology"].asString();
+        options.topology = args.at("--topology").asString();
     }
 
-    if (args["--topology-format"]){
+    if (args.at("--topology-format")){
         if (options.topology == "") {
             throw CFilesError("Useless '--topology-format' without '--topology'");
         }
         options.topology_format = args["--topology-format"].asString();
     }
 
-    if (args["--cell"]) {
+    if (args.at("--cell")) {
         options.custom_cell = true;
-		options.cell = parse_cell(args["--cell"].asString());
+		options.cell = parse_cell(args.at("--cell").asString());
 	}
 
     return options;
@@ -128,6 +137,30 @@ int Convert::run(int argc, const char* argv[]) {
             for (auto& position: positions) {
                 position = cell.wrap(position);
             }
+        }
+
+        selection_ = Selection(options.selection);
+        auto matched = selection_.evaluate(frame);
+
+        std::set<int> keep;
+        for (auto match: matched) {
+            for (int i = 0; i < match.size(); i++) {
+                keep.insert(match[i]);
+            }
+        }
+
+        std::set<int> remove;
+        for (int i = 0; i < frame.natoms(); ++i) {
+            auto search = keep.find(i);
+            if (search == keep.end()) { // element not found
+                remove.insert(i);
+            }
+        }
+        
+        // deleting an atom in the frame shifts all the indexes after it
+        // so we need to iterate in reverse order to delete the good atoms
+        for (auto i = remove.rbegin(); i != remove.rend(); ++i) {
+            frame.remove(*i);
         }
 
         outfile.write(frame);

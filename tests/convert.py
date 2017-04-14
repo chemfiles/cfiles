@@ -28,6 +28,13 @@ H 1.497 5.859 1.682
 H 0.56 6.554 0.717
 """
 
+XYZ_SEL_CONTENT = """3
+Written by the chemfiles library
+O 0.417 8.303 11.737
+O 9.733 8.95 5.501
+O 1.486 6.471 0.946
+"""
+
 
 class isolate_files(object):
     '''
@@ -67,3 +74,9 @@ if __name__ == '__main__':
         assert(err == "")
         with open(filename + ".xyz") as fd:
             assert(fd.read() == XYZ_CONTENT)
+    with isolate_files(filename):
+        out, err = cfiles("convert", filename + ".pdb", filename + ".xyz","--selection", 'atoms: type O')
+        assert(out == "")
+        assert(err == "")
+        with open(filename + ".xyz") as fd:
+            assert(fd.read() == XYZ_SEL_CONTENT)

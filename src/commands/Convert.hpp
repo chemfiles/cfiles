@@ -18,6 +18,7 @@ public:
         std::string output_format = "";
         std::string topology = "";
         std::string topology_format = "";
+        std::string selection = "";
         bool custom_cell = false;
         chemfiles::UnitCell cell;
         bool guess_bonds = false;
@@ -25,11 +26,12 @@ public:
         steps_range steps;
     };
 
-    Convert() {}
+    Convert(): selection_("all") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 private:
     Options options_;
+    chemfiles::Selection selection_;
 };
 
 #endif

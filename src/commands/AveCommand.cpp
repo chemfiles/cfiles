@@ -55,8 +55,8 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
 
     if (args.at("--cell")) {
         options_.custom_cell = true;
-		options_.cell = parse_cell(args.at("--cell").asString());
-	}
+        options_.cell = parse_cell(args.at("--cell").asString());
+    }
 }
 
 int AveCommand::run(int argc, const char* argv[]) {

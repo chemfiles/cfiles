@@ -27,9 +27,18 @@ public:
     /// Constructor with a 3D vector
     Axis(double a, double b, double c): vector_(vector3d(a,b,c)/norm(vector3d(a,b,c))) {}
 
+    /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {
         auto dot_product = dot(vector_,positions);
-        return abs(dot_product);
+        return dot_product;
+    }
+
+    /// radial distance to axis
+    double radial(const Vector3D & positions) {
+        auto dot_product = dot(vector_,positions);
+        auto norme2 = norm2(positions);
+        auto distance2 = norme2 - dot_product * dot_product;
+        return sqrt(distance2);
     }
 
 private:

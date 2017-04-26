@@ -44,7 +44,10 @@ public:
     /// `bin_size` of the Histogram.
     void insert(T new_data) {
         auto bin = std::floor(new_data / dr_);
-        assert(bin < size());
+        if (not (bin < size())) {
+            throw "Element out of boundaries";
+            return;
+        }
         (*this)[bin] += 1;
     }
 

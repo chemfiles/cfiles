@@ -10,4 +10,8 @@ struct CFilesError : public std::runtime_error {
     CFilesError(const std::string& message): std::runtime_error(message) {}
 };
 
+struct OutOfBoundsError : public CFilesError {
+    OutOfBoundsError(const std::string& message): CFilesError(message) {}
+};
+
 #endif

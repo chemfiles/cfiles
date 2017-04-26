@@ -51,12 +51,14 @@ Options:
   --selection=<sel>             selection to use for the particles. This must be a
                                 selection of size 1.
                                 [default: atoms: all]
-  --axis=<axis>                 axis along which the density profile will be computed.
-                                To choose from 'x', 'y' or 'z'. [default: z]
+  --axis=<axis>                 axis along which the density profile will be 
+                                computed. Currently implemented for 'X', 'Y' or 'Z'. 
+                                [default: Z]
+  --vector=<vect>               vector defining the axis along which the density 
+                                profile will be computed (e.g. 1,1,1).
   -p <n>, --points=<n>          number of points in the profile [default: 200]
-  --max=<m>                     maximum distance in the profile. The default is the box
-                                length in the chosen direction.
-                                Be careful if your box size changes
+  --max=<m>                     maximum distance in the profile. [default: 10]
+  --min=<m>                     minimum distance in the profile. [default: -10]
 )";
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
@@ -81,13 +83,24 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + "_dp.dat";
     }
 
-    if (args.at("--axis")) {
+    if (args.at("--vector")) {
+        auto splitted = split(args.at("--vector").asString(),',');
+        if (splitted.size() != 3) {
+            throw CFilesError("Vector should be of size 3")
+        }
+        options_.axis_vec[0] = string2double(splitted[0]);
+        options_.axis_vec[1] = string2double(splitted[1]);
+        options_.axis_vec[2] = string2double(splitted[2]);
+        axis_ = Axis(options_.axis_vec[0], options_.axis_vec[1], options_.axis_vec[2]);
+    } else if (args.at("--axis")) {
         options_.axis_str = args.at("--axis").asString();
-    }
-    axis_ = Axis(options_.axis_str);
+        axis_ = Axis(options_.axis_str);
+    } 
 
-    if (args.at("--max")) {
-        return Averager<double>(options_.npoints, 0, options_.max);
+    if (args.at("--max") or args.at("--min")) {
+        options_.max = string2double(args.at("--max").asString());
+        options_.min = string2double(args.at("--min").asString());
+        return Averager<double>(options_.npoints, options_.min, options_.max);
     } else {
         throw CFilesError("Please enter a maximum value for the distance values");
     }
@@ -107,13 +120,13 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         assert(match.size() == 1);
 
         auto i = match[0];
-        
+
         double z = axis_.projection(cell.wrap(positions[i]));
 
         try {
             profile.insert(z);
-        } catch (const std::string e) {
-            std::cout << e << std::endl;
+        } catch (const OutOfBoundsError& e) {
+            std::cout << e.what() << std::endl;
         }
     }
 }
@@ -125,17 +138,16 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         throw CFilesError("No particles found in the '" + selection_.string() + "' selection found.");
     }
 
-    char ax[3] = {'x','y','z'};
-
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << options_.axis_str << ',';
+        outfile << "# along axis " << axis_.coordinates()[0] << ' ' << axis_.coordinates()[1] << ' ';
+        outfile << axis_.coordinates()[2] << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = profile.bin_size();
         for (size_t i=0; i<profile.size(); i++){
-            outfile << i * dr << "  " << profile[i] / max << "\n";
+            outfile << profile.min() + i * dr << "  " << profile[i] / max << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

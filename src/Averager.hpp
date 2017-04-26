@@ -15,8 +15,6 @@ public:
     /// Constructor with a specific number of bins `nbins`, and which can hold
     /// data in the `min - max` range.
     Averager(size_t nbins, double min, double max): Histogram<T>(nbins, min, max), averaged_(nbins) {}
-    /// Constructor with a specific number of `bins` and a specific bin size `dr`
-    Averager(size_t nbins, double dr): Histogram<T>(nbins, dr), averaged_(nbins) {}
 
     Averager(const Averager&) = default;
     Averager(Averager&&) = default;

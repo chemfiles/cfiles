@@ -55,9 +55,13 @@ Options:
                                 computed. It should be either one of 'X','Y','Z'
                                 or a vector defining the axis (e.g. 1:1:1). 
                                 [default: Z]
+  --profile=<str>               type of density profile. Currently implemented are
+                                "along_axis" and "radial". [default: along_axis]
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<m>                     maximum distance in the profile. [default: 10]
-  --min=<m>                     minimum distance in the profile. [default: -10]
+  --min=<m>                     minimum distance in the profile.
+                                If "--profile=radial", min is 0.
+                                If "--profile=along_axis", min is -max if not precised.
 )";
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
@@ -82,6 +86,8 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + "_dp.dat";
     }
 
+    options_.type_profile = args.at("--profile").asString();
+
     if (args.at("--axis")) {
         auto splitted = split(args.at("--axis").asString(),':');
         if (splitted.size() == 1) {
@@ -100,9 +106,15 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         }
     } 
 
-    if (args.at("--max") or args.at("--min")) {
+    if (args.at("--max")) {
         options_.max = string2double(args.at("--max").asString());
-        options_.min = string2double(args.at("--min").asString());
+        options_.min = - options_.max;
+        if (args.at("--min")) {
+            options_.min = string2double(args.at("--min").asString());
+        }
+        if (options_.type_profile == "radial") {
+            options_.min = 0;
+        }
         return Averager<double>(options_.npoints, options_.min, options_.max);
     } else {
         throw CFilesError("Please enter a maximum value for the distance values");
@@ -123,9 +135,12 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         assert(match.size() == 1);
 
         auto i = match[0];
-
-        double z = axis_.projection(cell.wrap(positions[i]));
-
+        double z;
+        if (options_.type_profile == "along_axis") {
+            z = axis_.projection(cell.wrap(positions[i]));
+        } else if (options_.type_profile == "radial") {
+            z = axis_.radial(cell.wrap(positions[i]));
+        }
         try {
             profile.insert(z);
         } catch (const OutOfBoundsError& e) {

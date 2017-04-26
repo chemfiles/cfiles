@@ -17,6 +17,8 @@ public:
 	std::string outfile;
 	/// Selection for the donor-acceptor
 	std::string selection;
+        /// Type of profile
+        std::string type_profile;
         /// Axis along which the profile should be computed
         Vector3D axis;
         /// Number of points in the profile

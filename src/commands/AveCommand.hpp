@@ -26,7 +26,7 @@ public:
         /// Specific steps to use from the trajectory
         steps_range steps;
         /// Do we have a custom cell to use?
-        bool custom_cell;
+        bool custom_cell = false;
         /// Unit cell to use
         chemfiles::UnitCell cell;
         /// Topology file to use

@@ -24,6 +24,8 @@ public:
         size_t npoints;
         /// Maximum in the profile
         double max = 0;
+        /// Minimum in the profile
+        double min = 0;
     };
 
     DensityProfile(): selection_("atoms: all"), axis_(0,0,1) {}

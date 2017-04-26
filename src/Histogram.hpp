@@ -8,6 +8,7 @@
 #include <cmath>
 #include <numeric>
 #include <functional>
+#include "Errors.hpp"
 
 /// Histogram class
 template <class T>
@@ -20,12 +21,10 @@ public:
     using super::end;
 
     /// Default constructor
-    Histogram(): Histogram(0, 0) {}
+    Histogram(): Histogram(0, 0, 0) {}
     /// Constructor with a specific number of bins `nbins`, and which can hold
     /// data in the `min - max` range.
-    Histogram(size_t nbins, double min, double max): Histogram(nbins, (max - min) / nbins) {}
-    /// Constructor with a specific number of `bins` and a specific bin size `dr`
-    Histogram(size_t nbins, double dr): super(nbins), dr_(dr) {
+    Histogram(size_t nbins, double min, double max): super(nbins), min_(min), dr_((max - min) / nbins) {
         static_assert(
             std::is_arithmetic<T>::value,
             "Histogram<T> is only defined for arithmetics types T"
@@ -40,13 +39,15 @@ public:
     /// Get the size of the bins
     double bin_size() const {return dr_;}
 
+    /// Get the min
+    double min() const {return min_;}
+
     /// Insert some `data` in the histogram, and guess the position using the
     /// `bin_size` of the Histogram.
     void insert(T new_data) {
-        auto bin = std::floor(new_data / dr_);
-        if (not (bin < size())) {
-            throw "Element out of boundaries";
-            return;
+        auto bin = std::floor((new_data - min_) / dr_);
+        if (bin >= size() or bin < 0) {
+            throw OutOfBoundsError("Element out of boundaries");
         }
         (*this)[bin] += 1;
     }
@@ -62,6 +63,7 @@ public:
 private:
     /// Width of a bin in the Histogram, for arithmetic types only
     double dr_ = 0;
+    double min_ = 0;
 };
 
 #endif

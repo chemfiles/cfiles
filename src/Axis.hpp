@@ -7,6 +7,7 @@
 #include <chemfiles.hpp>
 #include "Errors.hpp"
 #include <cmath>
+#include <iostream>
 
 using namespace chemfiles;
 
@@ -14,18 +15,21 @@ class Axis {
 public:
     /// Constructor with an axis name (X,Y,Z, XY, XZ, YZ...)
     explicit Axis(std::string name): Axis(0,0,0) {
-        if (name=="X") {
-            vector_[0] = 1;
-        } else if (name=="Y") {
-            vector_[1] = 1;
-        } else if (name=="Z") {
-            vector_[2] = 1;
+        if (name=="X" or name=="x") {
+            vector_ = {1,0,0};
+        } else if (name=="Y" or name=="y") {
+            vector_ = {0,1,0};
+        } else if (name=="Z" or name=="z") {
+            vector_ = {0,0,1};
         } else {
             throw CFilesError("Axis non implemented, enter vector coordinates instead");
         }
     }
     /// Constructor with a 3D vector
     Axis(double a, double b, double c): vector_(vector3d(a,b,c)/norm(vector3d(a,b,c))) {}
+
+    /// print axis
+    Vector3D& coordinates() { return vector_; }
 
     /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {

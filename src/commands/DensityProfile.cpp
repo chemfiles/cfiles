@@ -4,6 +4,7 @@
 #include <docopt/docopt.h>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
 #include "DensityProfile.hpp"
 #include "Errors.hpp"
@@ -109,7 +110,11 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         
         double z = axis_.projection(cell.wrap(positions[i]));
 
-        profile.insert(z);
+        try {
+            profile.insert(z);
+        } catch (const std::string e) {
+            std::cout << e << std::endl;
+        }
     }
 }
 

@@ -18,8 +18,7 @@ public:
 	/// Selection for the donor-acceptor
 	std::string selection;
         /// Axis along which the profile should be computed
-        std::string axis_str;
-        size_t axis_vec[3];
+        Vector3D axis;
         /// Number of points in the profile
         size_t npoints;
         /// Maximum in the profile

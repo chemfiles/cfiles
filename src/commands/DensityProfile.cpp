@@ -48,14 +48,13 @@ Options:
                                 and <stride> optional. Default is to use all
                                 steps from the input; starting at 0, ending at
                                 the last step, and with a stride of 1.
-  --selection=<sel>             selection to use for the particles. This must be a
+  -s <sel>, --selection=<sel>   selection to use for the particles. This must be a
                                 selection of size 1.
                                 [default: atoms: all]
   --axis=<axis>                 axis along which the density profile will be 
-                                computed. Currently implemented for 'X', 'Y' or 'Z'. 
+                                computed. It should be either one of 'X','Y','Z'
+                                or a vector defining the axis (e.g. 1:1:1). 
                                 [default: Z]
-  --vector=<vect>               vector defining the axis along which the density 
-                                profile will be computed (e.g. 1,1,1).
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<m>                     maximum distance in the profile. [default: 10]
   --min=<m>                     minimum distance in the profile. [default: -10]
@@ -83,18 +82,22 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + "_dp.dat";
     }
 
-    if (args.at("--vector")) {
-        auto splitted = split(args.at("--vector").asString(),',');
-        if (splitted.size() != 3) {
-            throw CFilesError("Vector should be of size 3")
+    if (args.at("--axis")) {
+        auto splitted = split(args.at("--axis").asString(),':');
+        if (splitted.size() == 1) {
+            axis_ = Axis(args.at("--axis").asString());
+        } else if (splitted.size() == 3) {
+            auto a = string2double(splitted[0]);
+            auto b = string2double(splitted[1]);
+            auto c = string2double(splitted[2]);
+            options_.axis = vector3d(a,b,c);
+            if (options_.axis == vector3d(0,0,0)) {
+                throw CFilesError("Null axis does not make sense");
+            }
+            axis_ = Axis(options_.axis[0], options_.axis[1], options_.axis[2]);
+        } else {
+            throw CFilesError("Vector should be of size 3");
         }
-        options_.axis_vec[0] = string2double(splitted[0]);
-        options_.axis_vec[1] = string2double(splitted[1]);
-        options_.axis_vec[2] = string2double(splitted[2]);
-        axis_ = Axis(options_.axis_vec[0], options_.axis_vec[1], options_.axis_vec[2]);
-    } else if (args.at("--axis")) {
-        options_.axis_str = args.at("--axis").asString();
-        axis_ = Axis(options_.axis_str);
     } 
 
     if (args.at("--max") or args.at("--min")) {

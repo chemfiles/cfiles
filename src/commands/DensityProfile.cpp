@@ -51,12 +51,14 @@ Options:
   -s <sel>, --selection=<sel>   selection to use for the particles. This must be a
                                 selection of size 1.
                                 [default: atoms: all]
+  --profile=<str>               type of density profile. Currently implemented are
+                                "along_axis" and "radial". [default: along_axis]
   --axis=<axis>                 axis along which the density profile will be 
                                 computed. It should be either one of 'X','Y','Z'
                                 or a vector defining the axis (e.g. 1:1:1). 
                                 [default: Z]
-  --profile=<str>               type of density profile. Currently implemented are
-                                "along_axis" and "radial". [default: along_axis]
+  --origin=<coord>              coordinates for the origin of the axis.
+                                [default: 0:0:0]  
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<m>                     maximum distance in the profile. [default: 10]
   --min=<m>                     minimum distance in the profile.
@@ -96,15 +98,25 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             auto a = string2double(splitted[0]);
             auto b = string2double(splitted[1]);
             auto c = string2double(splitted[2]);
-            options_.axis = vector3d(a,b,c);
-            if (options_.axis == vector3d(0,0,0)) {
+            if (axis_.is_null() ) {
                 throw CFilesError("Null axis does not make sense");
             }
-            axis_ = Axis(options_.axis[0], options_.axis[1], options_.axis[2]);
+            axis_ = Axis(a,b,c);
         } else {
             throw CFilesError("Vector should be of size 3");
         }
     } 
+
+    if (args.at("--origin")) {
+        auto splitted = split(args.at("--origin").asString(),':');
+        if (splitted.size() != 3) {
+            throw CFilesError("The origin option should be a vector of size 3");
+        }
+        auto a = string2double(splitted[0]);
+        auto b = string2double(splitted[1]);
+        auto c = string2double(splitted[2]);
+        options_.origin = vector3d(a,b,c);
+    }
 
     if (args.at("--max")) {
         options_.max = string2double(args.at("--max").asString());
@@ -139,7 +151,7 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         if (options_.type_profile == "along_axis") {
             z = axis_.projection(cell.wrap(positions[i]));
         } else if (options_.type_profile == "radial") {
-            z = axis_.radial(cell.wrap(positions[i]));
+            z = axis_.radial(cell.wrap(positions[i]-options_.origin));
         }
         try {
             profile.insert(z);
@@ -159,8 +171,8 @@ void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << axis_.coordinates()[0] << ' ' << axis_.coordinates()[1] << ' ';
-        outfile << axis_.coordinates()[2] << std::endl;
+        outfile << "# along axis " << axis_.get_coordinates()[0] << ' ' << axis_.get_coordinates()[1] << ' ';
+        outfile << axis_.get_coordinates()[2] << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = profile.bin_size();

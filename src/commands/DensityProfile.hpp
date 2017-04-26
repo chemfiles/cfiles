@@ -19,8 +19,8 @@ public:
 	std::string selection;
         /// Type of profile
         std::string type_profile;
-        /// Axis along which the profile should be computed
-        Vector3D axis;
+        /// Coordinate of origin
+        Vector3D origin;
         /// Number of points in the profile
         size_t npoints;
         /// Maximum in the profile

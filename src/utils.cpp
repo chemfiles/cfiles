@@ -140,7 +140,10 @@ steps_range steps_range::parse(const std::string& string) {
     }
 
     if (range.last_ != static_cast<size_t>(-1)) {
-        range.last_ = range.last_ / range.stride_ + range.stride_;
+        // integer division to know the number of steps to use
+        auto div = range.last_ / range.stride_;
+        // last step to use (useful if last % stride !=0)
+        range.last_ = div * range.stride_;
     }
     return range;
 }

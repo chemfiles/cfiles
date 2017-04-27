@@ -55,7 +55,7 @@ public:
     iterator end() const {return iterator(last_, 0);}
 
     /// Parse a range `string` of the form `first:last:stride`, which will
-    /// generate the steps from first to last (excluded) by a step of stride. 
+    /// generate the steps from first to last (excluded) by a step of stride.
     static steps_range parse(const std::string& string);
 private:
     /// Starting step
@@ -65,5 +65,19 @@ private:
     /// Use one step every `stride` steps
     size_t stride_ = 1;
 };
+
+template<typename C>
+struct reverse_wrapper {
+    C & c_;
+    reverse_wrapper(C & c): c_(c) {}
+
+    typename C::reverse_iterator begin() {return c_.rbegin();}
+    typename C::reverse_iterator end() {return c_.rend(); }
+};
+
+template <typename C>
+reverse_wrapper<C> reverse(C& c) {
+    return reverse_wrapper<C>(c);
+}
 
 #endif

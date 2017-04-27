@@ -161,8 +161,8 @@ int Convert::run(int argc, const char* argv[]) {
 
         // deleting an atom in the frame shifts all the indexes after it
         // so we need to iterate in reverse order to delete the good atoms
-        for (auto i = remove.rbegin(); i != remove.rend(); ++i) {
-            frame.remove(*i);
+        for (auto i: reverse(remove)) {
+            frame.remove(i);
         }
 
         outfile.write(frame);

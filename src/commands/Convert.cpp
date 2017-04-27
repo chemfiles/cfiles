@@ -16,7 +16,7 @@ R"(Convert trajectories from one format to another, automatically guessing the
 format to use based on the files extension. It is possible to force a specific
 input or output file format, and to specify an alternative unit cell or topology
 for the input file if they are not defined in the input format.
-One may write only a part of the input file by defining a selection using 
+One may write only a part of the input file by defining a selection using
 the chemfiles selection language.
 
 For more information about chemfiles selection language, please see
@@ -46,9 +46,10 @@ Options:
                                 degrees.
   --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional. Default is to use all
-                                steps from the input; starting at 0, ending at
-                                the last step, and with a stride of 1.
+                                and <stride> optional. The used steps goes from
+                                <start> to <end> (excluded) by steps of
+                                <stride>. The default values are 0 for <start>,
+                                the number of steps for <end> and 1 for <stride>.
   --wrap                        rewrap the particles inside the unit cell
   -s <sel>, --selection=<sel>   selection to use for the output file
                                 [default: atoms: all]
@@ -156,7 +157,7 @@ int Convert::run(int argc, const char* argv[]) {
                 remove.insert(i);
             }
         }
-        
+
         // deleting an atom in the frame shifts all the indexes after it
         // so we need to iterate in reverse order to delete the good atoms
         for (auto i = remove.rbegin(); i != remove.rend(); ++i) {

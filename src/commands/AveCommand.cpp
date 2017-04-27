@@ -19,11 +19,12 @@ const std::string AveCommand::AVERAGE_OPTIONS = R"(
                                 <a:b:c:α:β:γ> or <a:b:c> or <a>. 'a', 'b' and
                                 'c' are in angstroms, 'α', 'β', and 'γ' are in
                                 degrees.
-  --steps=<steps>               steps to use from the trajectory. <steps> format
+  --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional. Default is to use all
-                                steps from the trajectory; starting at 0, ending
-                                at the last step, and with a stride of 1.)";
+                                and <stride> optional. The used steps goes from
+                                <start> to <end> (excluded) by steps of
+                                <stride>. The default values are 0 for <start>,
+                                the number of steps for <end> and 1 for <stride>.)";
 
 void AveCommand::parse_options(const std::map<std::string, docopt::value>& args) {
     options_.trajectory = args.at("<trajectory>").asString();

@@ -49,9 +49,10 @@ Options:
                                 degrees.
   --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional. Default is to use all
-                                steps from the input; starting at 0, ending at
-                                the last step, and with a stride of 1.
+                                and <stride> optional. The used steps goes from
+                                <start> to <end> (excluded) by steps of 
+                                <stride>. The default values are 0 for <start>,
+                                the number of steps for <end> and 1 for <stride>.
   --donors=<sel>                selection to use for the donors. This must be a
                                 selection of size 2 and type bonds The second atom
 				should be the hydrogen atom.
@@ -117,10 +118,10 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     options.angle = 30.0;
     if (args.at("--distance")) {
         options.distance = string2double(args.at("--distance").asString());
-    }	
+    }
     if (args.at("--angle")) {
         options.angle = string2double(args.at("--angle").asString())*pi/180;
-    }	
+    }
 
     return options;
 }

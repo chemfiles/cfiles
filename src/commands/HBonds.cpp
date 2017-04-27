@@ -38,7 +38,8 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `_hb.dat` extension.
+                                trajectory file name with the `.hbonds.dat`
+                                extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --topology-format=<format>    use <format> as format for the topology file
@@ -50,7 +51,7 @@ Options:
   --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
                                 and <stride> optional. The used steps goes from
-                                <start> to <end> (excluded) by steps of 
+                                <start> to <end> (excluded) by steps of
                                 <stride>. The default values are 0 for <start>,
                                 the number of steps for <end> and 1 for <stride>.
   --donors=<sel>                selection to use for the donors. This must be a
@@ -84,7 +85,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     if (args.at("--output")){
         options.outfile = args.at("--output").asString();
     } else {
-        options.outfile = options.trajectory + "_hb.dat";
+        options.outfile = options.trajectory + ".hbonds.dat";
     }
 
     if (args.at("--steps")) {

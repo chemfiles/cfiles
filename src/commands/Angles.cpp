@@ -35,7 +35,8 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `.ang` extension.
+                                trajectory file name with the `.angles.dat`
+                                extension.
   -s <sel>, --selection=<sel>   selection to use for the atoms. This must be a
                                 selection of size 3 (for angles) or 4 (for
                                 dihedral angles) [default: angles: all]
@@ -57,7 +58,7 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
     if (args["--output"]){
         options_.outfile = args["--output"].asString();
     } else {
-        options_.outfile = AveCommand::options().trajectory + ".ang";
+        options_.outfile = AveCommand::options().trajectory + ".angles.dat";
     }
 
     options_.npoints = string2long(args["--points"].asString());

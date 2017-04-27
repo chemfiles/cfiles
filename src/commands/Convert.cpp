@@ -121,6 +121,7 @@ int Convert::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
+    selection_ = Selection(options.selection);
     for (auto step: options.steps) {
         if (step >= infile.nsteps()) {
             break;
@@ -140,29 +141,30 @@ int Convert::run(int argc, const char* argv[]) {
             }
         }
 
-        selection_ = Selection(options.selection);
-        auto matched = selection_.evaluate(frame);
+        if (options.selection != "") {
+            auto matched = selection_.evaluate(frame);
 
-        std::set<size_t> keep;
-        for (auto match: matched) {
-            for (size_t i = 0; i < match.size(); i++) {
-                keep.insert(match[i]);
+            std::set<size_t> keep;
+            for (auto match: matched) {
+                for (size_t i = 0; i < match.size(); i++) {
+                    keep.insert(match[i]);
+                }
             }
-        }
 
-        std::vector<size_t> remove;
-        remove.reserve(frame.natoms() - keep.size());
-        for (size_t i = 0; i < frame.natoms(); ++i) {
-            auto search = keep.find(i);
-            if (search == keep.end()) { // element not found
-                remove.push_back(i);
+            std::vector<size_t> remove;
+            remove.reserve(frame.natoms() - keep.size());
+            for (size_t i = 0; i < frame.natoms(); ++i) {
+                auto search = keep.find(i);
+                if (search == keep.end()) { // element not found
+                    remove.push_back(i);
+                }
             }
-        }
 
-        // deleting an atom in the frame shifts all the indexes after it
-        // so we need to iterate in reverse order to delete the good atoms
-        for (auto i: reverse(remove)) {
-            frame.remove(i);
+            // deleting an atom in the frame shifts all the indexes after it
+            // so we need to iterate in reverse order to delete the good atoms
+            for (auto i: reverse(remove)) {
+                frame.remove(i);
+            }
         }
 
         outfile.write(frame);

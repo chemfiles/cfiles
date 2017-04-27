@@ -54,6 +54,8 @@ public:
     iterator begin() const {return iterator(first_, stride_);}
     iterator end() const {return iterator(last_, 0);}
 
+    /// Parse a range `string` of the form `first:last:stride`, which will
+    /// generate the steps from first to last (excluded) by a step of stride. 
     static steps_range parse(const std::string& string);
 private:
     /// Starting step

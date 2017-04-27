@@ -150,11 +150,12 @@ int Convert::run(int argc, const char* argv[]) {
             }
         }
 
-        std::set<size_t> remove;
+        std::vector<size_t> remove;
+        remove.reserve(frame.natoms() - keep.size());
         for (size_t i = 0; i < frame.natoms(); ++i) {
             auto search = keep.find(i);
             if (search == keep.end()) { // element not found
-                remove.insert(i);
+                remove.push_back(i);
             }
         }
 

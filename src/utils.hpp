@@ -32,7 +32,7 @@ chemfiles::UnitCell parse_cell(const std::string& string);
 /// Range of steps to use from a trajectory
 class steps_range {
 public:
-    class iterator {
+    class iterator: public std::iterator<std::input_iterator_tag, size_t, long, const size_t*, size_t> {
        friend class steps_range;
     public:
         size_t operator*() const {return step_;}

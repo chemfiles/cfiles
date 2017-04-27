@@ -36,7 +36,8 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `.rdf` extension.
+                                trajectory file name with the `.rdf.dat`
+                                extension.
   -s <sel>, --selection=<sel>   selection to use for the atoms. This can be a
                                 single selection ("name O") or a selection of
                                 two atoms ("pairs: name(#1) O and name(#2) H")
@@ -58,7 +59,7 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
     if (args["--output"]){
         options_.outfile = args["--output"].asString();
     } else {
-        options_.outfile = AveCommand::options().trajectory + ".rdf";
+        options_.outfile = AveCommand::options().trajectory + ".rdf.dat";
     }
 
     options_.rmax = string2double(args["--max"].asString());

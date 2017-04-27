@@ -24,11 +24,11 @@ addons:
 before_install:
   # Setting environement
   - export C_COMPILER="$CC"
-  - export CMAKE_ARGS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DENABLE_NETCDF=ON"
+  - export CMAKE_ARGS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCHFL_ENABLE_NETCDF=ON"
   - |
     if test "$TRAVIS_OS_NAME" == "linux" && test "$C_COMPILER" == "gcc"; then
         export DO_COVERAGE=true
-        export CMAKE_ARGS="$CMAKE_ARGS -DCODE_COVERAGE=ON"
+        export CMAKE_ARGS="$CMAKE_ARGS -DCHFL_CODE_COVERAGE=ON"
         pip install --user codecov
     else
         export DO_COVERAGE=false

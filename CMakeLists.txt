@@ -78,10 +78,7 @@ target_link_libraries(cfiles libcfiles)
 
 install(TARGETS cfiles DESTINATION bin)
 
-enable_testing()
-add_subdirectory(tests)
-
-if(CODE_COVERAGE)
+if(CHFL_CODE_COVERAGE)
     # Code coverage should use gcc
     if(NOT CMAKE_COMPILER_IS_GNUCXX)
         message(FATAL_ERROR "Code coverage can only be used with GCC")
@@ -89,3 +86,6 @@ if(CODE_COVERAGE)
     set(CMAKE_BUILD_TYPE "debug" CACHE STRING "Type of build: release|debug|relwithdebuginfo" FORCE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 endif()
+
+enable_testing()
+add_subdirectory(tests)

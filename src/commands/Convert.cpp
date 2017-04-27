@@ -143,15 +143,15 @@ int Convert::run(int argc, const char* argv[]) {
         selection_ = Selection(options.selection);
         auto matched = selection_.evaluate(frame);
 
-        std::set<int> keep;
+        std::set<size_t> keep;
         for (auto match: matched) {
-            for (int i = 0; i < match.size(); i++) {
+            for (size_t i = 0; i < match.size(); i++) {
                 keep.insert(match[i]);
             }
         }
 
-        std::set<int> remove;
-        for (int i = 0; i < frame.natoms(); ++i) {
+        std::set<size_t> remove;
+        for (size_t i = 0; i < frame.natoms(); ++i) {
             auto search = keep.find(i);
             if (search == keep.end()) { // element not found
                 remove.insert(i);

@@ -14,13 +14,14 @@ using namespace chemfiles;
 
 static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor and donor atoms
-can be specified using the chemfiles selection language. It is possible to provide an alternative
-unit cell or topology for the trajectory file if they are not defined in the trajectory format.
-Hydrogen bonds are defined as electrostatic attraction between two polar groups: the donor group
-is a hydrogen atom covalently bound to an electronegative atom (usually O, N, F) while
-the acceptor group is another highly electronegative atom.
-The criteria used depend on a maximum donor-acceptor distance and a maximum acceptor-donor-H angle.
+R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor
+and donor atoms can be specified using the chemfiles selection language. It is
+possible to provide an alternative unit cell or topology for the trajectory file
+if they are not defined in the trajectory format. Hydrogen bonds are defined as
+electrostatic attraction between two polar groups: the donor group is a hydrogen
+atom covalently bound to an electronegative atom (usually O, N, F) while the
+acceptor group is another highly electronegative atom. The criteria used depend
+on a maximum donor-acceptor distance and a maximum acceptor-donor-H angle.
 Hydrogen bonds criteria can be specified.
 
 For more information about chemfiles selection language, please see
@@ -53,20 +54,20 @@ Options:
                                 and <stride> optional. The used steps goes from
                                 <start> to <end> (excluded) by steps of
                                 <stride>. The default values are 0 for <start>,
-                                the number of steps for <end> and 1 for <stride>.
+                                the number of steps for <end> and 1 for
+                                <stride>.
   --donors=<sel>                selection to use for the donors. This must be a
-                                selection of size 2 and type bonds The second atom
-				should be the hydrogen atom.
-                                [default: bonds: type(#2) == H]
-  --acceptors=<sel>             selection to use for the acceptors. This must be a
-                                selection of size 1.
+                                'bonds:' selection, with the hydrogen atom as
+                                second atom. [default: bonds: type(#2) == H]
+  --acceptors=<sel>             selection to use for the acceptors. This must
+                                be a selection of size 1.
                                 [default: atoms: type O or type N or type F]
-  --distance=<dist>             distance criterion to use for the hydrogen bond detection.
-                                'dist' is the donor-acceptor maximum distance in angstroms.
-                                [default: 3.0]
-  --angle=<angle>               angle criterion to use for the hydrogen bond detection.
-                                'angle' is the acceptor-donor-hydrogen maximum angle in degrees.
-                                [default: 30.0]
+  --distance=<dist>             distance criterion to use for the hydrogen bond
+                                detection. <dist> is the donor-acceptor maximum
+                                distance in angstroms. [default: 3.0]
+  --angle=<angle>               angle criterion to use for the hydrogen bond
+                                detection. <angle> is the acceptor-donor-hydrogen
+                                maximum angle in degrees. [default: 30.0]
 )";
 
 static HBonds::Options parse_options(int argc, const char* argv[]) {

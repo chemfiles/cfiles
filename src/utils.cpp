@@ -12,7 +12,12 @@
 
 double string2double(const std::string& string) {
     try {
-        return std::stod(string);
+        size_t length = 0;
+        double value = std::stod(string, &length);
+        if (length != string.length()) {
+            throw CFilesError("Can not convert '" + string + "' to number");
+        }
+        return value;
     } catch (const std::invalid_argument&) {
         throw CFilesError("Can not convert '" + string + "' to number");
     }
@@ -20,7 +25,12 @@ double string2double(const std::string& string) {
 
 long string2long(const std::string& string) {
     try {
-        return std::stol(string);
+        size_t length = 0;
+        long value = std::stol(string, &length);
+        if (length != string.length()) {
+            throw CFilesError("Can not convert '" + string + "' to number");
+        }
+        return value;
     } catch (const std::invalid_argument&) {
         throw CFilesError("Can not convert '" + string + "' to number");
     }
@@ -51,11 +61,18 @@ std::vector<std::string> split(const std::string& string, char delimiter) {
 chemfiles::UnitCell parse_cell(const std::string& string) {
     auto splitted = split(string, ':');
     if (splitted.size() == 1) {
-        return chemfiles::UnitCell(string2double(splitted[0]));
+        auto a = string2double(splitted[0]);
+        if (a <= 0) {
+            throw CFilesError("custom cell can not have negative length");
+        }
+        return chemfiles::UnitCell(a);
     } else if (splitted.size() == 3) {
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
         auto c = string2double(splitted[2]);
+        if (a <= 0 || b <= 0 || c <= 0) {
+            throw CFilesError("custom cell can not have negative length");
+        }
         return chemfiles::UnitCell(a, b, c);
     } else if (splitted.size() == 6) {
         auto a = string2double(splitted[0]);
@@ -64,6 +81,12 @@ chemfiles::UnitCell parse_cell(const std::string& string) {
         auto alpha = string2double(splitted[3]);
         auto beta  = string2double(splitted[4]);
         auto gamma = string2double(splitted[5]);
+        if (a <= 0 || b <= 0 || c <= 0) {
+            throw CFilesError("custom cell can not have negative length");
+        }
+        if (alpha <= 0 || beta <= 0 || gamma <= 0) {
+            throw CFilesError("custom cell can not have negative angles");
+        }
         return chemfiles::UnitCell(a, b, c, alpha, beta, gamma);
     } else {
         throw CFilesError(
@@ -140,10 +163,10 @@ steps_range steps_range::parse(const std::string& string) {
     }
 
     if (range.last_ != static_cast<size_t>(-1)) {
-        // integer division to know the number of steps to use
-        auto div = range.last_ / range.stride_;
-        // last step to use (useful if last % stride !=0)
-        range.last_ = div * range.stride_;
+        if (range.last_ % range.stride_ != 0) {
+            auto div = range.last_ / range.stride_;
+            range.last_ = (div + 1) * range.stride_;
+        }
     }
     return range;
 }

@@ -13,10 +13,26 @@ function(cfiles_test _file_)
     set_tests_properties(${_name_} PROPERTIES LABELS "cfiles")
 endfunction()
 
-file(GLOB all_test_files
+file(GLOB all_python_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/*.py
 )
 
-foreach(test_file IN LISTS all_test_files)
+foreach(test_file IN LISTS all_python_tests)
     cfiles_test(${test_file})
-endforeach(test_file)
+endforeach()
+
+function(unit_test _file_)
+    get_filename_component(_name_ ${_file_} NAME_WE)
+    add_executable(${_name_} ${_file_})
+    target_link_libraries(${_name_} libcfiles)
+    add_test(${_name_} ${_name_})
+    set_tests_properties(${_name_} PROPERTIES LABELS "cfiles")
+endfunction()
+
+file(GLOB all_unit_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+)
+
+foreach(test_file IN LISTS all_unit_tests)
+    unit_test(${test_file})
+endforeach()

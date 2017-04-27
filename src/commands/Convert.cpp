@@ -49,7 +49,8 @@ Options:
                                 and <stride> optional. The used steps goes from
                                 <start> to <end> (excluded) by steps of
                                 <stride>. The default values are 0 for <start>,
-                                the number of steps for <end> and 1 for <stride>.
+                                the number of steps for <end> and 1 for
+                                <stride>.
   --wrap                        rewrap the particles inside the unit cell
   -s <sel>, --selection=<sel>   selection to use for the output file
                                 [default: atoms: all]

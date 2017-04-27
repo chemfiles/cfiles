@@ -48,28 +48,33 @@ include_directories(src/)
 include_directories(SYSTEM external/)
 
 file(GLOB_RECURSE sources src/**.cpp)
-add_executable(cfiles ${sources})
+list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+add_library(libcfiles STATIC ${sources})
 
 try_compile(STD_REGEX_WORKS
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/cmake/check_std_regex.cpp
 )
 
+add_library(docopt STATIC external/docopt/docopt.cpp)
+target_link_libraries(libcfiles docopt chemfiles)
+
 if(NOT ${STD_REGEX_WORKS})
     message(STATUS "Using Boost.Regex instead of std::regex")
     find_package(Boost 1.53 REQUIRED COMPONENTS regex)
     include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(cfiles ${Boost_LIBRARIES})
-    add_definitions("-DDOCTOPT_USE_BOOST_REGEX")
+    target_link_libraries(docopt ${Boost_LIBRARIES})
+    target_compile_definitions(docopt PRIVATE "-DDOCTOPT_USE_BOOST_REGEX")
 endif()
 
-add_library(docopt STATIC external/docopt/docopt.cpp)
-target_link_libraries(cfiles docopt chemfiles)
-add_dependencies(cfiles version)
+add_dependencies(libcfiles version)
 set_source_files_properties(
     src/utils.cpp
     PROPERTIES OBJECT_DEPENDS ${CMAKE_BINARY_DIR}/version.hpp
 )
+
+add_executable(cfiles src/main.cpp)
+target_link_libraries(cfiles libcfiles)
 
 install(TARGETS cfiles DESTINATION bin)
 

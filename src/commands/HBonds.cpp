@@ -154,7 +154,7 @@ int HBonds::run(int argc, const char* argv[]) {
     auto infile = Trajectory(options.trajectory, 'r', options.format);
     std::ofstream outfile(options.outfile, std::ios::out);
     if (outfile.is_open()) {
-        outfile << "#Hydrogen bond network in trajectory " << options.trajectory << std::endl;
+        outfile << "# Hydrogen bonds in trajectory " << options.trajectory << std::endl;
         outfile << "# Selection: acceptors: " << options.selection_acceptor;
         outfile << " and donors: " << options.selection_donor << std::endl;
         outfile << "# Criteria:" << std::endl;
@@ -182,7 +182,7 @@ int HBonds::run(int argc, const char* argv[]) {
         }
 
         outfile << "# Frame: " << step << std::endl;
-        outfile << "# Acceptor (name index)   Donor (name index)   Hydrogen (name index)  : Distance D-A    Angle A-D-H" << std::endl;
+        outfile << "# Acceptor (name index)\tDonor (name index)\tHydrogen (name index)\tDistance D-A\tAngle A-D-H" << std::endl;
 
         auto positions = frame.positions();
         auto cell = frame.cell();
@@ -200,8 +200,7 @@ int HBonds::run(int argc, const char* argv[]) {
             } else if (frame.topology()[match[1]].type() == "H") {
                 donor = match[0];
                 hydrogen = match[1];
-            } else
-            {
+            } else {
                 throw CFilesError("Invalid donors selection: there is no hydrogen atom.");
             }
 
@@ -213,11 +212,11 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto r_dh = cell.wrap(positions[hydrogen] - positions[donor]);
                     auto theta = angle(r_da, r_dh);
                     if (distance < options.distance && theta < options.angle) {
-                        outfile << frame.topology()[acceptor].name() << " " << acceptor << "   ";
-                        outfile << frame.topology()[donor].name() << " " << donor << "   ";
-                        outfile << frame.topology()[hydrogen].name() << " " << hydrogen << "  : ";
-                        outfile << distance << "    ";
-                        outfile << theta * 180 / pi << std::endl;
+                        outfile << frame.topology()[acceptor].name() << " " << acceptor << "\t";
+                        outfile << frame.topology()[donor].name() << " " << donor << "\t";
+                        outfile << frame.topology()[hydrogen].name() << " " << hydrogen << "\t";
+                        outfile << distance << "\t";
+                        outfile << theta * 180 / pi << "\n";
                     }
                 }
             }

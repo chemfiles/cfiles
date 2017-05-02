@@ -13,7 +13,7 @@ using namespace chemfiles;
 class Axis {
 public:
     /// Constructor with an axis name (X,Y,Z, XY, XZ, YZ...)
-    explicit Axis(std::string name): Axis(0,0,0) {
+    explicit Axis(std::string name): Axis(0,0,1) {
         if (name=="X" or name=="x") {
             vector_ = {1,0,0};
         } else if (name=="Y" or name=="y") {
@@ -27,15 +27,15 @@ public:
     /// Constructor with a 3D vector
     Axis(double a, double b, double c): vector_(vector3d(a,b,c)) {
         /// normalize the axis
-        if (vector_  != vector3d(0,0,0)) {
+        if (vector_  == vector3d(0,0,0)) {
+            throw CFilesError("Axis should not be null");
+        } else {
             vector_ = vector_ / norm(vector_);
         }
     }
 
     /// Get the vector coordinates
     Vector3D& get_coordinates() { return vector_; }
-    /// Check if axis is null
-    bool is_null() { return vector_ == vector3d(0,0,0); }
 
     /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {

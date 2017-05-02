@@ -15,9 +15,11 @@ using namespace chemfiles;
 
 static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(Compute the density profile of particles along a given axis. Selections for the particles
-can be specified using the chemfiles selection language. It is possible to provide an alternative
-unit cell or topology for the trajectory file if they are not defined in the trajectory format.
+R"(Compute the density profile of particles along a given axis or radially. 
+The output for the radial density profile is normalized by r.
+Selections for the particles can be specified using the chemfiles selection 
+language. It is possible to provide an alternative unit cell or topology 
+for the trajectory file if they are not defined in the trajectory format.
 The axis can be specified using a coordinate vector (e.g. z axis would be (0,0,1)).
 
 For more information about chemfiles selection language, please see
@@ -34,7 +36,8 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `_dp.dat` extension.
+                                trajectory file name with the `.density.dat` 
+                                extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
   --topology-format=<format>    use <format> as format for the topology file
@@ -45,12 +48,13 @@ Options:
                                 degrees.
   --steps=<steps>               steps to use from the input. <steps> format
                                 is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional. Default is to use all
-                                steps from the input; starting at 0, ending at
-                                the last step, and with a stride of 1.
+                                and <stride> optional. The used steps goes from
+                                <start> to <end> (excluded) by steps of
+                                <stride>. The default values are 0 for <start>,
+                                the number of steps for <end> and 1 for 
+                                <stride>.
   -s <sel>, --selection=<sel>   selection to use for the particles. This must be a
-                                selection of size 1.
-                                [default: atoms: all]
+                                selection of size 1. [default: atoms: all]
   --profile=<str>               type of density profile. Currently implemented are
                                 "along_axis" and "radial". [default: along_axis]
   --axis=<axis>                 axis along which the density profile will be 
@@ -85,7 +89,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     if (args.at("--output")){
         options_.outfile = args.at("--output").asString();
     } else {
-        options_.outfile = AveCommand::options().trajectory + "_dp.dat";
+        options_.outfile = AveCommand::options().trajectory + ".density.dat";
     }
 
     options_.type_profile = args.at("--profile").asString();
@@ -162,12 +166,6 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 }
 
 void DensityProfile::finish(const Histogram<double>& profile) {
-    auto max = *std::max_element(profile.begin(), profile.end());
-
-    if (max == 0) {
-        throw CFilesError("No particles found in the '" + selection_.string() + "' selection found.");
-    }
-
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
@@ -177,7 +175,15 @@ void DensityProfile::finish(const Histogram<double>& profile) {
 
         double dr = profile.bin_size();
         for (size_t i=0; i<profile.size(); i++){
-            outfile << profile.min() + i * dr << "  " << profile[i] / max << "\n";
+            if (options_.type_profile == "along_axis") {
+                outfile << profile.min() + i * dr << "  " << profile[i] << "\n";
+            } else if (options_.type_profile == "radial") {
+                auto r = profile.min() + (i + 0.5) * dr;
+                if (r == 0) {
+                    r = dr / 1000;
+                }
+                outfile << profile.min() + i * dr << "  " << profile[i] / r << "\n";
+            }
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

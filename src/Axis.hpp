@@ -12,22 +12,22 @@ using namespace chemfiles;
 
 class Axis {
 public:
-    /// Constructor with an axis name (X,Y,Z, XY, XZ, YZ...)
-    explicit Axis(std::string name): Axis(0,0,1) {
-        if (name=="X" or name=="x") {
-            vector_ = {1,0,0};
-        } else if (name=="Y" or name=="y") {
-            vector_ = {0,1,0};
-        } else if (name=="Z" or name=="z") {
-            vector_ = {0,0,1};
+    /// Constructor with an axis name (X, Y, Z, XY, XZ, YZ...)
+    explicit Axis(std::string name): Axis(0, 0, 1) {
+        if (name == "X" or name == "x") {
+            vector_ = {1, 0, 0};
+        } else if (name == "Y" or name == "y") {
+            vector_ = {0, 1, 0};
+        } else if (name == "Z" or name == "z") {
+            vector_ = {0, 0, 1};
         } else {
             throw CFilesError("Axis non implemented, enter vector coordinates instead");
         }
     }
     /// Constructor with a 3D vector
-    Axis(double a, double b, double c): vector_(vector3d(a,b,c)) {
+    Axis(double a, double b, double c): vector_(vector3d(a, b, c)) {
         /// normalize the axis
-        if (vector_  == vector3d(0,0,0)) {
+        if (vector_  == vector3d(0, 0, 0)) {
             throw CFilesError("Axis should not be null");
         } else {
             vector_ = vector_ / norm(vector_);
@@ -39,12 +39,12 @@ public:
 
     /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {
-        return dot(vector_,positions);
+        return dot(vector_, positions);
     }
 
     /// radial distance to axis
     double radial(const Vector3D & positions) {
-        auto dot_product = dot(vector_,positions);
+        auto dot_product = dot(vector_, positions);
         auto distance2 = norm2(positions) - dot_product * dot_product;
         return sqrt(distance2);
     }

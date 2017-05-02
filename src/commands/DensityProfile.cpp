@@ -57,7 +57,7 @@ Options:
                                 <stride>.
   -s <sel>, --selection=<sel>   selection to use for the particles. This must be a
                                 selection of size 1. [default: atoms: all]
-  --profile=<str>               type of density profile. Currently implemented are
+  --profile=<profile>           type of density profile. Currently implemented are
                                 "along_axis" and "radial". [default: along_axis]
   --axis=<axis>                 axis along which the density profile will be 
                                 computed. It should be either one of 'X','Y','Z'
@@ -66,8 +66,8 @@ Options:
   --origin=<coord>              coordinates for the origin of the axis.
                                 [default: 0:0:0]  
   -p <n>, --points=<n>          number of points in the profile [default: 200]
-  --max=<m>                     maximum distance in the profile. [default: 10]
-  --min=<m>                     minimum distance in the profile.
+  --max=<max>                   maximum distance in the profile. [default: 10]
+  --min=<min>                   minimum distance in the profile.
                                 If "--profile=radial", min is 0.
                                 If "--profile=along_axis", min is -max if not precised.
 )";

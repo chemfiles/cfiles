@@ -30,8 +30,10 @@ Usage:
   cfiles density (-h | --help)
 
 Examples:
-  cfiles density water.xyz --cell 15:15:25 --guess-bonds --axis=1,1,1
-  cfiles density in.pdb --selection="x>3"
+  cfiles density water.xyz --cell 15:15:25 --guess-bonds --axis=1:1:1
+  cfiles density in.pdb --selection="x > 3" --points=500
+  cfiles density water.pdb --axis=X --origin=0:0:2 --profile=radial
+  cfiles density in.pdb --profile=radial --max=3 --origin=0:0:2
 
 Options:
   -h --help                     show this help
@@ -103,18 +105,18 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             auto b = string2double(splitted[1]);
             auto c = string2double(splitted[2]);
             if (axis_.is_null() ) {
-                throw CFilesError("Null axis does not make sense");
+                throw CFilesError("Cannot use null axis for density profile");
             }
             axis_ = Axis(a,b,c);
         } else {
-            throw CFilesError("Vector should be of size 3");
+            throw CFilesError("Axis for density profile should be of size 3");
         }
     } 
 
     if (args.at("--origin")) {
         auto splitted = split(args.at("--origin").asString(),':');
         if (splitted.size() != 3) {
-            throw CFilesError("The origin option should be a vector of size 3");
+            throw CFilesError("Origin for density profile should be a vector of size 3");
         }
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
@@ -133,7 +135,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         }
         return Averager<double>(options_.npoints, options_.min, options_.max);
     } else {
-        throw CFilesError("Please enter a maximum value for the distance values");
+        throw CFilesError("Please enter a maximum value for the distances in density profile");
     }
 }
 
@@ -167,10 +169,10 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 
 void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
+    auto axis = axis_.get_coordinates();
     if(outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << axis_.get_coordinates()[0] << ' ' << axis_.get_coordinates()[1] << ' ';
-        outfile << axis_.get_coordinates()[2] << std::endl;
+        outfile << "# along axis " << axis[0] << ' ' << axis[1] << ' ' << axis[2] << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         double dr = profile.bin_size();
@@ -180,7 +182,7 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             } else if (options_.type_profile == "radial") {
                 auto r = profile.min() + (i + 0.5) * dr;
                 if (r == 0) {
-                    r = dr / 1000;
+                    r = dr / 1000; // use a small r compared to dr to avoid Nan in the output
                 }
                 outfile << profile.min() + i * dr << "  " << profile[i] / r << "\n";
             }

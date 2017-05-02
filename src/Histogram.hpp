@@ -39,13 +39,12 @@ public:
     /// Get the size of the bins
     double bin_size() const {return dr_;}
 
-    /// Get the min
+    /// Get the minimal value of this histogram
     double min() const {return min_;}
 
-    /// Insert some `data` in the histogram, and guess the position using the
-    /// `bin_size` of the Histogram.
-    void insert(T new_data) {
-        auto bin = std::floor((new_data - min_) / dr_);
+    /// Insert some `data` in the histogram
+    void insert(T data) {
+        auto bin = std::floor((data - min_) / dr_);
         if (bin >= size() or bin < 0) {
             throw OutOfBoundsError("Element out of boundaries");
         }

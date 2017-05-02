@@ -7,7 +7,6 @@
 #include <chemfiles.hpp>
 #include "Errors.hpp"
 #include <cmath>
-#include <iostream>
 
 using namespace chemfiles;
 
@@ -28,24 +27,25 @@ public:
     /// Constructor with a 3D vector
     Axis(double a, double b, double c): vector_(vector3d(a,b,c)) {
         /// normalize the axis
-        vector_ = vector_ / norm(vector_);
+        if (vector_  != vector3d(0,0,0)) {
+            vector_ = vector_ / norm(vector_);
+        }
     }
 
-    /// print axis
+    /// Get the vector coordinates
     Vector3D& get_coordinates() { return vector_; }
+    /// Check if axis is null
     bool is_null() { return vector_ == vector3d(0,0,0); }
 
     /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {
-        auto dot_product = dot(vector_,positions);
-        return dot_product;
+        return dot(vector_,positions);
     }
 
     /// radial distance to axis
     double radial(const Vector3D & positions) {
         auto dot_product = dot(vector_,positions);
-        auto norme2 = norm2(positions);
-        auto distance2 = norme2 - dot_product * dot_product;
+        auto distance2 = norm2(positions) - dot_product * dot_product;
         return sqrt(distance2);
     }
 

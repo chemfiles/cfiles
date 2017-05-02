@@ -15,6 +15,7 @@ You can ask questions about cfiles in the [chat], or in github issues.
 ### Analysis algorithms
 
 * Radial distribution functions;
+* Density profiles;
 * Angles and dihedral angles distributions;
 * Hydrogen bonds detection.
 

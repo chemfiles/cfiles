@@ -67,9 +67,8 @@ script:
   - cmake $CMAKE_ARGS ..
   - make
   - ctest -L cfiles --output-on-failure
-
-after_success:
   - |
     if ${DO_COVERAGE}; then
+        cd ${TRAVIS_BUILD_DIR}
         codecov --gcov-exec=gcov-4.9
     fi

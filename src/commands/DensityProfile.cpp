@@ -104,9 +104,6 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             auto a = string2double(splitted[0]);
             auto b = string2double(splitted[1]);
             auto c = string2double(splitted[2]);
-            if (axis_.is_null() ) {
-                throw CFilesError("Cannot use null axis for density profile");
-            }
             axis_ = Axis(a,b,c);
         } else {
             throw CFilesError("Axis for density profile should be of size 3");

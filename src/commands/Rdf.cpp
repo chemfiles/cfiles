@@ -93,7 +93,7 @@ void Rdf::finish(const Histogram<double>& histogram) {
     outfile << "# Using selection: " << options_.selection << std::endl;
     outfile << "# r\tg(r)\tN(r) " << std::endl;
 
-    double dr = histogram.bin_size();
+    double dr = histogram.dx();
     for (size_t i=0; i<histogram.size(); i++){
         outfile << i * dr << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
     }
@@ -155,7 +155,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     double volume = cell.volume();
     if (volume <= 0) {volume = 1;}
 
-    double dr = histogram.bin_size();
+    double dr = histogram.dx();
     double factor = n_first * n_second / volume;
 
     histogram.normalize([factor, dr](size_t i, double val){

@@ -172,16 +172,16 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         outfile << "# along axis " << axis[0] << ' ' << axis[1] << ' ' << axis[2] << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        double dr = profile.bin_size();
+        double dr = profile.dx();
         for (size_t i=0; i<profile.size(); i++){
             if (options_.type_profile == "along_axis") {
-                outfile << profile.min() + i * dr << "  " << profile[i] << "\n";
+                outfile << profile.min_x() + i * dr << "  " << profile[i] << "\n";
             } else if (options_.type_profile == "radial") {
-                auto r = profile.min() + (i + 0.5) * dr;
+                auto r = profile.min_x() + (i + 0.5) * dr;
                 if (r == 0) {
                     r = dr / 1000; // use a small r compared to dr to avoid Nan in the output
                 }
-                outfile << profile.min() + i * dr << "  " << profile[i] / r << "\n";
+                outfile << profile.min_x() + i * dr << "  " << profile[i] / r << "\n";
             }
         }
     } else {

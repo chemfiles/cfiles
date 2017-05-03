@@ -301,7 +301,7 @@ void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
     auto axis_x = axis_x_.get_coordinates();
     auto axis_y = axis_y_.get_coordinates();
-    if(outfile.is_open()) {
+    if (outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# along axis " << axis_x[0] << ' ' << axis_x[1] << ' ' << axis_x[2] << std::endl;
         if (n_axis_ == 2) {
@@ -327,26 +327,30 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             outfile << "# X Y Density" << std::endl;
             size_t nx = profile.n_x();
             size_t ny = profile.n_y();
+            size_t min_x = profile.min_x();
+            size_t min_y = profile.min_y();
+
             for (size_t i=0; i<nx; i++){
                 for (size_t j=0; j<ny; j++){
+                    outfile << min_x + i * dx << "\t" << min_y + j * dy << "\t";
                     if (options_.type_profile[0] == 1 and options_.type_profile[1] == 1) {
-                        outfile << profile.min_x() + i * dx << "\t" << profile.min_y() + j * dy << "\t" << profile(i,j) << "\n";
+                        outfile << profile(i,j) << "\n";
                     } else if (options_.type_profile[0] == 2 xor options_.type_profile[1] == 2) {
-                            auto r = profile.min_y() + (j + 0.5) * dy;
+                            auto r = min_y + (j + 0.5) * dy;
                             if (r == 0) {
                                 r = dy / 1000; // use a small r compared to dr to avoid Nan in the output
                             }
-                        outfile << profile.min_x() + i * dx << "\t" << profile.min_y() + j * dy << "\t" << profile(i,j) / r << "\n";
+                        outfile << profile(i,j) / r << "\n";
                     } else if (options_.type_profile[0] == 2 and options_.type_profile[1] == 2) {
-                            auto rx = profile.min_x() + (i + 0.5) * dx;
+                            auto rx = min_x + (i + 0.5) * dx;
                             if (rx == 0) {
                                 rx = dx / 1000; // use a small r compared to dr to avoid Nan in the output
                             }
-                            auto ry = profile.min_y() + (j + 0.5) * dy;
+                            auto ry = min_y + (j + 0.5) * dy;
                             if (ry == 0) {
                                 ry = dy / 1000; // use a small r compared to dr to avoid Nan in the output
                             }
-                        outfile << profile.min_x() + i * dx << "\t" << profile.min_y() + j * dy << "\t" << profile(i,j) / (rx * ry);
+                        outfile << profile(i,j) / (rx * ry);
                     }
                 }
             }

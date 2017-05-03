@@ -45,6 +45,9 @@ public:
     Histogram(Histogram&&) = default;
     Histogram& operator=(const Histogram&) = default;
     Histogram& operator=(Histogram&&) = default;
+    const T& operator()(size_t i, size_t j) const {
+        return (*this)[j + i * ny_];
+    }
 
     /// Get the size of the bins
     double dx() const {return dx_;}
@@ -53,6 +56,10 @@ public:
     /// Get the minimal value of this histogram
     double min_x() const {return min_x_;}
     double min_y() const {return min_y_;}
+
+    /// Get the number of bins
+    double n_x() const {return nx_;}
+    double n_y() const {return ny_;}
 
     /// Insert some `x,y` in the histogram
     void insert(T x, T y = 0) {
@@ -66,7 +73,7 @@ public:
             std::string s = std::to_string(y);
             throw OutOfBoundsError("Element " + s + " out of boundaries");
         }
-        (*this)[bin_x + bin_y * nx_] += 1;
+        (*this)[bin_y + bin_x * ny_] += 1;
     }
 
     /// Normalize the data with a `function` callback, which will be called for

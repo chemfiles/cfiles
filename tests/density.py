@@ -36,10 +36,9 @@ def density(selection):
     out, err = cfiles(
         "density",
         "-c", "24:24:25.458:90:90:120",
-        "--axis=Z",
         "--max=20",
         "--points=200",
-        "--profile=radial",
+        "--radial=Z",
         "-s", selection,
         TRAJECTORY, "-o", OUTPUT
     )

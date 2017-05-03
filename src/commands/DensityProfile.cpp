@@ -312,24 +312,25 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         double dx = profile.dx();
         double dy = profile.dy();
         if (n_axis_ == 1) {
+            double min_x = profile.min_x();
             for (size_t i=0; i<profile.size(); i++){
                 if (options_.type_profile[0] == 1) {
-                    outfile << profile.min_x() + i * dx << "  " << profile[i] << "\n";
+                    outfile << min_x + i * dx << "  " << profile[i] << "\n";
                 } else if (options_.type_profile[0] == 2) {
-                    auto r = profile.min_x() + (i + 0.5) * dx;
+                    auto r = min_x + (i + 0.5) * dx;
                     if (r == 0) {
                         r = dx / 1000; // use a small r compared to dr to avoid Nan in the output
                     }
-                    outfile << profile.min_x() + i * dx << "  " << profile[i] / r << "\n";
+                    outfile << min_x + i * dx << "  " << profile[i] / r << "\n";
                 }
             }
         } else {
             outfile << "# X Y Density" << std::endl;
-            size_t nx = profile.n_x();
-            size_t ny = profile.n_y();
-            size_t min_x = profile.min_x();
-            size_t min_y = profile.min_y();
-
+            double nx = profile.n_x();
+            double ny = profile.n_y();
+            double min_x = profile.min_x();
+            double min_y = profile.min_y();
+            
             for (size_t i=0; i<nx; i++){
                 for (size_t j=0; j<ny; j++){
                     outfile << min_x + i * dx << "\t" << min_y + j * dy << "\t";

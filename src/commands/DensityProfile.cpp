@@ -20,7 +20,18 @@ The output for the radial density profile is normalized by r.
 Selections for the particles can be specified using the chemfiles selection 
 language. It is possible to provide an alternative unit cell or topology 
 for the trajectory file if they are not defined in the trajectory format.
-The axis can be specified using a coordinate vector (e.g. z axis would be (0,0,1)).
+The axis can be specified using a coordinate vector (e.g. z axis would be 
+(0,0,1)).
+
+It is possible to compute 2D profiles. This is possible by specifying 2 axis 
+(see --axis and --radial options). Other options (--points, --max, --min, 
+--origin) may accept two values, one for each axis. If only one is specified, 
+the same value will be used for both axis (see Examples). The output is
+a 2D histogram with the first dimension (raws) being the first axis and the 
+second dimension (columns) the second axis. If two axis of the same type are
+used (e.g. twice --axis option), the order will be the one the user gave. If 
+the axis types are different (e.g. --axis and --radial), the --axis will be
+first.  
 
 For more information about chemfiles selection language, please see
 http://chemfiles.org/chemfiles/latest/selections.html
@@ -32,8 +43,8 @@ Usage:
 Examples:
   cfiles density water.xyz --cell 15:15:25 --guess-bonds --axis=1:1:1
   cfiles density in.pdb --selection="x > 3" --points=500
-  cfiles density water.pdb --axis=X --origin=0:0:2 --profile=radial
-  cfiles density in.pdb --profile=radial --max=3 --origin=0:0:2
+  cfiles density nt.pdb --radial=Z --max=3 --origin=0:0:2
+  cfiles density nt.pdb --profile=Z --radial=Z --max=10:5 --origin=0:0:2
 
 Options:
   -h --help                     show this help
@@ -55,22 +66,39 @@ Options:
                                 <stride>. The default values are 0 for <start>,
                                 the number of steps for <end> and 1 for 
                                 <stride>.
-  -s <sel>, --selection=<sel>   selection to use for the particles. This must be a
-                                selection of size 1. [default: atoms: all]
-  --profile=<profile>           type of density profile. Currently implemented are
-                                "along_axis" and "radial". [default: along_axis]
-  --axis=<axis>                 axis along which the density profile will be 
-                                computed. It should be either one of 'X','Y','Z'
+  -s <sel>, --selection=<sel>   selection to use for the particles. This must
+                                be a selection of size 1. [default: atoms: all]
+  --axis=<axis>...              computes a linear density profile along <axis>.
+                                It should be either one of 'X','Y','Z'
                                 or a vector defining the axis (e.g. 1:1:1). 
-                                [default: Z]
-  --origin=<coord>              coordinates for the origin of the axis.
+  --radial=<axis>...            computes a radial density profile using the 
+                                distance to <axis>.
+                                It should be either one of 'X','Y','Z'
+                                or a vector defining the axis (e.g. 1:1:1). 
+  --origin=<coord>              coordinates for the origin of the axis (used 
+                                only for radial profiles).
                                 [default: 0:0:0]  
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
   --min=<min>                   minimum distance in the profile.
-                                If "--profile=radial", min is 0.
-                                If "--profile=along_axis", min is -max if not precised.
+                                For radial profiles, <min> must be positive.
+                                For linear profiles, <min> is set to -<max> 
+                                if not precised.
 )";
+
+Axis axis_parse(std::string axis) {
+    auto splitted = split(axis,':');
+    if (splitted.size() == 1) {
+        return Axis(axis);
+    } else if (splitted.size() == 3) {
+        auto a = string2double(splitted[0]);
+        auto b = string2double(splitted[1]);
+        auto c = string2double(splitted[2]);
+        return Axis(a, b, c);
+    } else {
+        throw CFilesError("Axis for density profile should be of size 3");
+    }
+}
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     auto options_str = command_header("density", DensityProfile().description()) + "\n";
@@ -79,6 +107,56 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     AveCommand::parse_options(args);
+
+    size_t n_axis = 0;
+
+    if (args.at("--axis")) {
+        if (args["--axis"].isString()) {
+            options_.type_profile[n_axis] = 1;
+            n_axis ++;
+            axis_x_ = axis_parse(args.at("--axis").asString());
+        } else if (args["--axis"].isStringList()) {
+            if (args.at("--axis").asStringList().size() == 2) {
+                options_.type_profile[n_axis] = 1;
+                n_axis ++;
+                axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+                options_.type_profile[n_axis] = 1;
+                n_axis ++;
+                axis_y_ = axis_parse(args.at("--axis").asStringList()[1]);
+            } else {
+                throw CFilesError("Too many axis were given");
+            }
+        }
+    }
+
+    if (args.at("--radial")) {
+        if (args["--radial"].isString()) {
+            options_.type_profile[n_axis] = 2;
+            n_axis ++;
+            if (n_axis > 2) {
+                throw CFilesError("Too many axis were given");
+            }
+            axis_x_ = axis_parse(args.at("--radial").asString());
+        } else if (args["--radial"].isStringList()) {
+            if (args.at("--radial").asStringList().size() == 2) {
+                options_.type_profile[n_axis] = 2;
+                n_axis ++;
+                if (n_axis > 2) {
+                    throw CFilesError("Too many axis were given");
+                }
+                axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+                options_.type_profile[n_axis] = 2;
+                n_axis ++;
+                if (n_axis > 2) {
+                    throw CFilesError("Too many axis were given");
+                }
+                axis_y_ = axis_parse(args.at("--radial").asStringList()[1]);
+            } else {
+                throw CFilesError("Too many axis were given");
+            }
+        }
+    }
+
 
     options_.npoints = string2long(args.at("--points").asString());
     options_.selection = args.at("--selection").asString();
@@ -93,22 +171,6 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     } else {
         options_.outfile = AveCommand::options().trajectory + ".density.dat";
     }
-
-    options_.type_profile = args.at("--profile").asString();
-
-    if (args.at("--axis")) {
-        auto splitted = split(args.at("--axis").asString(),':');
-        if (splitted.size() == 1) {
-            axis_ = Axis(args.at("--axis").asString());
-        } else if (splitted.size() == 3) {
-            auto a = string2double(splitted[0]);
-            auto b = string2double(splitted[1]);
-            auto c = string2double(splitted[2]);
-            axis_ = Axis(a,b,c);
-        } else {
-            throw CFilesError("Axis for density profile should be of size 3");
-        }
-    } 
 
     if (args.at("--origin")) {
         auto splitted = split(args.at("--origin").asString(),':');
@@ -127,7 +189,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         if (args.at("--min")) {
             options_.min = string2double(args.at("--min").asString());
         }
-        if (options_.type_profile == "radial") {
+        if (options_.type_profile[0] == 2) {
             options_.min = 0;
         }
         return Averager<double>(options_.npoints, options_.min, options_.max);
@@ -151,10 +213,10 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 
         auto i = match[0];
         double z;
-        if (options_.type_profile == "along_axis") {
-            z = axis_.projection(cell.wrap(positions[i]));
-        } else if (options_.type_profile == "radial") {
-            z = axis_.radial(cell.wrap(positions[i]-options_.origin));
+        if (options_.type_profile[0] == 1) {
+            z = axis_x_.projection(cell.wrap(positions[i]));
+        } else if (options_.type_profile[0] == 2) {
+            z = axis_x_.radial(cell.wrap(positions[i]-options_.origin));
         }
         try {
             profile.insert(z);
@@ -166,7 +228,7 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 
 void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
-    auto axis = axis_.get_coordinates();
+    auto axis = axis_x_.get_coordinates();
     if(outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# along axis " << axis[0] << ' ' << axis[1] << ' ' << axis[2] << std::endl;
@@ -174,9 +236,9 @@ void DensityProfile::finish(const Histogram<double>& profile) {
 
         double dr = profile.dx();
         for (size_t i=0; i<profile.size(); i++){
-            if (options_.type_profile == "along_axis") {
+            if (options_.type_profile[0] == 1) {
                 outfile << profile.min_x() + i * dr << "  " << profile[i] << "\n";
-            } else if (options_.type_profile == "radial") {
+            } else if (options_.type_profile[0] == 2) {
                 auto r = profile.min_x() + (i + 0.5) * dr;
                 if (r == 0) {
                     r = dr / 1000; // use a small r compared to dr to avoid Nan in the output

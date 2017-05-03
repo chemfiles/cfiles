@@ -86,7 +86,7 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
         outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        double dr = histogram.bin_size();
+        double dr = histogram.dx();
         for (size_t i=0; i<histogram.size(); i++){
             outfile << (histogram.min() + i * dr ) * 180 / pi << "  " << histogram[i] / max << "\n";
         }

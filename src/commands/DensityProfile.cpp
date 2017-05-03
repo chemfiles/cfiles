@@ -37,7 +37,7 @@ For more information about chemfiles selection language, please see
 http://chemfiles.org/chemfiles/latest/selections.html
 
 Usage:
-  cfiles density [options] <trajectory>
+  cfiles density [options] <trajectory> [--axis=<axis>...] [--radial=<axis>...]
   cfiles density (-h | --help)
 
 Examples:
@@ -111,52 +111,48 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     size_t n_axis = 0;
 
     if (args.at("--axis")) {
-        if (args["--axis"].isString()) {
-            options_.type_profile[n_axis] = 1;
+        if (args.at("--axis").asStringList().size() == 0) {
+        } else if (args.at("--axis").asStringList().size() == 1) {
             n_axis ++;
-            axis_x_ = axis_parse(args.at("--axis").asString());
-        } else if (args["--axis"].isStringList()) {
-            if (args.at("--axis").asStringList().size() == 2) {
-                options_.type_profile[n_axis] = 1;
-                n_axis ++;
-                axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
-                options_.type_profile[n_axis] = 1;
-                n_axis ++;
-                axis_y_ = axis_parse(args.at("--axis").asStringList()[1]);
-            } else {
-                throw CFilesError("Too many axis were given");
-            }
+            axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+            options_.type_profile[n_axis - 1] = 1;
+        } else if (args.at("--axis").asStringList().size() == 2) {
+            n_axis ++;
+            options_.type_profile[n_axis - 1] = 1;
+            axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+            n_axis ++;
+            options_.type_profile[n_axis - 1] = 1;
+            axis_y_ = axis_parse(args.at("--axis").asStringList()[1]);
+        } else {
+            throw CFilesError("Too many axis were given");
         }
     }
 
     if (args.at("--radial")) {
-        if (args["--radial"].isString()) {
-            options_.type_profile[n_axis] = 2;
+        if (args.at("--radial").asStringList().size() == 0) {
+        } else if (args.at("--radial").asStringList().size() == 1) {
             n_axis ++;
-            if (n_axis > 2) {
+            if (n_axis == 1) {
+                axis_x_ = axis_parse(args.at("--radial").asStringList()[0]);
+            } else if (n_axis == 2) {
+                axis_y_ = axis_parse(args.at("--radial").asStringList()[0]);
+            } else { 
                 throw CFilesError("Too many axis were given");
             }
-            axis_x_ = axis_parse(args.at("--radial").asString());
-        } else if (args["--radial"].isStringList()) {
-            if (args.at("--radial").asStringList().size() == 2) {
-                options_.type_profile[n_axis] = 2;
-                n_axis ++;
-                if (n_axis > 2) {
-                    throw CFilesError("Too many axis were given");
-                }
-                axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
-                options_.type_profile[n_axis] = 2;
-                n_axis ++;
-                if (n_axis > 2) {
-                    throw CFilesError("Too many axis were given");
-                }
-                axis_y_ = axis_parse(args.at("--radial").asStringList()[1]);
-            } else {
+            options_.type_profile[n_axis - 1] = 2;
+        } else if (args.at("--radial").asStringList().size() == 2) {
+            if (n_axis == 2) {
                 throw CFilesError("Too many axis were given");
+            } else {
+                n_axis ++;
+                options_.type_profile[n_axis - 1] = 2;
+                axis_x_ = axis_parse(args.at("--radial").asStringList()[0]);
+                n_axis ++;
+                options_.type_profile[n_axis - 1] = 2;
+                axis_y_ = axis_parse(args.at("--radial").asStringList()[0]);
             }
         }
     }
-
 
     options_.npoints = string2long(args.at("--points").asString());
     options_.selection = args.at("--selection").asString();

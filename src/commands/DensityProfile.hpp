@@ -18,15 +18,15 @@ public:
 	/// Selection for the donor-acceptor
 	std::string selection;
         /// Type of profile: 0 means none, 1 linear profile, 2 radial profile
-        size_t type_profile[2] = {0,0};
+        size_t type_profile[2] = {0, 0};
 	/// Coordinate of origin
-        Vector3D origin;
+        Vector3D origin[2];
         /// Number of points in the profile
-        size_t npoints;
+        size_t npoints[2];
         /// Maximum in the profile
-        double max = 0;
+        double max[2] = {0, 0};
         /// Minimum in the profile
-        double min = 0;
+        double min[2] = {0, 0};
     };
 
     DensityProfile(): selection_("atoms: all"), axis_x_(0,0,1), axis_y_(0,0,1) {}
@@ -39,6 +39,7 @@ public:
 private:
     Options options_;
     chemfiles::Selection selection_;
+    size_t n_axis_;
     Axis axis_x_;
     Axis axis_y_;
 };

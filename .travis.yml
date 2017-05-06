@@ -50,10 +50,10 @@ before_install:
         brew tap homebrew/science
         brew update
         brew rm gcc
-        brew install gcc netcdf
+        brew install gcc@5 netcdf
         if test "${C_COMPILER}" == "gcc"; then
-            export CC=gcc-6
-            export CXX=g++-6
+            export CC=gcc-5
+            export CXX=g++-5
         elif test "${C_COMPILER}" == "clang"; then
             export CC=clang
             export CXX=clang++

@@ -8,6 +8,8 @@ chemical simulations. It offer both data managing capacities and analysis of
 simulation output. `cfiles` is implemented using the [chemfiles] library for
 reading and writing trajectory data.
 
+You can ask questions about cfiles in the [chat], or in github issues.
+
 ## Capacities
 
 ### Analysis algorithms
@@ -58,7 +60,7 @@ ctest
 
 Here is a short check list to contribute to cfiles. If there is anything you
 don't understand, or if you have any question, please ask! You can reach me on
-github issues, by email, or in the [gitter] chat.
+github issues, by email, or in the [chat].
 
 - [ ] Fork cfiles;
 - [ ] Create a local branch;
@@ -83,6 +85,6 @@ All the contributors to chemfiles are listed in the [AUTHORS](AUTHORS) file.
 Many thanks to all of them!
 
 
-[gitter]: https://gitter.im/chemfiles/chemfiles
+[chat]: https://gitter.im/chemfiles/chemfiles
 [issue]: https://github.com/chemfiles/cfiles/issues
 [chemfiles]: https://chemfiles.org/

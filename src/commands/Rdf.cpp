@@ -7,12 +7,12 @@
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
+#include "geometry.hpp"
 #include "utils.hpp"
 #include "warnings.hpp"
 
 using namespace chemfiles;
 
-static const double PI = 3.141592653589793238463;
 static const char OPTIONS[] =
 R"(Compute radial pair distribution function (often denoted g(r)) and running
 coordination number. The pair of particles to use can be specified using the

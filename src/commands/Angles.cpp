@@ -12,7 +12,6 @@
 
 using namespace chemfiles;
 
-static const double pi = 3.141592653589793238463;
 static const std::string OPTIONS =
 R"(Compute distribution of angles or dihedral angles along a trajectory. The
 angle can be specified using the chemfiles selection language. It is possible
@@ -67,9 +66,9 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
 
     selection_ = Selection(options_.selection);
     if (selection_.size() == 3) {
-        return Averager<double>(options_.npoints, 0, pi);
+        return Averager<double>(options_.npoints, 0, PI);
     } else if (selection_.size() == 4) {
-        return Averager<double>(options_.npoints, -pi, pi);
+        return Averager<double>(options_.npoints, -PI, PI);
     } else {
         throw CFilesError("Can not use a selection with less than three atoms in angle distribution.");
     }
@@ -84,7 +83,7 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
         outfile << "# Selection: " << options_.selection << std::endl;
 
         for (size_t i=0; i<histogram.size(); i++){
-            outfile << histogram.first_coord(i) * 180 / pi << "  " << histogram[i] / max << "\n";
+            outfile << histogram.first_coord(i) * 180 / PI << "  " << histogram[i] / max << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

@@ -12,7 +12,6 @@
 
 using namespace chemfiles;
 
-static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
 R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor
 and donor atoms can be specified using the chemfiles selection language. It is
@@ -122,7 +121,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
         options.distance = string2double(args.at("--distance").asString());
     }
     if (args.at("--angle")) {
-        options.angle = string2double(args.at("--angle").asString())*pi/180;
+        options.angle = string2double(args.at("--angle").asString()) * PI / 180;
     }
 
     return options;
@@ -159,7 +158,7 @@ int HBonds::run(int argc, const char* argv[]) {
         outfile << " and donors: " << options.selection_donor << std::endl;
         outfile << "# Criteria:" << std::endl;
         outfile << "# donor-acceptor distance < " << options.distance << " angstroms" << std::endl;
-        outfile << "# acceptor-donor-H angle < " << options.angle * 180 / pi << " degrees" << std::endl;
+        outfile << "# acceptor-donor-H angle < " << options.angle * 180 / PI << " degrees" << std::endl;
     } else {
         throw CFilesError("Could not open the '" + options.outfile + "' file.");
     }
@@ -216,7 +215,7 @@ int HBonds::run(int argc, const char* argv[]) {
                         outfile << frame.topology()[donor].name() << " " << donor << "\t";
                         outfile << frame.topology()[hydrogen].name() << " " << hydrogen << "\t";
                         outfile << distance << "\t";
-                        outfile << theta * 180 / pi << "\n";
+                        outfile << theta * 180 / PI << "\n";
                     }
                 }
             }

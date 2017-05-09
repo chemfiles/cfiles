@@ -4,12 +4,12 @@
 #include <docopt/docopt.h>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 
 #include "DensityProfile.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 #include "geometry.hpp"
+#include "warnings.hpp"
 
 using namespace chemfiles;
 
@@ -237,7 +237,7 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
                 profile.insert(x,y);
             }
         } catch (const OutOfBoundsError& e) {
-            std::cout << e.what() << std::endl;
+            warn_once(e.what());
         }
     }
 }

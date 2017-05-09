@@ -8,6 +8,7 @@
 #include "Angles.hpp"
 #include "Errors.hpp"
 #include "geometry.hpp"
+#include "warnings.hpp"
 
 using namespace chemfiles;
 
@@ -77,10 +78,6 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
 void AngleDistribution::finish(const Histogram<double>& histogram) {
     auto max = *std::max_element(histogram.begin(), histogram.end());
 
-    if (max == 0) {
-        throw CFilesError("No angle corresponding to the '" + selection_.string() + "' selection found.");
-    }
-
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;
@@ -99,6 +96,13 @@ void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histog
     auto cell = frame.cell();
 
     auto matched = selection_.evaluate(frame);
+
+    if (matched.empty()) {
+        warn_once(
+            "No angle corresponding to '" + selection_.string() + "' found."
+        );
+    }
+
     for (auto match: matched) {
         assert(match.size() == 3 || match.size() == 4);
 

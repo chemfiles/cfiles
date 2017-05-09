@@ -88,7 +88,7 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
 
         double dr = histogram.dx();
         for (size_t i=0; i<histogram.size(); i++){
-            outfile << (histogram.min() + i * dr ) * 180 / pi << "  " << histogram[i] / max << "\n";
+            outfile << (histogram.min_x() + i * dr ) * 180 / pi << "  " << histogram[i] / max << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

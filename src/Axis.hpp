@@ -4,9 +4,12 @@
 #ifndef CFILES_AXIS_HPP
 #define CFILES_AXIS_HPP
 
-#include <chemfiles.hpp>
-#include "Errors.hpp"
 #include <cmath>
+
+#include <chemfiles.hpp>
+
+#include "Errors.hpp"
+#include "utils.hpp"
 
 using namespace chemfiles;
 

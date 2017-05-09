@@ -13,23 +13,22 @@
 
 using namespace chemfiles;
 
-static const double pi = 3.141592653589793238463;
 static const char OPTIONS[] =
-R"(Compute the density profile of particles along a given axis or radially. 
+R"(Compute the density profile of particles along a given axis or radially.
 The output for the radial density profile is normalized by r.
-Selections for the particles can be specified using the chemfiles selection 
+Selections for the particles can be specified using the chemfiles selection
 language. It is possible to provide an alternative unit cell or topology for the
-trajectory file if they are not defined in the trajectory format. The axis can 
+trajectory file if they are not defined in the trajectory format. The axis can
 be specified using a coordinate vector (e.g. z axis would be (0,0,1)).
 
 It is also possible to compute 2D profiles by specifying 2 axis (see --axis and
 --radial options). Other options (--points, --max, --min) may accept two values,
-one for each axis. If only one is specified, the same value will be used for 
+one for each axis. If only one is specified, the same value will be used for
 both axis (see Examples). The output is a 2D histogram with the first dimension
-being the first axis and the second dimension the second axis. If two axis of 
+being the first axis and the second dimension the second axis. If two axis of
 the same type are used (e.g. twice --axis option), the order will be the one the
-user gave. If the axis types are different (e.g. --axis and --radial), the 
---axis will be first. Two axis of type radial are forbidden.  
+user gave. If the axis types are different (e.g. --axis and --radial), the
+--axis will be first. Two axis of type radial are forbidden.
 
 For more information about chemfiles selection language, please see
 http://chemfiles.org/chemfiles/latest/selections.html
@@ -47,7 +46,7 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `.density.dat` 
+                                trajectory file name with the `.density.dat`
                                 extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
@@ -62,18 +61,18 @@ Options:
                                 and <stride> optional. The used steps goes from
                                 <start> to <end> (excluded) by steps of
                                 <stride>. The default values are 0 for <start>,
-                                the number of steps for <end> and 1 for 
+                                the number of steps for <end> and 1 for
                                 <stride>.
   -s <sel>, --selection=<sel>   selection to use for the particles. This must
                                 be a selection of size 1. [default: atoms: all]
   --axis=<axis>...              computes a linear density profile along <axis>.
                                 It should be either one of 'X','Y','Z'
-                                or a vector defining the axis (e.g. 1:1:1). 
-  --radial=<axis>...            computes a radial density profile using the 
+                                or a vector defining the axis (e.g. 1:1:1).
+  --radial=<axis>...            computes a radial density profile using the
                                 distance to <axis>.
                                 It should be either one of 'X','Y','Z'
-                                or a vector defining the axis (e.g. 1:1:1). 
-  --origin=<coord>              coordinates for the origin of the axis (only 
+                                or a vector defining the axis (e.g. 1:1:1).
+  --origin=<coord>              coordinates for the origin of the axis (only
                                 relevant for radial profiles). [default: 0:0:0]
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
@@ -213,11 +212,8 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
     auto positions = frame.positions();
     auto cell = frame.cell();
 
-    auto matched = selection_.evaluate(frame);
-    for (auto match: matched) {
-        assert(match.size() == 1);
-
-        auto i = match[0];
+    assert(selection_.size() == 1);
+    for (auto i: selection_.list(frame)) {
         double x = 0;
         double y = 0;
         if (axis_[0].is_linear()) {
@@ -269,7 +265,7 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             }
         } else {
             outfile << "# FirstDimension SecondDimension Density" << std::endl;
-            
+
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
                     outfile << profile.first_coord(i) << "\t" << profile.second_coord(j) << "\t";

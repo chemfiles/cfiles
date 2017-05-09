@@ -7,6 +7,7 @@
 #include "AveCommand.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
+#include "warnings.hpp"
 
 using namespace chemfiles;
 
@@ -70,6 +71,7 @@ int AveCommand::run(int argc, const char* argv[]) {
         file.set_topology(options_.topology, options_.topology_format);
     }
 
+    size_t steps_done = 0;
     for (auto step: options_.steps) {
         if (step >= file.nsteps()) {
             break;
@@ -80,7 +82,15 @@ int AveCommand::run(int argc, const char* argv[]) {
         }
         accumulate(frame, histogram_);
         histogram_.step();
+        steps_done++;
     }
+
+    if (steps_done == 0) {
+        warn(
+            "We did not use any step of the trajectory. Is your '--steps' argument valid?"
+        );
+    }
+
     histogram_.average();
 
     finish(histogram_);

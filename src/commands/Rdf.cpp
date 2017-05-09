@@ -8,6 +8,7 @@
 #include "Rdf.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
+#include "warnings.hpp"
 
 using namespace chemfiles;
 
@@ -145,8 +146,8 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     }
 
     if (n_first == 0 || n_second == 0) {
-        throw CFilesError(
-            "No pair corresponding to the '" + selection_.string() + "' selection found."
+        warn_once(
+            "No pair corresponding to '" + selection_.string() + "' found."
         );
     }
 

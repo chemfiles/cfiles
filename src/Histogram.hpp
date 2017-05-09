@@ -46,7 +46,8 @@ public:
     void insert(T data) {
         auto bin = std::floor((data - min_) / dr_);
         if (bin >= size() or bin < 0) {
-            throw OutOfBoundsError("Element out of boundaries");
+            std::string s = std::to_string(data);
+            throw OutOfBoundsError("Element "+ s +" out of boundaries");
         }
         (*this)[bin] += 1;
     }

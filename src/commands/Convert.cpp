@@ -90,7 +90,7 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--topology-format")){
         if (options.topology == "") {
-            throw CFilesError("Useless '--topology-format' without '--topology'");
+            throw CFilesError("Can not use '--topology-format' without a '--topology'");
         }
         options.topology_format = args["--topology-format"].asString();
     }

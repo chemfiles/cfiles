@@ -106,7 +106,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--topology-format")){
         if (options.topology == "") {
-            throw CFilesError("Useless '--topology-format' without '--topology'");
+            throw CFilesError("Can not use '--topology-format' without a '--topology'");
         }
         options.topology_format = args.at("--topology-format").asString();
     }
@@ -138,7 +138,7 @@ int HBonds::run(int argc, const char* argv[]) {
 
     selection_donor_ = Selection(options.selection_donor);
     if (selection_donor_.size() != 2) {
-        throw CFilesError("Can not use a selection for donors with size different than 2.");
+        throw CFilesError("Can not use a selection for donors with size that is not 2.");
     }
 
     auto selection_string = split(selection_donor_.string(),':');

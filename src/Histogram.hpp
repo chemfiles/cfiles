@@ -81,6 +81,24 @@ public:
         (*this)[bin_y + bin_x * ny_] += 1;
     }
 
+    /// Get the x value corresponding to the ith element of the histogram
+    T x(size_t i, bool radial = false) const {
+        auto coord_x = min_x_ + i * dx_;
+        if (radial and coord_x == 0) {
+            coord_x = dx_ / 1000; // use a small r compared to dr to avoid Nan in the output
+        }
+        return coord_x;
+    } 
+
+    /// Get the y value corresponding to the ith element of the histogram
+    T y(size_t i, bool radial = false) const {
+        auto coord_y = min_y_ + i * dy_;
+        if (radial and coord_y == 0) {
+            coord_y = dy_ / 1000; // use a small r compared to dr to avoid Nan in the output
+        }
+        return coord_y;
+    } 
+
     /// Normalize the data with a `function` callback, which will be called for
     /// each value. The function should take two arguments being the current
     /// bin index and the data, and return the new data.

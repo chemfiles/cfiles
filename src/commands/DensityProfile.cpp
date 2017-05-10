@@ -295,49 +295,28 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         }
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        double dx = profile.dx();
-        double dy = profile.dy();
         if (n_axis_ == 1) {
-            double min_x = profile.min_x();
             for (size_t i=0; i<profile.size(); i++){
                 if (options_.type_profile[0] == 1) {
-                    outfile << min_x + i * dx << "  " << profile[i] << "\n";
+                    outfile << profile.x(i) << "  " << profile[i] << "\n";
                 } else if (options_.type_profile[0] == 2) {
-                    auto r = min_x + (i + 0.5) * dx;
-                    if (r == 0) {
-                        r = dx / 1000; // use a small r compared to dr to avoid Nan in the output
-                    }
-                    outfile << min_x + i * dx << "  " << profile[i] / r << "\n";
+                    outfile << profile.x(i) << "  " << profile[i] / profile.x(i, true) << "\n";
                 }
             }
         } else {
             outfile << "# X Y Density" << std::endl;
             double nx = profile.nx();
             double ny = profile.ny();
-            double min_x = profile.min_x();
-            double min_y = profile.min_y();
             
             for (size_t i=0; i<nx; i++){
                 for (size_t j=0; j<ny; j++){
-                    outfile << min_x + i * dx << "\t" << min_y + j * dy << "\t";
+                    outfile << profile.x(i) << "\t" << profile.y(j) << "\t";
                     if (options_.type_profile[0] == 1 and options_.type_profile[1] == 1) {
                         outfile << profile(i,j) << "\n";
                     } else if (options_.type_profile[0] == 2 xor options_.type_profile[1] == 2) {
-                            auto r = min_y + (j + 0.5) * dy;
-                            if (r == 0) {
-                                r = dy / 1000; // use a small r compared to dr to avoid Nan in the output
-                            }
-                        outfile << profile(i,j) / r << "\n";
+                        outfile << profile(i,j) / profile.y(j, true) << "\n";
                     } else if (options_.type_profile[0] == 2 and options_.type_profile[1] == 2) {
-                            auto rx = min_x + (i + 0.5) * dx;
-                            if (rx == 0) {
-                                rx = dx / 1000; // use a small r compared to dr to avoid Nan in the output
-                            }
-                            auto ry = min_y + (j + 0.5) * dy;
-                            if (ry == 0) {
-                                ry = dy / 1000; // use a small r compared to dr to avoid Nan in the output
-                            }
-                        outfile << profile(i,j) / (rx * ry);
+                        outfile << profile(i,j) / (profile.x(i, true) * profile.y(j, true));
                     }
                 }
             }

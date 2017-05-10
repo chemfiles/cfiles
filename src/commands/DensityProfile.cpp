@@ -75,8 +75,8 @@ Options:
                                 distance to <axis>.
                                 It should be either one of 'X','Y','Z'
                                 or a vector defining the axis (e.g. 1:1:1). 
-  --origin=<coord>              coordinates for the origin of the axis (used 
-                                only for radial profiles).
+  --origin=<coord>              coordinates for the origin of the axis (only 
+                                relevant for radial profiles).
                                 [default: 0:0:0]  
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
@@ -85,20 +85,6 @@ Options:
                                 For linear profiles, <min> is set to -<max> 
                                 if not precised.
 )";
-
-Axis axis_parse(std::string axis) {
-    auto splitted = split(axis,':');
-    if (splitted.size() == 1) {
-        return Axis(axis);
-    } else if (splitted.size() == 3) {
-        auto a = string2double(splitted[0]);
-        auto b = string2double(splitted[1]);
-        auto c = string2double(splitted[2]);
-        return Axis(a, b, c);
-    } else {
-        throw CFilesError("Axis for density profile should be of size 3");
-    }
-}
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     auto options_str = command_header("density", DensityProfile().description()) + "\n";
@@ -114,15 +100,15 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         if (args.at("--axis").asStringList().size() == 0) {
         } else if (args.at("--axis").asStringList().size() == 1) {
             n_axis_ ++;
-            axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0]);
             options_.type_profile[n_axis_ - 1] = 1;
         } else if (args.at("--axis").asStringList().size() == 2) {
             n_axis_ ++;
             options_.type_profile[n_axis_ - 1] = 1;
-            axis_x_ = axis_parse(args.at("--axis").asStringList()[0]);
+            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0]);
             n_axis_ ++;
             options_.type_profile[n_axis_ - 1] = 1;
-            axis_y_ = axis_parse(args.at("--axis").asStringList()[1]);
+            axis_y_ = Axis::parse(args.at("--axis").asStringList()[1]);
         } else {
             throw CFilesError("Too many axis were given");
         }
@@ -133,9 +119,9 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         } else if (args.at("--radial").asStringList().size() == 1) {
             n_axis_ ++;
             if (n_axis_ == 1) {
-                axis_x_ = axis_parse(args.at("--radial").asStringList()[0]);
+                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0]);
             } else if (n_axis_ == 2) {
-                axis_y_ = axis_parse(args.at("--radial").asStringList()[0]);
+                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0]);
             } else { 
                 throw CFilesError("Too many axis were given");
             }
@@ -146,10 +132,10 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             } else {
                 n_axis_ ++;
                 options_.type_profile[n_axis_ - 1] = 2;
-                axis_x_ = axis_parse(args.at("--radial").asStringList()[0]);
+                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0]);
                 n_axis_ ++;
                 options_.type_profile[n_axis_ - 1] = 2;
-                axis_y_ = axis_parse(args.at("--radial").asStringList()[0]);
+                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0]);
             }
         }
     }
@@ -326,8 +312,8 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             }
         } else {
             outfile << "# X Y Density" << std::endl;
-            double nx = profile.n_x();
-            double ny = profile.n_y();
+            double nx = profile.nx();
+            double ny = profile.ny();
             double min_x = profile.min_x();
             double min_y = profile.min_y();
             

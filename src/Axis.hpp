@@ -34,6 +34,20 @@ public:
         }
     }
 
+    static Axis parse(std::string string) {
+        auto splitted = split(string,':');
+        if (splitted.size() == 1) {
+            return Axis(string);
+        } else if (splitted.size() == 3) {
+            auto a = string2double(splitted[0]);
+            auto b = string2double(splitted[1]);
+            auto c = string2double(splitted[2]);
+            return Axis(a, b, c);
+        } else {
+            throw CFilesError("Axis for density profile should be of size 3");
+        }
+    }
+
     /// Get the vector coordinates
     Vector3D& get_coordinates() { return vector_; }
 

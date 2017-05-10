@@ -86,9 +86,8 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
         outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        double dr = histogram.dx();
         for (size_t i=0; i<histogram.size(); i++){
-            outfile << (histogram.min_x() + i * dr ) * 180 / pi << "  " << histogram[i] / max << "\n";
+            outfile << histogram.first_index(i) * 180 / pi << "  " << histogram[i] / max << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

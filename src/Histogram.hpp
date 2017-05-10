@@ -10,6 +10,16 @@
 #include <functional>
 #include "Errors.hpp"
 
+/// Information for each dimension of a Histogram
+struct HistDim {
+    /// Number of bins
+    size_t nbins;
+    /// Starting value for the histogram
+    double min;
+    /// Width of a bin
+    double dr;
+};
+
 /// Histogram class
 template <class T>
 class Histogram: private std::vector<T> {
@@ -23,15 +33,11 @@ public:
     /// Default constructor
     Histogram(): Histogram(0, 0, 0, 0, 0, 0) {}
     /// Constructor for a flat 2d histogram with a specific number of bins in each direction 
-    /// `nx` and `ny`, and which can hold data in the `min_x - max_x` range (resp `min_y - max_y`).
-    Histogram(size_t nx, double min_x, double max_x, size_t ny, double min_y, double max_y): 
-        super(nx*ny),
-        nx_(nx),
-        min_x_(min_x),
-        dx_((max_x - min_x) / nx),
-        ny_(ny),
-        min_y_(min_y),
-        dy_((max_y - min_y) / ny) {
+    /// `n1` and `n2`, and which can hold data in the `min_1 - max_2` range (resp `min_1 - max_2`).
+    Histogram(size_t n1, double min1, double max1, size_t n2, double min2, double max2): 
+        super(n1*n2),
+        first_dimension_{n1, min1, (max1 - min1) / n1},
+        second_dimension_{n2, min2, (max2 - min2) / n2} {
         static_assert(
             std::is_arithmetic<T>::value,
             "Histogram<T> is only defined for arithmetics types T"
@@ -48,55 +54,46 @@ public:
     Histogram& operator=(Histogram&&) = default;
     /// Operator to get the (i,j) element of a 2D histogram
     const T& operator()(size_t i, size_t j) const {
-        return (*this)[j + i * ny_];
+        return (*this)[j + i * second_dimension_.nbins];
     }
 
-    /// Get the size of the bins in the first dimension
-    double dx() const {return dx_;}
-    /// Get the size of the bins in the second dimension
-    double dy() const {return dy_;}
+    /// Get the first dimension
+    const HistDim& first() const {return first_dimension_;}
 
-    /// Get the minimal value of this histogram in the first dimension
-    double min_x() const {return min_x_;}
-    /// Get the minimal value of this histogram in the second dimension
-    double min_y() const {return min_y_;}
-
-    /// Get the number of bins in the first dimension
-    double nx() const {return nx_;}
-    /// Get the number of bins in the second dimension
-    double ny() const {return ny_;}
+    /// Get the second dimension
+    const HistDim& second() const {return second_dimension_;}
 
     /// Insert some `x,y` in the histogram
     void insert(T x, T y = 0) {
-        auto bin_x = std::floor((x - min_x_) / dx_);
-        auto bin_y = std::floor((y - min_y_) / dy_);
-        if (bin_x >= nx_ or bin_x < 0) {
+        auto bin1 = std::floor((x - first_dimension_.min) / first_dimension_.dr);
+        auto bin2 = std::floor((y - second_dimension_.min) / second_dimension_.dr);
+        if (bin1 >= first_dimension_.nbins or bin1 < 0) {
             std::string s = std::to_string(x);
             throw OutOfBoundsError("Element " + s + " out of boundaries");
         }
-        if (bin_y >= ny_ or bin_y < 0) {
+        if (bin2 >= second_dimension_.nbins or bin2 < 0) {
             std::string s = std::to_string(y);
             throw OutOfBoundsError("Element " + s + " out of boundaries");
         }
-        (*this)[bin_y + bin_x * ny_] += 1;
+        (*this)[bin2 + bin1 * second_dimension_.nbins] += 1;
     }
 
     /// Get the x value corresponding to the ith element of the histogram
-    T x(size_t i, bool radial = false) const {
-        auto coord_x = min_x_ + i * dx_;
-        if (radial and coord_x == 0) {
-            coord_x = dx_ / 1000; // use a small r compared to dr to avoid Nan in the output
+    T first_index(size_t i, bool radial = false) const {
+        auto coord = first_dimension_.min + i * first_dimension_.dr;
+        if (radial and coord == 0) {
+            coord = first_dimension_.min + (i + 0.5) * first_dimension_.dr; // shift the histogram to avoid Nan in the output
         }
-        return coord_x;
+        return coord;
     } 
 
     /// Get the y value corresponding to the ith element of the histogram
-    T y(size_t i, bool radial = false) const {
-        auto coord_y = min_y_ + i * dy_;
-        if (radial and coord_y == 0) {
-            coord_y = dy_ / 1000; // use a small r compared to dr to avoid Nan in the output
+    T second_index(size_t i, bool radial = false) const {
+        auto coord = second_dimension_.min + i * second_dimension_.dr;
+        if (radial and coord == 0) {
+            coord = second_dimension_.min + (i + 0.5) * second_dimension_.dr; // shift the histogram to avoid Nan in the output
         }
-        return coord_y;
+        return coord;
     } 
 
     /// Normalize the data with a `function` callback, which will be called for
@@ -108,18 +105,10 @@ public:
         }
     }
 private:
-    /// Number of bins in the first dimension
-    size_t nx_ = 0;
-    /// Width of a bin in the first dimension
-    double dx_ = 0;
-    /// Starting value for the histogram in the first dimension
-    double min_x_ = 0;
-    /// Number of bins in the second dimension
-    size_t ny_ = 0;
-    /// Width of a bin in the second dimension
-    double dy_ = 0;
-    /// Starting value for the histogram in the second dimension
-    double min_y_ = 0;
+    /// First dimension
+    HistDim first_dimension_;
+    /// Second dimension
+    HistDim second_dimension_;
 };
 
 #endif

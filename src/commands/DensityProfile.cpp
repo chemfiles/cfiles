@@ -298,25 +298,23 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         if (n_axis_ == 1) {
             for (size_t i=0; i<profile.size(); i++){
                 if (options_.type_profile[0] == 1) {
-                    outfile << profile.x(i) << "  " << profile[i] << "\n";
+                    outfile << profile.first_index(i) << "  " << profile[i] << "\n";
                 } else if (options_.type_profile[0] == 2) {
-                    outfile << profile.x(i) << "  " << profile[i] / profile.x(i, true) << "\n";
+                    outfile << profile.first_index(i) << "  " << profile[i] / profile.first_index(i, true) << "\n";
                 }
             }
         } else {
             outfile << "# X Y Density" << std::endl;
-            double nx = profile.nx();
-            double ny = profile.ny();
             
-            for (size_t i=0; i<nx; i++){
-                for (size_t j=0; j<ny; j++){
-                    outfile << profile.x(i) << "\t" << profile.y(j) << "\t";
+            for (size_t i = 0; i < profile.first().nbins; i++){
+                for (size_t j = 0; j < profile.second().nbins; j++){
+                    outfile << profile.first_index(i) << "\t" << profile.second_index(j) << "\t";
                     if (options_.type_profile[0] == 1 and options_.type_profile[1] == 1) {
                         outfile << profile(i,j) << "\n";
                     } else if (options_.type_profile[0] == 2 xor options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / profile.y(j, true) << "\n";
+                        outfile << profile(i,j) / profile.second_index(j, true) << "\n";
                     } else if (options_.type_profile[0] == 2 and options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / (profile.x(i, true) * profile.y(j, true));
+                        outfile << profile(i,j) / (profile.first_index(i, true) * profile.second_index(j, true));
                     }
                 }
             }

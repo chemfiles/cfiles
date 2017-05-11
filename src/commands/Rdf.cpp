@@ -94,7 +94,7 @@ void Rdf::finish(const Histogram<double>& histogram) {
     outfile << "# r\tg(r)\tN(r) " << std::endl;
 
     for (size_t i=0; i<histogram.size(); i++){
-        outfile << histogram.first_index(i) << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
+        outfile << histogram.first_coord(i) << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
     }
 }
 

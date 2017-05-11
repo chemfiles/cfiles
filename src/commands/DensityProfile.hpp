@@ -29,7 +29,7 @@ public:
         double min[2] = {0, 0};
     };
 
-    DensityProfile(): selection_("atoms: all"), axis_x_(0,0,1), axis_y_(0,0,1) {}
+    DensityProfile(): selection_("atoms: all"), axis_x_(0,0,1, Axis::Linear), axis_y_(0,0,1, Axis::Linear) {}
     std::string description() const override;
 
     Averager<double> setup(int argc, const char* argv[]) override;

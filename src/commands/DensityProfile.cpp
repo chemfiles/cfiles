@@ -100,15 +100,15 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         if (args.at("--axis").asStringList().size() == 0) {
         } else if (args.at("--axis").asStringList().size() == 1) {
             n_axis_ ++;
-            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0]);
+            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0], Axis::Linear);
             options_.type_profile[n_axis_ - 1] = 1;
         } else if (args.at("--axis").asStringList().size() == 2) {
             n_axis_ ++;
             options_.type_profile[n_axis_ - 1] = 1;
-            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0]);
+            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0], Axis::Linear);
             n_axis_ ++;
             options_.type_profile[n_axis_ - 1] = 1;
-            axis_y_ = Axis::parse(args.at("--axis").asStringList()[1]);
+            axis_y_ = Axis::parse(args.at("--axis").asStringList()[1], Axis::Linear);
         } else {
             throw CFilesError("Too many axis were given");
         }
@@ -119,9 +119,9 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         } else if (args.at("--radial").asStringList().size() == 1) {
             n_axis_ ++;
             if (n_axis_ == 1) {
-                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0]);
+                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
             } else if (n_axis_ == 2) {
-                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0]);
+                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
             } else { 
                 throw CFilesError("Too many axis were given");
             }
@@ -132,10 +132,10 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             } else {
                 n_axis_ ++;
                 options_.type_profile[n_axis_ - 1] = 2;
-                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0]);
+                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
                 n_axis_ ++;
                 options_.type_profile[n_axis_ - 1] = 2;
-                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0]);
+                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
             }
         }
     }
@@ -298,9 +298,9 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         if (n_axis_ == 1) {
             for (size_t i=0; i<profile.size(); i++){
                 if (options_.type_profile[0] == 1) {
-                    outfile << profile.first_index(i) << "  " << profile[i] << "\n";
+                    outfile << profile.first_coord(i) << "  " << profile[i] << "\n";
                 } else if (options_.type_profile[0] == 2) {
-                    outfile << profile.first_index(i) << "  " << profile[i] / profile.first_index(i, true) << "\n";
+                    outfile << profile.first_coord(i) << "  " << profile[i] / profile.first_coord(i, true) << "\n";
                 }
             }
         } else {
@@ -308,13 +308,13 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
-                    outfile << profile.first_index(i) << "\t" << profile.second_index(j) << "\t";
+                    outfile << profile.first_coord(i) << "\t" << profile.second_coord(j) << "\t";
                     if (options_.type_profile[0] == 1 and options_.type_profile[1] == 1) {
                         outfile << profile(i,j) << "\n";
                     } else if (options_.type_profile[0] == 2 xor options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / profile.second_index(j, true) << "\n";
+                        outfile << profile(i,j) / profile.second_coord(j, true) << "\n";
                     } else if (options_.type_profile[0] == 2 and options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / (profile.first_index(i, true) * profile.second_index(j, true));
+                        outfile << profile(i,j) / (profile.first_coord(i, true) * profile.second_coord(j, true));
                     }
                 }
             }

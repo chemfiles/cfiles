@@ -79,21 +79,13 @@ public:
     }
 
     /// Get the x value corresponding to the ith element of the histogram
-    T first_index(size_t i, bool radial = false) const {
-        auto coord = first_dimension_.min + i * first_dimension_.dr;
-        if (radial and coord == 0) {
-            coord = first_dimension_.min + (i + 0.5) * first_dimension_.dr; // shift the histogram to avoid Nan in the output
-        }
-        return coord;
+    T first_coord(size_t i, bool radial = false) const {
+        return first_dimension_.min + (i + 0.5) * first_dimension_.dr;
     } 
 
     /// Get the y value corresponding to the ith element of the histogram
-    T second_index(size_t i, bool radial = false) const {
-        auto coord = second_dimension_.min + i * second_dimension_.dr;
-        if (radial and coord == 0) {
-            coord = second_dimension_.min + (i + 0.5) * second_dimension_.dr; // shift the histogram to avoid Nan in the output
-        }
-        return coord;
+    T second_coord(size_t i, bool radial = false) const {
+        return second_dimension_.min + (i + 0.5) * second_dimension_.dr;
     } 
 
     /// Normalize the data with a `function` callback, which will be called for

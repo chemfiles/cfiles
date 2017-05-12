@@ -20,14 +20,14 @@ def read_rdf(path):
 def check_oxygen_rdf(data):
     # Check the maximal value of the rdf
     max_value = max(data, key=lambda u: u[1])
-    assert(max_value[0] == 2.75)
+    assert(max_value[0] == 2.775)
     assert(max_value[1] > 3)
     # Check that the coordination number in the first sphere is around 2
     assert(abs(max_value[2] - 2) < 1)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
-    assert(last_zero[0] == 2.45)
+    assert(last_zero[0] == 2.475)
 
     # Check that the rdf converges to 1
     end = [g[1] for g in data[len(data)/2:]]
@@ -42,14 +42,14 @@ def check_oxygen_rdf(data):
 def check_oh_rdf(data):
     # Check the maximal value of the rdf
     max_value = max(data, key=lambda u: u[1])
-    assert(max_value[0] == 0.95)
+    assert(max_value[0] == 0.975)
     assert(max_value[1] > 25)
     # Check that the coordination number in the first sphere is 3
     assert(abs(max_value[2] - 3) < 0.1)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
-    assert(last_zero[0] == 0.9)
+    assert(last_zero[0] == 0.925)
 
     # Check that the rdf converges to 1
     end = [g[1] for g in data[len(data)/2:]]

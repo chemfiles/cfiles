@@ -34,16 +34,7 @@ public:
     void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram);
     void finish(const Histogram<double>& histogram);
 
-    void insert_axis(Axis axis) { axis_.push_back(axis);}
     size_t dimensionality() { return axis_.size();}
-    const Axis& get_axis(size_t dimension) const {
-        if (dimension > 0 and dimension <= axis_.size()) {
-            return axis_[dimension-1];
-        } else {
-            throw CFilesError("You tried to access an axis that does not exist");
-        }
-    }
-        
 
 private:
     Options options_;

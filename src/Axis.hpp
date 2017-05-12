@@ -53,7 +53,10 @@ public:
     Vector3D& get_coordinates() { return vector_; }
 
     /// True if the axis type_ is 'Linear'
-    bool is_linear() {return type_ == Linear;}
+    bool is_linear() const {return type_ == Linear;}
+
+    /// True if the axis type_ is 'Radial'
+    bool is_radial() const {return type_ == Radial;}
 
     /// projection on axis (may be negative)
     double projection(const Vector3D & positions) {

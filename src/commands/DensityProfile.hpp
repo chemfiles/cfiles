@@ -17,10 +17,8 @@ public:
 	std::string outfile;
 	/// Selection for the donor-acceptor
 	std::string selection;
-        /// Type of profile: 0 means none, 1 linear profile, 2 radial profile
-        size_t type_profile[2] = {0, 0};
 	/// Coordinate of origin
-        Vector3D origin[2];
+        Vector3D origin;
         /// Number of points in the profile
         size_t npoints[2];
         /// Maximum in the profile
@@ -29,19 +27,28 @@ public:
         double min[2] = {0, 0};
     };
 
-    DensityProfile(): selection_("atoms: all"), axis_x_(0,0,1, Axis::Linear), axis_y_(0,0,1, Axis::Linear) {}
+    DensityProfile(): selection_("atoms: all"), axis_() {}
     std::string description() const override;
 
     Averager<double> setup(int argc, const char* argv[]) override;
     void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram);
     void finish(const Histogram<double>& histogram);
 
+    void insert_axis(Axis axis) { axis_.push_back(axis);}
+    size_t dimensionality() { return axis_.size();}
+    const Axis& get_axis(size_t dimension) const {
+        if (dimension > 0 and dimension <= axis_.size()) {
+            return axis_[dimension-1];
+        } else {
+            throw CFilesError("You tried to access an axis that does not exist");
+        }
+    }
+        
+
 private:
     Options options_;
     chemfiles::Selection selection_;
-    size_t n_axis_;
-    Axis axis_x_;
-    Axis axis_y_;
+    std::vector<Axis> axis_;
 };
 
 #endif

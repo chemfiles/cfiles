@@ -24,14 +24,14 @@ The axis can be specified using a coordinate vector (e.g. z axis would be
 (0,0,1)).
 
 It is possible to compute 2D profiles. This is possible by specifying 2 axis 
-(see --axis and --radial options). Other options (--points, --max, --min, 
---origin) may accept two values, one for each axis. If only one is specified, 
+(see --axis and --radial options). Other options (--points, --max, --min) 
+may accept two values, one for each axis. If only one is specified, 
 the same value will be used for both axis (see Examples). The output is
-a 2D histogram with the first dimension (raws) being the first axis and the 
-second dimension (columns) the second axis. If two axis of the same type are
+a 2D histogram with the first dimension being the first axis and the 
+second dimension the second axis. If two axis of the same type are
 used (e.g. twice --axis option), the order will be the one the user gave. If 
 the axis types are different (e.g. --axis and --radial), the --axis will be
-first.  
+first. Two axis of type radial are forbidden.  
 
 For more information about chemfiles selection language, please see
 http://chemfiles.org/chemfiles/latest/selections.html
@@ -80,10 +80,8 @@ Options:
                                 [default: 0:0:0]  
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
-  --min=<min>                   minimum distance in the profile.
+  --min=<min>                   minimum distance in the profile. [default: 0]
                                 For radial profiles, <min> must be positive.
-                                For linear profiles, <min> is set to -<max> 
-                                if not precised.
 )";
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
@@ -93,68 +91,6 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
     AveCommand::parse_options(args);
-
-    n_axis_ = 0;
-
-    if (args.at("--axis")) {
-        if (args.at("--axis").asStringList().size() == 0) {
-        } else if (args.at("--axis").asStringList().size() == 1) {
-            n_axis_ ++;
-            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0], Axis::Linear);
-            options_.type_profile[n_axis_ - 1] = 1;
-        } else if (args.at("--axis").asStringList().size() == 2) {
-            n_axis_ ++;
-            options_.type_profile[n_axis_ - 1] = 1;
-            axis_x_ = Axis::parse(args.at("--axis").asStringList()[0], Axis::Linear);
-            n_axis_ ++;
-            options_.type_profile[n_axis_ - 1] = 1;
-            axis_y_ = Axis::parse(args.at("--axis").asStringList()[1], Axis::Linear);
-        } else {
-            throw CFilesError("Too many axis were given");
-        }
-    }
-
-    if (args.at("--radial")) {
-        if (args.at("--radial").asStringList().size() == 0) {
-        } else if (args.at("--radial").asStringList().size() == 1) {
-            n_axis_ ++;
-            if (n_axis_ == 1) {
-                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
-            } else if (n_axis_ == 2) {
-                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
-            } else { 
-                throw CFilesError("Too many axis were given");
-            }
-            options_.type_profile[n_axis_ - 1] = 2;
-        } else if (args.at("--radial").asStringList().size() == 2) {
-            if (n_axis_ == 2) {
-                throw CFilesError("Too many axis were given");
-            } else {
-                n_axis_ ++;
-                options_.type_profile[n_axis_ - 1] = 2;
-                axis_x_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
-                n_axis_ ++;
-                options_.type_profile[n_axis_ - 1] = 2;
-                axis_y_ = Axis::parse(args.at("--radial").asStringList()[0], Axis::Radial);
-            }
-        }
-    }
-
-    if (args.at("--points")) {
-        auto splitted = split(args.at("--points").asString(),':');
-        if (splitted.size() == 1) {
-            options_.npoints[0] = string2long(splitted[0]);
-            options_.npoints[1] = string2long(splitted[0]);
-        } else if (splitted.size() == 2) {
-            if (n_axis_ < 2) {
-                throw CFilesError("More --points options than axis");
-            }
-            options_.npoints[0] = string2long(splitted[0]);
-            options_.npoints[1] = string2long(splitted[1]);
-        } else {
-            throw CFilesError("Too many arguments for --points option");
-        }
-    }
 
     options_.selection = args.at("--selection").asString();
     selection_ = Selection(options_.selection);
@@ -168,31 +104,49 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + ".density.dat";
     }
 
+    if (args.at("--axis")) {
+        for (auto axis: args.at("--axis").asStringList()) {
+            insert_axis(Axis::parse(axis, Axis::Linear));
+        }
+    }
+
+    if (args.at("--radial")) {
+        for (auto axis: args.at("--radial").asStringList()) {
+            insert_axis(Axis::parse(axis, Axis::Radial));
+        }
+    }
+
+    size_t dimension = dimensionality();
+
+    if (dimension == 0 or dimension > 2) {
+        throw CFilesError("No axis or too many axis were given");
+    }
+
+    if (args.at("--points")) {
+        auto splitted = split(args.at("--points").asString(),':');
+        if (splitted.size() == 1) {
+            options_.npoints[0] = string2long(splitted[0]);
+            options_.npoints[1] = string2long(splitted[0]);
+        } else if (splitted.size() == 2) {
+            if (dimension < 2) {
+                throw CFilesError("More --points options than axis");
+            }
+            options_.npoints[0] = string2long(splitted[0]);
+            options_.npoints[1] = string2long(splitted[1]);
+        } else {
+            throw CFilesError("Too many arguments for --points option");
+        }
+    }
 
     if (args.at("--origin")) {
         auto splitted = split(args.at("--origin").asString(),':');
-        if (splitted.size() != 3 and splitted.size() != 6) {
-            throw CFilesError("Origin for density profile should be one or two vectors of size 3");
+        if (splitted.size() != 3) {
+            throw CFilesError("Origin for density profile should be a vector of size 3");
         }
-        if (splitted.size() == 3) {
-            auto a = string2double(splitted[0]);
-            auto b = string2double(splitted[1]);
-            auto c = string2double(splitted[2]);
-            options_.origin[0] = vector3d(a, b, c);
-            options_.origin[1] = vector3d(a, b, c);
-        } else if (splitted.size() == 6) {
-            if (options_.type_profile[0] != 2 or options_.type_profile[1] != 2) {
-                throw CFilesError("More --origin options than radial axis");
-            }
-            auto a1 = string2double(splitted[0]);
-            auto b1 = string2double(splitted[1]);
-            auto c1 = string2double(splitted[2]);
-            auto a2 = string2double(splitted[3]);
-            auto b2 = string2double(splitted[4]);
-            auto c2 = string2double(splitted[5]);
-            options_.origin[0] = vector3d(a1, b1, c1);
-            options_.origin[1] = vector3d(a2, b2, c2);
-        }
+        auto a = string2double(splitted[0]);
+        auto b = string2double(splitted[1]);
+        auto c = string2double(splitted[2]);
+        options_.origin = vector3d(a, b, c);
     }
 
     if (args.at("--max")) {
@@ -201,47 +155,55 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
             options_.max[0] = string2double(splitted[0]);
             options_.max[1] = string2double(splitted[0]);
         } else if (splitted.size() == 2) {
-            if (n_axis_ < 2) {
+            if (dimension < 2) {
                 throw CFilesError("More --max options than axis");
             }
             options_.max[0] = string2double(splitted[0]);
             options_.max[1] = string2double(splitted[1]);
         } else {
-            throw CFilesError("Too many arguments for --points option");
+            throw CFilesError("Too many arguments for --max option");
         }
-        options_.min[0] = - options_.max[0];
-        options_.min[1] = - options_.max[1];
-
-        if (args.at("--min")) {
-             auto splitted = split(args.at("--min").asString(),':');
-             if (splitted.size() == 1) {
-                 options_.min[0] = string2double(splitted[0]);
-                 options_.min[1] = string2double(splitted[0]);
-             } else if (splitted.size() == 2) {
-                 if (n_axis_ < 2) {
-                     throw CFilesError("More --min options than axis");
-                 }
-                 options_.min[0] = string2double(splitted[0]);
-                 options_.min[1] = string2double(splitted[1]);
-             } else {
-                 throw CFilesError("Too many arguments for --points option");
-             }
-        }
-        if (options_.type_profile[0] == 2) {
-            options_.min[0] = 0;
-        } else if (options_.type_profile[1] == 2) {
-            options_.min[1] = 0;
-        }
-    } else {
-        throw CFilesError("Please enter a maximum value for the distances in density profile");
     }
-        
-    if (n_axis_ == 1) {
+
+    if (args.at("--min")) {
+         auto splitted = split(args.at("--min").asString(),':');
+         if (splitted.size() == 1) {
+             options_.min[0] = string2double(splitted[0]);
+             options_.min[1] = string2double(splitted[0]);
+         } else if (splitted.size() == 2) {
+             if (dimension < 2) {
+                 throw CFilesError("More --min options than axis");
+             }
+             options_.min[0] = string2double(splitted[0]);
+             options_.min[1] = string2double(splitted[1]);
+         } else {
+             throw CFilesError("Too many arguments for --min option");
+         }
+    }
+
+    if (options_.min[0] > options_.max[0]) {
+        throw CFilesError("Min > Max for first dimension");
+    }
+
+    if (options_.min[1] > options_.max[1]) {
+        throw CFilesError("Min > Max for second dimension");
+    }
+
+    if (dimension == 1) {
+        if (get_axis(1).Axis::is_radial()) {
+            if (options_.min[0] < 0) {
+                throw CFilesError("Min value for radial axis should be positive");
+            }
+        }
         return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0]);
-    } else if (n_axis_ == 2) {
-        return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
     } else {
-        throw CFilesError("No axis or too many axis have been defined");
+        assert(dimension == 2);
+        if (get_axis(2).Axis::is_radial()) {
+            if (options_.min[1] < 0) {
+                throw CFilesError("Min value for radial axis should be positive");
+            }
+        }
+        return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
     }
 }
 
@@ -259,20 +221,24 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         assert(match.size() == 1);
 
         auto i = match[0];
-        double x;
-        double y;
-        if (options_.type_profile[0] == 1) {
-            x = axis_x_.projection(cell.wrap(positions[i]));
-        } else if (options_.type_profile[0] == 2) {
-            x = axis_x_.radial(cell.wrap(positions[i]-options_.origin[0]));
+        double x = 0;
+        double y = 0;
+        if (axis_[0].Axis::is_linear()) {
+            x = axis_[0].projection(cell.wrap(positions[i]));
+        } else {
+            assert(axis_[0].Axis::is_radial());
+            x = axis_[0].radial(cell.wrap(positions[i] - options_.origin));
         }
-        if (options_.type_profile[1] == 1) {
-            y = axis_y_.projection(cell.wrap(positions[i]));
-        } else if (options_.type_profile[1] == 2) {
-            y = axis_y_.radial(cell.wrap(positions[i]-options_.origin[1]));
+        if (dimensionality() == 2) {
+            if (axis_[1].Axis::is_linear()) {
+                y = axis_[1].projection(cell.wrap(positions[i]));
+            } else {
+                assert(axis_[1].Axis::is_radial());
+                y = axis_[1].radial(cell.wrap(positions[i] - options_.origin));
+            }
         }
         try {
-            if (n_axis_ == 1) {
+            if (dimensionality() == 1) {
                 profile.insert(x);
             } else {
                 profile.insert(x,y);
@@ -285,36 +251,36 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 
 void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
-    auto axis_x = axis_x_.get_coordinates();
-    auto axis_y = axis_y_.get_coordinates();
+    auto axis1 = axis_[0].get_coordinates();
+    auto axis2 = axis_[1].get_coordinates();
     if (outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << axis_x[0] << ' ' << axis_x[1] << ' ' << axis_x[2] << std::endl;
-        if (n_axis_ == 2) {
-            outfile << "# and along axis " << axis_y[0] << ' ' << axis_y[1] << ' ' << axis_y[2] << std::endl;
+        outfile << "# along axis " << axis1[0] << ' ' << axis1[1] << ' ' << axis1[2] << std::endl;
+        if (dimensionality() == 2) {
+            outfile << "# and along axis " << axis2[0] << ' ' << axis2[1] << ' ' << axis2[2] << std::endl;
         }
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        if (n_axis_ == 1) {
-            for (size_t i=0; i<profile.size(); i++){
-                if (options_.type_profile[0] == 1) {
+        if (dimensionality() == 1) {
+            for (size_t i = 0; i < profile.size(); i++){
+                if (axis_[0].Axis::is_linear()) {
                     outfile << profile.first_coord(i) << "  " << profile[i] << "\n";
-                } else if (options_.type_profile[0] == 2) {
-                    outfile << profile.first_coord(i) << "  " << profile[i] / profile.first_coord(i, true) << "\n";
+                } else {
+                    assert(axis_[0].Axis::is_radial());
+                    outfile << profile.first_coord(i) << "  " << profile[i] / profile.first_coord(i) << "\n";
                 }
             }
         } else {
-            outfile << "# X Y Density" << std::endl;
+            outfile << "# FirstDimension SecondDimension Density" << std::endl;
             
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
                     outfile << profile.first_coord(i) << "\t" << profile.second_coord(j) << "\t";
-                    if (options_.type_profile[0] == 1 and options_.type_profile[1] == 1) {
+                    if (axis_[0].Axis::is_linear() and axis_[1].Axis::is_linear()) {
                         outfile << profile(i,j) << "\n";
-                    } else if (options_.type_profile[0] == 2 xor options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / profile.second_coord(j, true) << "\n";
-                    } else if (options_.type_profile[0] == 2 and options_.type_profile[1] == 2) {
-                        outfile << profile(i,j) / (profile.first_coord(i, true) * profile.second_coord(j, true));
+                    } else {
+                        assert(axis_[0].Axis::is_linear() and axis_[1].Axis::is_radial());
+                        outfile << profile(i,j) / profile.second_coord(j) << "\n";
                     }
                 }
             }

@@ -79,12 +79,12 @@ public:
     }
 
     /// Get the x value corresponding to the ith element of the histogram
-    T first_coord(size_t i, bool radial = false) const {
+    T first_coord(size_t i) const {
         return first_dimension_.min + (i + 0.5) * first_dimension_.dr;
     } 
 
     /// Get the y value corresponding to the ith element of the histogram
-    T second_coord(size_t i, bool radial = false) const {
+    T second_coord(size_t i) const {
         return second_dimension_.min + (i + 0.5) * second_dimension_.dr;
     } 
 

@@ -37,7 +37,7 @@ public:
             } else if (splitted[0] == "Z" or splitted[0] == "z") {
                 return Axis(0, 0, 1, type);
             } else {
-                throw CFilesError("Axis non implemented, enter vector coordinates instead");
+                throw CFilesError("Unknown axis specification'" + splitted[0] + "'. It should be x, y, z or a:b:c");
             }
         } else if (splitted.size() == 3) {
             auto a = string2double(splitted[0]);
@@ -45,7 +45,7 @@ public:
             auto c = string2double(splitted[2]);
             return Axis(a, b, c, type);
         } else {
-            throw CFilesError("Axis for density profile should be of size 3");
+            throw CFilesError("Axis option should be x, y, z or a:b:c");
         }
     }
 

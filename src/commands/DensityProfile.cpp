@@ -18,20 +18,18 @@ static const char OPTIONS[] =
 R"(Compute the density profile of particles along a given axis or radially. 
 The output for the radial density profile is normalized by r.
 Selections for the particles can be specified using the chemfiles selection 
-language. It is possible to provide an alternative unit cell or topology 
-for the trajectory file if they are not defined in the trajectory format.
-The axis can be specified using a coordinate vector (e.g. z axis would be 
-(0,0,1)).
+language. It is possible to provide an alternative unit cell or topology for the
+trajectory file if they are not defined in the trajectory format. The axis can 
+be specified using a coordinate vector (e.g. z axis would be (0,0,1)).
 
-It is possible to compute 2D profiles. This is possible by specifying 2 axis 
-(see --axis and --radial options). Other options (--points, --max, --min) 
-may accept two values, one for each axis. If only one is specified, 
-the same value will be used for both axis (see Examples). The output is
-a 2D histogram with the first dimension being the first axis and the 
-second dimension the second axis. If two axis of the same type are
-used (e.g. twice --axis option), the order will be the one the user gave. If 
-the axis types are different (e.g. --axis and --radial), the --axis will be
-first. Two axis of type radial are forbidden.  
+It is also possible to compute 2D profiles by specifying 2 axis (see --axis and
+--radial options). Other options (--points, --max, --min) may accept two values,
+one for each axis. If only one is specified, the same value will be used for 
+both axis (see Examples). The output is a 2D histogram with the first dimension
+being the first axis and the second dimension the second axis. If two axis of 
+the same type are used (e.g. twice --axis option), the order will be the one the
+user gave. If the axis types are different (e.g. --axis and --radial), the 
+--axis will be first. Two axis of type radial are forbidden.  
 
 For more information about chemfiles selection language, please see
 http://chemfiles.org/chemfiles/latest/selections.html
@@ -76,8 +74,7 @@ Options:
                                 It should be either one of 'X','Y','Z'
                                 or a vector defining the axis (e.g. 1:1:1). 
   --origin=<coord>              coordinates for the origin of the axis (only 
-                                relevant for radial profiles).
-                                [default: 0:0:0]  
+                                relevant for radial profiles). [default: 0:0:0]
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
   --min=<min>                   minimum distance in the profile. [default: 0]
@@ -106,13 +103,13 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
 
     if (args.at("--axis")) {
         for (auto axis: args.at("--axis").asStringList()) {
-            insert_axis(Axis::parse(axis, Axis::Linear));
+            axis_.push_back(Axis::parse(axis, Axis::Linear));
         }
     }
 
     if (args.at("--radial")) {
         for (auto axis: args.at("--radial").asStringList()) {
-            insert_axis(Axis::parse(axis, Axis::Radial));
+            axis_.push_back(Axis::parse(axis, Axis::Radial));
         }
     }
 
@@ -190,7 +187,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
     }
 
     if (dimension == 1) {
-        if (get_axis(1).Axis::is_radial()) {
+        if (axis_[0].is_radial()) {
             if (options_.min[0] < 0) {
                 throw CFilesError("Min value for radial axis should be positive");
             }
@@ -198,7 +195,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0]);
     } else {
         assert(dimension == 2);
-        if (get_axis(2).Axis::is_radial()) {
+        if (axis_[0].is_radial()) {
             if (options_.min[1] < 0) {
                 throw CFilesError("Min value for radial axis should be positive");
             }
@@ -223,17 +220,17 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
         auto i = match[0];
         double x = 0;
         double y = 0;
-        if (axis_[0].Axis::is_linear()) {
+        if (axis_[0].is_linear()) {
             x = axis_[0].projection(cell.wrap(positions[i]));
         } else {
-            assert(axis_[0].Axis::is_radial());
+            assert(axis_[0].is_radial());
             x = axis_[0].radial(cell.wrap(positions[i] - options_.origin));
         }
         if (dimensionality() == 2) {
-            if (axis_[1].Axis::is_linear()) {
+            if (axis_[1].is_linear()) {
                 y = axis_[1].projection(cell.wrap(positions[i]));
             } else {
-                assert(axis_[1].Axis::is_radial());
+                assert(axis_[1].is_radial());
                 y = axis_[1].radial(cell.wrap(positions[i] - options_.origin));
             }
         }
@@ -263,10 +260,10 @@ void DensityProfile::finish(const Histogram<double>& profile) {
 
         if (dimensionality() == 1) {
             for (size_t i = 0; i < profile.size(); i++){
-                if (axis_[0].Axis::is_linear()) {
+                if (axis_[0].is_linear()) {
                     outfile << profile.first_coord(i) << "  " << profile[i] << "\n";
                 } else {
-                    assert(axis_[0].Axis::is_radial());
+                    assert(axis_[0].is_radial());
                     outfile << profile.first_coord(i) << "  " << profile[i] / profile.first_coord(i) << "\n";
                 }
             }
@@ -276,10 +273,10 @@ void DensityProfile::finish(const Histogram<double>& profile) {
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
                     outfile << profile.first_coord(i) << "\t" << profile.second_coord(j) << "\t";
-                    if (axis_[0].Axis::is_linear() and axis_[1].Axis::is_linear()) {
+                    if (axis_[0].is_linear() and axis_[1].is_linear()) {
                         outfile << profile(i,j) << "\n";
                     } else {
-                        assert(axis_[0].Axis::is_linear() and axis_[1].Axis::is_radial());
+                        assert(axis_[0].is_linear() and axis_[1].is_radial());
                         outfile << profile(i,j) / profile.second_coord(j) << "\n";
                     }
                 }

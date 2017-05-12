@@ -20,12 +20,12 @@ def read_data(path):
 def check_angles(data):
     # Check the maximal value
     max_value = max(data, key=lambda u: u[1])
-    assert(max_value[0] == 104.4)
+    assert(max_value[0] == 104.85)
     assert(max_value[1] == 1)
 
     # Check that other values are roughlty zero
     for (theta, value) in data:
-        if (theta != 104.4):
+        if (theta != 104.85):
             assert(abs(value) < 0.02)
 
 

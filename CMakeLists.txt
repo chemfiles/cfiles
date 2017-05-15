@@ -50,6 +50,7 @@ include_directories(SYSTEM external/)
 file(GLOB_RECURSE sources src/**.cpp)
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 add_library(libcfiles STATIC ${sources})
+set_target_properties(libcfiles PROPERTIES PREFIX "")
 
 try_compile(STD_REGEX_WORKS
     ${PROJECT_BINARY_DIR}

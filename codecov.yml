@@ -1,6 +1,7 @@
 coverage:
   ignore:
-  - external/*
+    - tests/.*
+    - external/.*
   status:
     project: true
     patch: off

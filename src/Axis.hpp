@@ -5,6 +5,7 @@
 #define CFILES_AXIS_HPP
 
 #include <cmath>
+#include <sstream>
 
 #include <chemfiles.hpp>
 
@@ -52,29 +53,43 @@ public:
         }
     }
 
-    /// Get the vector coordinates
-    Vector3D& get_coordinates() { return vector_; }
-
-    /// True if the axis type_ is 'Linear'
-    bool is_linear() const {return type_ == Linear;}
-
-    /// True if the axis type_ is 'Radial'
-    bool is_radial() const {return type_ == Radial;}
-
-    /// projection on axis (may be negative)
-    double projection(const Vector3D & positions) {
-        return dot(vector_, positions);
+    /// Get a string describing the axis
+    std::string str() const {
+        if (vector_ == vector3d(1, 0, 0)) {
+            return "x";
+        } else if (vector_ == vector3d(0, 1, 0)) {
+            return "y";
+        } else if (vector_ == vector3d(0, 0, 1)) {
+            return "z";
+        } else {
+            std::stringstream ss;
+            ss << "(" << vector_[0] << ", " << vector_[1] << ", " << vector_[2] << ")";
+            return ss.str();
+        }
     }
 
-    /// radial distance to axis
-    double radial(const Vector3D & positions) {
-        auto dot_product = dot(vector_, positions);
-        auto distance2 = norm2(positions) - dot_product * dot_product;
-        return sqrt(distance2);
+    /// Get the coordinates of the axis
+    const Vector3D& vector() const { return vector_; }
+
+    /// Check if the axis type is 'Linear'
+    bool is_linear() const {return type_ == Linear;}
+
+    /// Check if the axis type is 'Radial'
+    bool is_radial() const {return type_ == Radial;}
+
+    /// Project the given `point` on this axis. For radial axis, this returns
+    /// the radial distance to the axis. For linear axis, the projection may be
+    /// negative.
+    double projection(const Vector3D& point) const {
+        switch(type_) {
+        case Linear:
+            return dot(vector_, point);
+        case Radial:
+            return sqrt(norm2(point) - dot(vector_, point) * dot(vector_, point));
+        }
     }
 
 private:
-    /// axis coordinates
     Vector3D vector_;
     Type type_;
 };

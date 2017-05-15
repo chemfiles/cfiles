@@ -220,14 +220,14 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
             x = axis_[0].projection(cell.wrap(positions[i]));
         } else {
             assert(axis_[0].is_radial());
-            x = axis_[0].radial(cell.wrap(positions[i] - options_.origin));
+            x = axis_[0].projection(cell.wrap(positions[i] - options_.origin));
         }
         if (dimensionality() == 2) {
             if (axis_[1].is_linear()) {
                 y = axis_[1].projection(cell.wrap(positions[i]));
             } else {
                 assert(axis_[1].is_radial());
-                y = axis_[1].radial(cell.wrap(positions[i] - options_.origin));
+                y = axis_[1].projection(cell.wrap(positions[i] - options_.origin));
             }
         }
         try {
@@ -244,13 +244,11 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
 
 void DensityProfile::finish(const Histogram<double>& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
-    auto axis1 = axis_[0].get_coordinates();
-    auto axis2 = axis_[1].get_coordinates();
     if (outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << axis1[0] << ' ' << axis1[1] << ' ' << axis1[2] << std::endl;
+        outfile << "# along axis " << axis_[0].str() << std::endl;
         if (dimensionality() == 2) {
-            outfile << "# and along axis " << axis2[0] << ' ' << axis2[1] << ' ' << axis2[2] << std::endl;
+            outfile << "# and along axis " << axis_[1].str() << std::endl;
         }
         outfile << "# Selection: " << options_.selection << std::endl;
 

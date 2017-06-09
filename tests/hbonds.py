@@ -4,8 +4,11 @@ import os
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
 OUTPUT = "tmp.dat"
+EXPECTED = [
+    (39, 0, 1), (270, 0, 2), (69, 3, 4), (75, 3, 5), (228, 6, 8), (66, 9, 10),
+    (3, 9, 11), (24, 18, 19), (27, 18, 20), (42, 21, 22)
+]
 
-HBONDS = [(39, 0, 1), (270, 0, 2), (69, 3, 4), (75, 3, 5), (228, 6, 8), (66, 9, 10), (3, 9, 11), (24, 18, 19), (27, 18, 20), (42, 21, 22)]
 
 def read_data(path):
     data = []
@@ -19,7 +22,7 @@ def read_data(path):
                 continue
             dist, angle = map(float, line.split()[-2:])
             data.append((dist, angle))
-            if (frame): 
+            if (frame):
                 donor = int(line.split()[1])
                 acceptor = int(line.split()[3])
                 hydrogen = int(line.split()[5])
@@ -35,10 +38,12 @@ def check_angles(data):
     assert(max_value[1] <= 30)
     assert(max_value[1] >= 0)
 
+
 def check_hbonds(indexes):
-    #Check the first hbonds 
-    for bond in HBONDS:
+    # Check the first hbonds
+    for bond in EXPECTED:
         assert(bond in indexes)
+
 
 def hbonds():
     out, err = cfiles(

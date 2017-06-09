@@ -12,9 +12,10 @@ class Averager: public Histogram<T> {
 public:
     /// Default constructor
     Averager(): Histogram<T>(), averaged_() {}
-    /// Constructor for a flat 2d histogram with a specific number of bins in each direction 
+    /// Constructor for a flat 2d histogram with a specific number of bins in each direction
     /// `n_x` and `n_y`, and which can hold data in the `min_x - max_x` range (resp `min_y - max_y`).
-    Averager(size_t n_x, double min_x, double max_x, size_t n_y, double min_y, double max_y): Histogram<T>(n_x, min_x, max_x, n_y, min_y, max_y), averaged_(n_x*n_y) {}
+    Averager(size_t n_x, double min_x, double max_x, size_t n_y, double min_y, double max_y):
+        Histogram<T>(n_x, min_x, max_x, n_y, min_y, max_y), averaged_(n_x*n_y) {}
     /// Constructor with a specific number of bins `nbins`, and which can hold
     /// data in the `min - max` range.
     Averager(size_t nbins, double min, double max): Histogram<T>(nbins, min, max), averaged_(nbins) {}

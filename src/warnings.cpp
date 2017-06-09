@@ -10,9 +10,9 @@ void warn(std::string message) {
 }
 
 void warn_once(std::string message) {
-    static std::set<std::string> already_seen;
-    auto seen = already_seen.insert(message).second;
-    if (!seen) {
+    static std::set<std::string> ALREADY_SEEN;
+    auto not_seen = ALREADY_SEEN.insert(message).second;
+    if (not_seen) {
         warn(message);
     }
 }

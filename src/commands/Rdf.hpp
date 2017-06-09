@@ -14,9 +14,9 @@ public:
         /// Selection for the atoms in radial distribution
         std::string selection;
         /// Number of points in the histogram
-        size_t npoints;
+        size_t npoints = 0;
         /// Maximum distance for the histogram
-        double rmax;
+        double rmax = 0;
     };
 
     Rdf(): selection_("all") {}
@@ -27,6 +27,10 @@ public:
     void finish(const Histogram<double>& histogram) override;
 
 private:
+    /// Check if the maximal distance is larger than the biggest inscribed
+    /// sphere in the frame unit cell
+    void check_rmax(const chemfiles::Frame& frame) const;
+
     /// Options for this instance of RDF
     Options options_;
     /// Selection for the atoms in the pair

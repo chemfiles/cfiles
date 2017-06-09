@@ -13,6 +13,9 @@
 
 using namespace chemfiles;
 
+/// Get the radius of the biggest inscribed sphere in the unit cell
+static double biggest_sphere_radius(const UnitCell& cell);
+
 static const char OPTIONS[] =
 R"(Compute radial pair distribution function (often denoted g(r)) and running
 coordination number. The pair of particles to use can be specified using the
@@ -43,7 +46,10 @@ Options:
                                 single selection ("name O") or a selection of
                                 two atoms ("pairs: name(#1) O and name(#2) H")
                                 [default: all]
-  --max=<max>                   maximal distance to use [default: 10]
+  --max=<max>                   maximal distance to use. If a custom unit cell
+                                is present (--cell option) and this option is
+                                not, the radius of the biggest inscribed sphere
+                                is used as maximal distance [default: 10]
   -p <n>, --points=<n>          number of points in the histogram [default: 200])";
 
 std::string Rdf::description() const {
@@ -67,11 +73,14 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
     options_.npoints = string2long(args["--points"].asString());
     options_.selection = args["--selection"].asString();
 
-    if (AveCommand::options().custom_cell) {
-        auto& cell = AveCommand::options().cell;
-        double L = std::min(cell.a(), std::min(cell.b(), cell.c()));
-        options_.rmax = L/2;
-	}
+    auto begin = argv;
+    auto end = argv + argc;
+    auto max_options = std::find_if(begin, end, [](const std::string& arg){
+        return arg.substr(std::min(5ul, arg.length())) == "--max";
+    });
+    if (AveCommand::options().custom_cell && max_options == end) {
+        options_.rmax = biggest_sphere_radius(AveCommand::options().cell);
+    }
 
     selection_ = Selection(options_.selection);
     if (selection_.size() > 2) {
@@ -100,6 +109,8 @@ void Rdf::finish(const Histogram<double>& histogram) {
 }
 
 void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
+    check_rmax(frame);
+
     auto positions = frame.positions();
     auto cell = frame.cell();
     size_t n_first = 0;
@@ -120,7 +131,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
                     histogram.insert(rij);
                 }
             }
-    	}
+        }
     } else {
         // If we have a pair selection, use it directly
         assert(selection_.size() == 2);
@@ -129,7 +140,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         std::unordered_set<size_t> second_particles;
 
         for (auto match: matched) {
-    		auto i = match[0];
+            auto i = match[0];
             auto j = match[1];
 
             first_particles.insert(i);
@@ -139,7 +150,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
             if (rij < options_.rmax){
                 histogram.insert(rij);
             }
-    	}
+        }
 
         n_first = first_particles.size();
         n_second = second_particles.size();
@@ -169,4 +180,37 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         coordination_[i] = coordination_[i - 1] + 4 * PI * rho * histogram[i] * r * r * dr;
     }
     coordination_.step();
+}
+
+void Rdf::check_rmax(const chemfiles::Frame& frame) const {
+    auto r_sphere = biggest_sphere_radius(frame.cell());
+    if (r_sphere < options_.rmax) {
+        warn_once(
+            "The maximal distance (--max option) is too big for this cell.\n"
+            "The cell contains values up to " + std::to_string(r_sphere) +
+            " and the max distance is " + std::to_string(options_.rmax) + "."
+        );
+    }
+}
+
+double biggest_sphere_radius(const UnitCell& cell) {
+    auto matrix = cell.matricial();
+    auto a = vector3d(matrix[0][0], matrix[1][0], matrix[2][0]);
+    auto b = vector3d(matrix[0][1], matrix[1][1], matrix[2][1]);
+    auto c = vector3d(matrix[0][2], matrix[1][2], matrix[2][2]);
+    // Make sure we have an upper triangular matrix
+    assert(matrix[1][0] == 0);
+    assert(matrix[2][0] == 0);
+    assert(matrix[2][1] == 0);
+
+    // Plan normal vectors
+    auto na = cross(b, c);
+    auto nb = cross(c, a);
+    auto nc = cross(a, b);
+
+    auto ra = std::abs(dot(na, a)) / (2 * norm(na));
+    auto rb = std::abs(dot(nb, b)) / (2 * norm(nb));
+    auto rc = std::abs(dot(nc, c)) / (2 * norm(nc));
+
+    return std::min(ra, std::min(rb, rc));
 }

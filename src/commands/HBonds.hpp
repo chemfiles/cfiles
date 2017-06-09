@@ -14,15 +14,15 @@ public:
     struct Options {
         /// Input trajectory
         std::string trajectory;
-	/// Output
-	std::string outfile;
+    /// Output
+    std::string outfile;
         /// Specific format to use with the trajectory
         std::string format = "";
         /// Specific steps to use from the trajectory
         steps_range steps;
-	/// Selection for the donor-acceptor
-	std::string selection_acceptor;
-	std::string selection_donor;
+    /// Selection for the donor-acceptor
+    std::string selection_acceptor;
+    std::string selection_donor;
         /// Do we have a custom cell to use?
         bool custom_cell = false;
         /// Unit cell to use
@@ -33,10 +33,10 @@ public:
         std::string topology_format = "";
         /// Should we try to guess the topology?
         bool guess_bonds = false;
-	/// Parameters for donor-acceptor max distance (in angstroms)
-	double distance = 0.0;
-	/// and for acceptor-donor-hydrogen max angle (in degrees)
-	double angle = 0.0;
+    /// Parameters for donor-acceptor max distance (in angstroms)
+    double distance = 0.0;
+    /// and for acceptor-donor-hydrogen max angle (in degrees)
+    double angle = 0.0;
     };
 
     HBonds(): selection_acceptor_("atoms: none"), selection_donor_("bonds: none") {}

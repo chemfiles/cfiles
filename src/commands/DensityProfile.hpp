@@ -13,11 +13,11 @@
 class DensityProfile final: public AveCommand {
 public:
     struct Options {
-	/// Output
-	std::string outfile;
-	/// Selection for the donor-acceptor
-	std::string selection;
-	/// Coordinate of origin
+    /// Output
+    std::string outfile;
+    /// Selection for the donor-acceptor
+    std::string selection;
+    /// Coordinate of origin
         Vector3D origin;
         /// Number of points in the profile
         size_t npoints[2];

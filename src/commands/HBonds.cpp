@@ -113,7 +113,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     if (args.at("--cell")) {
         options.custom_cell = true;
         options.cell = parse_cell(args.at("--cell").asString());
-	}
+    }
 
     options.distance = 3.0;
     options.angle = 30.0;

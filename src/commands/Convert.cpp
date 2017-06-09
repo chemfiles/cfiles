@@ -97,8 +97,8 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--cell")) {
         options.custom_cell = true;
-		options.cell = parse_cell(args.at("--cell").asString());
-	}
+        options.cell = parse_cell(args.at("--cell").asString());
+    }
 
     return options;
 }

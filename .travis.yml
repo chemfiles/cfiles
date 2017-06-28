@@ -17,18 +17,16 @@ addons:
     - kalakris-cmake
     packages:
     - g++-4.9
-    - libnetcdf-dev
     - clang-3.6
     - cmake
 
 before_install:
   # Setting environement
   - export C_COMPILER="$CC"
-  - export CMAKE_ARGS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCHFL_ENABLE_NETCDF=ON"
   - |
     if test "$TRAVIS_OS_NAME" == "linux" && test "$C_COMPILER" == "gcc"; then
         export DO_COVERAGE=true
-        export CMAKE_ARGS="$CMAKE_ARGS -DCHFL_CODE_COVERAGE=ON"
+        export CMAKE_ARGS="-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage"
         pip install --user codecov
     else
         export DO_COVERAGE=false
@@ -50,7 +48,7 @@ before_install:
         brew tap homebrew/science
         brew update
         brew rm gcc
-        brew install gcc@5 netcdf
+        brew install gcc@5
         if test "${C_COMPILER}" == "gcc"; then
             export CC=gcc-5
             export CXX=g++-5
@@ -65,7 +63,7 @@ script:
   - ./scripts/check-whitespaces.py
   - mkdir -p build
   - cd build
-  - cmake $CMAKE_ARGS ..
+  - cmake -DCMAKE_BUILD_TYPE=debug $CMAKE_ARGS ..
   - make
   - ctest -L cfiles --output-on-failure
   - |

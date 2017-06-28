@@ -213,7 +213,15 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
     auto cell = frame.cell();
 
     assert(selection_.size() == 1);
-    for (auto i: selection_.list(frame)) {
+    auto selected = selection_.list(frame);
+    if (selected.empty()) {
+        warn(
+            "No matching atom for selection '" + selection_.string() +
+            "' at step " + std::to_string(frame.step())
+        );
+    }
+
+    for (auto i: selected) {
         double x = 0;
         double y = 0;
         if (axis_[0].is_linear()) {

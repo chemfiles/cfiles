@@ -76,7 +76,7 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
     auto begin = argv;
     auto end = argv + argc;
     auto max_options = std::find_if(begin, end, [](const std::string& arg){
-        return arg.substr(std::min(5ul, arg.length())) == "--max";
+        return arg.substr(std::min(static_cast<size_t>(5), arg.length())) == "--max";
     });
     if (AveCommand::options().custom_cell && max_options == end) {
         options_.rmax = biggest_sphere_radius(AveCommand::options().cell);

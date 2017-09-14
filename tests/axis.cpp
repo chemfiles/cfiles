@@ -4,6 +4,10 @@
 #include "Axis.hpp"
 #include "Errors.hpp"
 
+static bool roughly(const Vector3D& a, const Vector3D& b, double eps=1e-12) {
+    return (fabs(a[0] - b[0]) < eps) && (fabs(a[1] - b[1]) < eps) && (fabs(a[2] - b[2]) < eps);
+}
+
 TEST_CASE("Axis") {
     SECTION("Constructor") {
         auto axis = Axis(1, 0, 0, Axis::Linear);
@@ -45,13 +49,13 @@ TEST_CASE("Axis") {
 
     SECTION("Parse") {
         auto axis = Axis::parse("1:1:1", Axis::Linear);
-        CHECK(axis.vector() == vector3d(1/sqrt(3), 1/sqrt(3), 1/sqrt(3)));
+        CHECK(roughly(axis.vector(), vector3d(1/sqrt(3), 1/sqrt(3), 1/sqrt(3))));
 
         axis = Axis::parse("1:1:2", Axis::Linear);
-        CHECK(axis.vector() == vector3d(1/sqrt(6), 1/sqrt(6), 2/sqrt(6)));
+        CHECK(roughly(axis.vector(), vector3d(1/sqrt(6), 1/sqrt(6), 2/sqrt(6))));
 
         axis = Axis::parse("-1:1:2", Axis::Linear);
-        CHECK(axis.vector() == vector3d(-1/sqrt(6), 1/sqrt(6), 2/sqrt(6)));
+        CHECK(roughly(axis.vector(), vector3d(-1/sqrt(6), 1/sqrt(6), 2/sqrt(6))));
     }
 
     SECTION("Parse errors") {

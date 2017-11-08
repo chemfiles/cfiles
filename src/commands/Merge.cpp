@@ -139,7 +139,7 @@ int Merge::run(int argc, const char* argv[]) {
         size_t natoms = 0;
         for (auto& frame: frames) {
             one_frame_has_velocity = one_frame_has_velocity || static_cast<bool>(frame.velocities());
-            natoms += frame.natoms();
+            natoms += frame.size();
         }
 
         auto output_frame = Frame();
@@ -150,7 +150,7 @@ int Merge::run(int argc, const char* argv[]) {
 
         auto start = 0;
         for (auto& frame: frames) {
-            for (size_t i=0; i<frame.natoms(); i++) {
+            for (size_t i=0; i<frame.size(); i++) {
                 output_frame.topology()[start + i] = frame.topology()[i];
                 output_frame.positions()[start + i] = frame.positions()[i];
                 if (frame.velocities()) {
@@ -163,7 +163,7 @@ int Merge::run(int argc, const char* argv[]) {
                 output_frame.topology().add_bond(start + bond[0], start + bond[1]);
             }
 
-            start += frame.natoms();
+            start += frame.size();
         }
 
         outfile.write(output_frame);

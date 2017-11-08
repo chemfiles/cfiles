@@ -153,8 +153,8 @@ int Convert::run(int argc, const char* argv[]) {
             }
 
             std::vector<size_t> remove;
-            remove.reserve(frame.natoms() - keep.size());
-            for (size_t i = 0; i < frame.natoms(); ++i) {
+            remove.reserve(frame.size() - keep.size());
+            for (size_t i = 0; i < frame.size(); ++i) {
                 auto search = keep.find(i);
                 if (search == keep.end()) { // element not found
                     remove.push_back(i);

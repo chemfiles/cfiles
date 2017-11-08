@@ -7,10 +7,10 @@
 
 #include "Angles.hpp"
 #include "Errors.hpp"
-#include "geometry.hpp"
 #include "warnings.hpp"
 
 using namespace chemfiles;
+constexpr double PI = 3.141592653589793238463;
 
 static const std::string OPTIONS =
 R"(Compute distribution of angles or dihedral angles along a trajectory. The
@@ -91,11 +91,7 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
 }
 
 void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histogram) {
-    auto positions = frame.positions();
-    auto cell = frame.cell();
-
     auto matched = selection_.evaluate(frame);
-
     if (matched.empty()) {
         warn_once(
             "No angle corresponding to '" + selection_.string() + "' found."
@@ -106,22 +102,10 @@ void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histog
         assert(match.size() == 3 || match.size() == 4);
 
         if (match.size() == 3) {
-            auto i = match[0];
-            auto j = match[1];
-            auto k = match[2];
-            auto r21 = cell.wrap(positions[i] - positions[j]);
-            auto r23 = cell.wrap(positions[k] - positions[j]);
-            auto theta = angle(r21, r23);
+            auto theta = frame.angle(match[0], match[1], match[2]);
             histogram.insert(theta);
         } else if (match.size() == 4) {
-            auto i = match[0];
-            auto j = match[1];
-            auto k = match[2];
-            auto m = match[3];
-            auto r12 = cell.wrap(positions[j] - positions[i]);
-            auto r23 = cell.wrap(positions[k] - positions[j]);
-            auto r34 = cell.wrap(positions[m] - positions[k]);
-            auto phi = dihedral(r12, r23, r34);
+            auto phi = frame.dihedral(match[0], match[1], match[2], match[3]);
             histogram.insert(phi);
         }
     }

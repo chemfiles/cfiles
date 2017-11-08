@@ -8,9 +8,9 @@
 #include "HBonds.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
-#include "geometry.hpp"
 
 using namespace chemfiles;
+constexpr double PI = 3.141592653589793238463;
 
 static const char OPTIONS[] =
 R"(Compute list of hydrogen bonds along a trajectory. Selections for the acceptor
@@ -183,9 +183,6 @@ int HBonds::run(int argc, const char* argv[]) {
         outfile << "# Frame: " << step << std::endl;
         outfile << "# Acceptor (name index)\tDonor (name index)\tHydrogen (name index)\tDistance D-A\tAngle A-D-H" << std::endl;
 
-        auto positions = frame.positions();
-        auto cell = frame.cell();
-
         auto matched = selection_donor_.evaluate(frame);
         for (auto match: matched) {
             assert(match.size() == 2);
@@ -206,10 +203,8 @@ int HBonds::run(int argc, const char* argv[]) {
             auto acceptors = selection_acceptor_.list(frame);
             for (auto acceptor: acceptors) {
                 if (acceptor != donor && frame.topology()[acceptor].type() != "H") {
-                    auto r_da = cell.wrap(positions[acceptor] - positions[donor]);
-                    auto distance = norm(r_da);
-                    auto r_dh = cell.wrap(positions[hydrogen] - positions[donor]);
-                    auto theta = angle(r_da, r_dh);
+                    auto distance = frame.distance(acceptor, donor);
+                    auto theta = frame.angle(acceptor, donor, hydrogen);
                     if (distance < options.distance && theta < options.angle) {
                         outfile << frame.topology()[acceptor].name() << " " << acceptor << "\t";
                         outfile << frame.topology()[donor].name() << " " << donor << "\t";

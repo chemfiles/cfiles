@@ -22,12 +22,12 @@ public:
     };
 
     /// Constructor with a 3D vector
-    Axis(double a, double b, double c, Type type): vector_(vector3d(a, b, c)), type_(type) {
+    Axis(double a, double b, double c, Type type): vector_(Vector3D(a, b, c)), type_(type) {
         /// normalize the axis
-        if (vector_  == vector3d(0, 0, 0)) {
+        if (vector_  == Vector3D(0, 0, 0)) {
             throw CFilesError("Axis should not be null");
         } else {
-            vector_ = vector_ / norm(vector_);
+            vector_ = vector_ / vector_.norm();
         }
     }
 
@@ -55,11 +55,11 @@ public:
 
     /// Get a string describing the axis
     std::string str() const {
-        if (vector_ == vector3d(1, 0, 0)) {
+        if (vector_ == Vector3D(1, 0, 0)) {
             return "x";
-        } else if (vector_ == vector3d(0, 1, 0)) {
+        } else if (vector_ == Vector3D(0, 1, 0)) {
             return "y";
-        } else if (vector_ == vector3d(0, 0, 1)) {
+        } else if (vector_ == Vector3D(0, 0, 1)) {
             return "z";
         } else {
             std::stringstream ss;
@@ -85,7 +85,7 @@ public:
         case Linear:
             return dot(vector_, point);
         case Radial:
-            return sqrt(norm2(point) - dot(vector_, point) * dot(vector_, point));
+            return sqrt(point.norm() * point.norm() - dot(vector_, point) * dot(vector_, point));
         }
     }
 

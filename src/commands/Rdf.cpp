@@ -7,11 +7,11 @@
 
 #include "Rdf.hpp"
 #include "Errors.hpp"
-#include "geometry.hpp"
 #include "utils.hpp"
 #include "warnings.hpp"
 
 using namespace chemfiles;
+constexpr double PI = 3.141592653589793238463;
 
 /// Get the radius of the biggest inscribed sphere in the unit cell
 static double biggest_sphere_radius(const UnitCell& cell);
@@ -126,7 +126,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
             for (auto j: matched) {
                 if (i == j) continue;
 
-                auto rij = norm(cell.wrap(positions[j] - positions[i]));
+                auto rij = frame.distance(i, j);
                 if (rij < options_.rmax){
                     histogram.insert(rij);
                 }
@@ -146,7 +146,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
             first_particles.insert(i);
             second_particles.insert(j);
 
-            auto rij = norm(cell.wrap(positions[j] - positions[i]));
+            auto rij = frame.distance(i, j);
             if (rij < options_.rmax){
                 histogram.insert(rij);
             }
@@ -195,9 +195,9 @@ void Rdf::check_rmax(const chemfiles::Frame& frame) const {
 
 double biggest_sphere_radius(const UnitCell& cell) {
     auto matrix = cell.matricial();
-    auto a = vector3d(matrix[0][0], matrix[1][0], matrix[2][0]);
-    auto b = vector3d(matrix[0][1], matrix[1][1], matrix[2][1]);
-    auto c = vector3d(matrix[0][2], matrix[1][2], matrix[2][2]);
+    auto a = Vector3D(matrix[0][0], matrix[1][0], matrix[2][0]);
+    auto b = Vector3D(matrix[0][1], matrix[1][1], matrix[2][1]);
+    auto c = Vector3D(matrix[0][2], matrix[1][2], matrix[2][2]);
     // Make sure we have an upper triangular matrix
     assert(matrix[1][0] == 0);
     assert(matrix[2][0] == 0);
@@ -208,9 +208,9 @@ double biggest_sphere_radius(const UnitCell& cell) {
     auto nb = cross(c, a);
     auto nc = cross(a, b);
 
-    auto ra = std::abs(dot(na, a)) / (2 * norm(na));
-    auto rb = std::abs(dot(nb, b)) / (2 * norm(nb));
-    auto rc = std::abs(dot(nc, c)) / (2 * norm(nc));
+    auto ra = std::abs(dot(na, a)) / (2 * na.norm());
+    auto rb = std::abs(dot(nb, b)) / (2 * nb.norm());
+    auto rc = std::abs(dot(nc, c)) / (2 * nc.norm());
 
     return std::min(ra, std::min(rb, rc));
 }

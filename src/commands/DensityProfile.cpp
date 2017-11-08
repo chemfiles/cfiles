@@ -8,7 +8,6 @@
 #include "DensityProfile.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
-#include "geometry.hpp"
 #include "warnings.hpp"
 
 using namespace chemfiles;
@@ -142,7 +141,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
         auto c = string2double(splitted[2]);
-        options_.origin = vector3d(a, b, c);
+        options_.origin = Vector3D(a, b, c);
     }
 
     if (args.at("--max")) {

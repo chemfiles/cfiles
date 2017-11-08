@@ -69,7 +69,7 @@ int Info::run(int argc, const char* argv[]) {
     if (input.nsteps() > options.step) {
         auto frame = input.read_step(options.step);
         output << std::endl << "frame " << frame.step() << ":" << std::endl;
-        output << "    atoms = " << frame.natoms() <<  std::endl;
+        output << "    atoms = " << frame.size() <<  std::endl;
 
         if (options.guess_bonds) {
             frame.guess_topology();

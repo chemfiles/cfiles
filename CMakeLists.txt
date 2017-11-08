@@ -33,7 +33,6 @@ if(${GIT_FOUND})
 endif()
 configure_file(\${SRC} \${DST})
 ")
-include_directories(${CMAKE_BINARY_DIR})
 
 add_custom_target(version
     ${CMAKE_COMMAND} -D SRC=${CMAKE_BINARY_DIR}/version.hpp.in
@@ -41,24 +40,30 @@ add_custom_target(version
                      -P ${CMAKE_BINARY_DIR}/version.cmake
 )
 
-include(CompilerFlags)
 
-include_directories(chemfiles/include/)
-include_directories(src/)
-include_directories(SYSTEM external/)
+add_library(docopt STATIC external/docopt/docopt.cpp)
+target_include_directories(docopt PUBLIC external)
 
-file(GLOB_RECURSE sources src/**.cpp)
+
+file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp)
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-add_library(libcfiles STATIC ${sources})
-set_target_properties(libcfiles PROPERTIES PREFIX "")
+add_library(libcfiles STATIC ${sources} $<TARGET_OBJECTS:fmt::object>)
+target_include_directories(libcfiles PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}/
+)
 
+target_include_directories(libcfiles PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/chemfiles/external/fmt
+)
+
+target_link_libraries(libcfiles docopt chemfiles)
+
+include(CompilerFlags)
 try_compile(STD_REGEX_WORKS
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/cmake/check_std_regex.cpp
 )
-
-add_library(docopt STATIC external/docopt/docopt.cpp)
-target_link_libraries(libcfiles docopt chemfiles)
 
 if(NOT ${STD_REGEX_WORKS})
     message(STATUS "Using Boost.Regex instead of std::regex")
@@ -69,10 +74,6 @@ if(NOT ${STD_REGEX_WORKS})
 endif()
 
 add_dependencies(libcfiles version)
-set_source_files_properties(
-    src/utils.cpp
-    PROPERTIES OBJECT_DEPENDS ${CMAKE_BINARY_DIR}/version.hpp
-)
 
 add_executable(cfiles src/main.cpp)
 target_link_libraries(cfiles libcfiles)

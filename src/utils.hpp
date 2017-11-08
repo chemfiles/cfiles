@@ -26,6 +26,9 @@ std::string command_header(std::string name, std::string description);
 /// Split a string a delimiter
 std::vector<std::string> split(const std::string& string, char delimiter);
 
+/// Trim whitespace from a string
+std::string trim(const std::string& str);
+
 /// Parse an unit cell string
 chemfiles::UnitCell parse_cell(const std::string& string);
 

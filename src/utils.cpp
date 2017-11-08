@@ -58,6 +58,17 @@ std::vector<std::string> split(const std::string& string, char delimiter) {
     return tokens;
 }
 
+std::string trim(const std::string& str) {
+    auto front = std::find_if_not(str.begin(), str.end(), [](int c) {
+        return std::isspace(c);
+    });
+    auto back = std::find_if_not(str.rbegin(), str.rend(), [](int c) {
+        return std::isspace(c);
+    }).base();
+    return (back <= front ? std::string() : std::string(front, back));
+}
+
+
 chemfiles::UnitCell parse_cell(const std::string& string) {
     auto splitted = split(string, ':');
     if (splitted.size() == 1) {

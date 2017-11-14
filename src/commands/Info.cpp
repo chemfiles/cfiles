@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <docopt/docopt.h>
 #include <chemfiles.hpp>
 
@@ -60,28 +62,32 @@ int Info::run(int argc, const char* argv[]) {
     auto input = Trajectory(options.input, 'r', "");
 
     std::stringstream output;
-
-    output << "information for " << options.input << std::endl;
-
-    output << std::endl << "global:" << std::endl;
-    output << "    steps = " << input.nsteps() <<  std::endl;
+    fmt::print(output, "file = {}\n", options.input);
+    fmt::print(output, "steps = {}\n", input.nsteps());
 
     if (input.nsteps() > options.step) {
         auto frame = input.read_step(options.step);
-        output << std::endl << "frame " << frame.step() << ":" << std::endl;
-        output << "    atoms = " << frame.size() <<  std::endl;
+        fmt::print(output, "\n[frame]\n", frame.step());
+        fmt::print(output, "step = {}\n", options.step);
+
+        auto& cell = frame.cell();
+        fmt::print(output, "cell = [{}, {}, {}, {}, {}, {}]\n",
+            cell.a(), cell.b(), cell.c(),
+            cell.alpha(), cell.beta(), cell.gamma()
+        );
 
         if (options.guess_bonds) {
             frame.guess_topology();
         }
 
         auto& topology = frame.topology();
-        output << "    bonds = " << topology.bonds().size() <<  std::endl;
-        output << "    angles = " << topology.angles().size() <<  std::endl;
-        output << "    dihedrals = " << topology.dihedrals().size() <<  std::endl;
-        output << "    residues = " << topology.residues().size() <<  std::endl;
+        fmt::print(output, "atoms_count = {}\n", frame.size());
+        fmt::print(output, "bonds_count = {}\n", topology.bonds().size());
+        fmt::print(output, "angles_count = {}\n", topology.angles().size());
+        fmt::print(output, "dihedrals_count = {}\n", topology.dihedrals().size());
+        fmt::print(output, "impropers_count = {}\n", topology.impropers().size());
+        fmt::print(output, "residues_count = {}\n", topology.residues().size());
     }
-
 
     std::cout << output.str();
 

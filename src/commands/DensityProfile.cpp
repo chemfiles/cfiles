@@ -221,14 +221,10 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
                 y = axis_[1].projection(cell.wrap(positions[i] - options_.origin));
             }
         }
-        try {
-            if (dimensionality() == 1) {
-                profile.insert(x);
-            } else {
-                profile.insert(x,y);
-            }
-        } catch (const OutOfBoundsError& e) {
-            warn_once(e.what());
+        if (dimensionality() == 1) {
+            profile.insert(x);
+        } else {
+            profile.insert(x,y);
         }
     }
 }

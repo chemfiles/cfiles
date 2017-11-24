@@ -8,7 +8,9 @@
 #include <cmath>
 #include <numeric>
 #include <functional>
-#include "Errors.hpp"
+
+#include <fmt/format.h>
+#include "warnings.hpp"
 
 /// Information for each dimension of a Histogram
 struct HistDim {
@@ -18,6 +20,10 @@ struct HistDim {
     double min;
     /// Width of a bin
     double dr;
+
+    double max() const {
+        return min + nbins * dr;
+    }
 };
 
 /// Histogram class
@@ -32,10 +38,11 @@ public:
 
     /// Default constructor
     Histogram(): Histogram(0, 0, 0, 0, 0, 0) {}
-    /// Constructor for a flat 2d histogram with a specific number of bins in each direction
-    /// `n1` and `n2`, and which can hold data in the `min_1 - max_2` range (resp `min_1 - max_2`).
+    /// Constructor for a flat 2d histogram with a specific number of bins in
+    /// each direction `n1` and `n2`, and which can hold data in the `min_1 -
+    /// max_2` range (resp `min_1 - max_2`).
     Histogram(size_t n1, double min1, double max1, size_t n2, double min2, double max2):
-        super(n1*n2),
+        super(n1 * n2),
         first_dimension_{n1, min1, (max1 - min1) / n1},
         second_dimension_{n2, min2, (max2 - min2) / n2} {
         static_assert(
@@ -44,8 +51,8 @@ public:
         );
     }
 
-    /// Constructor for a 1d histogram with a specific number of bins `n_bins`, and which can hold
-    /// data in the `min - max` range.
+    /// Constructor for a 1d histogram with a specific number of bins `n_bins`,
+    /// and which can hold data in the `min - max` range.
     Histogram(size_t n_bins, double min, double max): Histogram(n_bins, min, max, 1, 0, 1) {}
 
     Histogram(const Histogram&) = default;
@@ -68,12 +75,18 @@ public:
         auto bin1 = std::floor((x - first_dimension_.min) / first_dimension_.dr);
         auto bin2 = std::floor((y - second_dimension_.min) / second_dimension_.dr);
         if (bin1 >= first_dimension_.nbins or bin1 < 0) {
-            std::string s = std::to_string(x);
-            throw OutOfBoundsError("Element " + s + " out of boundaries");
+            warn_once(fmt::format(
+                "point {} is out of histogram boundaries ({}:{})",
+                x, first_dimension_.min, first_dimension_.max()
+            ));
+            return;
         }
         if (bin2 >= second_dimension_.nbins or bin2 < 0) {
-            std::string s = std::to_string(y);
-            throw OutOfBoundsError("Element " + s + " out of boundaries");
+            warn_once(fmt::format(
+                "point {} is out of histogram boundaries ({}:{})",
+                y, second_dimension_.min, second_dimension_.max()
+            ));
+            return;
         }
         (*this)[bin2 + bin1 * second_dimension_.nbins] += 1;
     }

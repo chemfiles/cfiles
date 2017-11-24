@@ -160,6 +160,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         warn_once(
             "No pair corresponding to '" + selection_.string() + "' found."
         );
+        return;
     }
 
     // Normalize the rdf to be 1 at long distances

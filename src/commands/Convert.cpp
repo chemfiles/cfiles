@@ -52,6 +52,10 @@ Options:
                                 the number of steps for <end> and 1 for
                                 <stride>.
   --wrap                        rewrap the particles inside the unit cell
+  --center                      place the frame center of mass at the origin. If
+                                both --wrap and --center are used, the particles
+                                are wrapped first, and then the whole frame is
+                                centered
   -s <sel>, --selection=<sel>   selection to use for the output file
                                 [default: atoms: all]
 )";
@@ -67,6 +71,7 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     options.outfile = args.at("<output>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
     options.wrap = args.at("--wrap").asBool();
+    options.center = args.at("--center").asBool();
     options.selection = args.at("--selection").asString();
 
     if (args.at("--steps")) {
@@ -139,6 +144,24 @@ int Convert::run(int argc, const char* argv[]) {
 
             for (auto& position: positions) {
                 position = cell.wrap(position);
+            }
+        }
+
+        if (options.center) {
+            auto positions = frame.positions();
+            auto& topology = frame.topology();
+
+            double total_mass = 0.0;
+            auto com = Vector3D();
+            for (size_t i=0; i<frame.size(); i++) {
+                auto mass = topology[i].mass();
+                com = com + mass * positions[i];
+                total_mass += mass;
+            }
+            com = com / total_mass;
+
+            for (auto& position: positions) {
+                position = position - com;
             }
         }
 

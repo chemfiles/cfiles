@@ -23,6 +23,7 @@ public:
         chemfiles::UnitCell cell;
         bool guess_bonds = false;
         bool wrap = false;
+        bool center = false;
         steps_range steps;
     };
 

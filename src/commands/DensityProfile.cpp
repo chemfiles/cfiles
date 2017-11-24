@@ -47,21 +47,6 @@ Options:
   -o <file>, --output=<file>    write result to <file>. This default to the
                                 trajectory file name with the `.density.dat`
                                 extension.
-  --format=<format>             force the input file format to be <format>
-  -t <path>, --topology=<path>  alternative topology file for the input
-  --topology-format=<format>    use <format> as format for the topology file
-  --guess-bonds                 guess the bonds in the input
-  -c <cell>, --cell=<cell>      alternative unit cell. <cell> format is one of
-                                <a:b:c:α:β:γ> or <a:b:c> or <a>. 'a', 'b' and
-                                'c' are in angstroms, 'α', 'β', and 'γ' are in
-                                degrees.
-  --steps=<steps>               steps to use from the input. <steps> format
-                                is <start>:<end>[:<stride>] with <start>, <end>
-                                and <stride> optional. The used steps goes from
-                                <start> to <end> (excluded) by steps of
-                                <stride>. The default values are 0 for <start>,
-                                the number of steps for <end> and 1 for
-                                <stride>.
   -s <sel>, --selection=<sel>   selection to use for the particles. This must
                                 be a selection of size 1. [default: atoms: all]
   --axis=<axis>...              computes a linear density profile along <axis>.
@@ -76,14 +61,13 @@ Options:
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
   --min=<min>                   minimum distance in the profile. [default: 0]
-                                For radial profiles, <min> must be positive.
-)";
+                                For radial profiles, <min> must be positive.)";
 
 Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
-    auto options_str = command_header("density", DensityProfile().description()) + "\n";
-    options_str += "Laura Scalfi <laura.scalfi@ens.fr>\n";
-    options_str += OPTIONS;
-    auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
+    auto options = command_header("density", DensityProfile().description()) + "\n";
+    options += "Laura Scalfi <laura.scalfi@ens.fr>\n\n";
+    options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
+    auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
 
     AveCommand::parse_options(args);
 

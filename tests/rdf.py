@@ -19,11 +19,12 @@ def read_rdf(path):
 
 def check_oxygen_rdf(data):
     # Check the maximal value of the rdf
-    max_value = max(data, key=lambda u: u[1])
+    max_index = max(enumerate(data), key=lambda u: u[1][1])[0]
+    max_value = data[max_index]
     assert(max_value[0] == 2.775)
     assert(max_value[1] > 3)
-    # Check that the coordination number in the first sphere is around 2
-    assert(abs(max_value[2] - 2) < 1)
+    # Check that the coordination number in the first sphere is around 2.6
+    assert(abs(data[max_index + 3][2] - 2.6) < 0.2)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
@@ -34,18 +35,15 @@ def check_oxygen_rdf(data):
     ave = sum(end) / len(end)
     assert(abs(ave - 1) < 1e-1)
 
-    # Check that the coordination number goes to N ⪞ 99
-    n_max = data[-1][2]
-    assert(abs(n_max - 99) < 3)
-
 
 def check_oh_rdf(data):
     # Check the maximal value of the rdf
-    max_value = max(data, key=lambda u: u[1])
+    max_index = max(enumerate(data), key=lambda u: u[1][1])[0]
+    max_value = data[max_index]
     assert(max_value[0] == 0.975)
     assert(max_value[1] > 25)
-    # Check that the coordination number in the first sphere is 3
-    assert(abs(max_value[2] - 3) < 0.1)
+    # Check that the coordination number in the first sphere is 2
+    assert(abs(data[max_index + 3][2] - 2) < 0.1)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
@@ -56,9 +54,24 @@ def check_oh_rdf(data):
     ave = sum(end) / len(end)
     assert(abs(ave - 1) < 1e-1)
 
-    # Check that the coordination number goes to N ⪞ 148.5
-    n_max = data[-1][2]
-    assert(abs(n_max - 148.5) < 7)
+
+def check_ho_rdf(data):
+    # Check the maximal value of the rdf
+    max_index = max(enumerate(data), key=lambda u: u[1][1])[0]
+    max_value = data[max_index]
+    assert(max_value[0] == 0.975)
+    assert(max_value[1] > 25)
+    # Check that the coordination number in the first sphere is 1
+    assert(abs(data[max_index + 3][2] - 1) < 0.1)
+
+    # Check the last zero value
+    last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
+    assert(last_zero[0] == 0.925)
+
+    # Check that the rdf converges to 1
+    end = [g[1] for g in data[len(data)/2:]]
+    ave = sum(end) / len(end)
+    assert(abs(ave - 1) < 1e-1)
 
 
 def oxygen_rdf_all():
@@ -109,6 +122,19 @@ def OH_rdf_all():
     data = read_rdf(OUTPUT)
     check_oh_rdf(data)
 
+    out, err = cfiles(
+        "rdf",
+        "-c", "15",
+        "-p", "150",
+        "-s", "pairs: name(#1) H and name(#2) O",
+        TRAJECTORY, "-o", OUTPUT
+    )
+    assert(out == "")
+    assert(err == "")
+
+    data = read_rdf(OUTPUT)
+    check_ho_rdf(data)
+
 
 def OH_rdf_partial():
     '''Oxygen-Hydrogen rdf for half of the trajectory'''
@@ -138,7 +164,7 @@ def OH_rdf_partial():
     assert(err == "")
 
     data = read_rdf(OUTPUT)
-    check_oh_rdf(data)
+    check_ho_rdf(data)
 
 
 if __name__ == '__main__':

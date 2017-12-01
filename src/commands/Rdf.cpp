@@ -176,9 +176,11 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     });
 
     double rho = (n_first + n_second) / volume;
+    double alpha = static_cast<double>(n_second) / static_cast<double>(n_first + n_second);
+    factor = alpha * 4 * PI * rho;
     for (size_t i=1; i<histogram.size(); i++){
         auto r = (i + 0.5) * dr;
-        coordination_[i] = coordination_[i - 1] + 4 * PI * rho * histogram[i] * r * r * dr;
+        coordination_[i] = coordination_[i - 1] + factor * histogram[i] * r * r * dr;
     }
     coordination_.step();
 }

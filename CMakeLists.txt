@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8.11)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/chemfiles/cmake")
 
 project(cfiles CXX)
 set(CMAKE_CXX_STANDARD 11)
@@ -10,6 +9,8 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/chemfiles/CMakeLists.txt")
 else()
     message(FATAL_ERROR "Missing the chemfiles library. Please run `git submodule update --init`.")
 endif()
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Git QUIET)
 set(CFILES_VERSION 0.1.0)

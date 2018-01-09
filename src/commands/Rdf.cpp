@@ -197,7 +197,7 @@ void Rdf::check_rmax(const chemfiles::Frame& frame) const {
 }
 
 double biggest_sphere_radius(const UnitCell& cell) {
-    auto matrix = cell.matricial();
+    auto matrix = cell.matrix();
     auto a = Vector3D(matrix[0][0], matrix[1][0], matrix[2][0]);
     auto b = Vector3D(matrix[0][1], matrix[1][1], matrix[2][1]);
     auto c = Vector3D(matrix[0][2], matrix[1][2], matrix[2][2]);

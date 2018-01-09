@@ -143,24 +143,30 @@ int Merge::run(int argc, const char* argv[]) {
         }
 
         auto output_frame = Frame();
-        output_frame.resize(natoms);
+        output_frame.reserve(natoms);
         if (one_frame_has_velocity) {
             output_frame.add_velocities();
         }
 
         auto start = 0;
         for (auto& frame: frames) {
+            auto positions = frame.positions();
+            auto& topology = frame.topology();
             for (size_t i=0; i<frame.size(); i++) {
-                output_frame.topology()[start + i] = frame.topology()[i];
-                output_frame.positions()[start + i] = frame.positions()[i];
-                if (frame.velocities()) {
-                    (*output_frame.velocities())[start + i] = (*frame.velocities())[i];
+                output_frame.add_atom(topology[i], positions[i]);
+            }
+
+            if (frame.velocities()) {
+                auto velocities = *frame.velocities();
+                auto output_velocities = *output_frame.velocities();
+                for (size_t i=0; i<frame.size(); i++) {
+                    output_velocities[start + i] = velocities[i];
                 }
             }
 
             // translate bonding informations
             for (auto& bond: frame.topology().bonds()) {
-                output_frame.topology().add_bond(start + bond[0], start + bond[1]);
+                output_frame.add_bond(start + bond[0], start + bond[1]);
             }
 
             start += frame.size();

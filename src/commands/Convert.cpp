@@ -51,13 +51,19 @@ Options:
                                 <stride>. The default values are 0 for <start>,
                                 the number of steps for <end> and 1 for
                                 <stride>.
-  --wrap                        rewrap the particles inside the unit cell
-  --center                      place the frame center of mass at the origin. If
-                                both --wrap and --center are used, the particles
-                                are wrapped first, and then the whole frame is
+  --wrap                        rewrap the particles matching the wrapping
+                                selection inside the unit cell
+  --wrap-selection=<self>       selection of atoms to wrap inside the cell
+                                [default: all]
+  --center                      translate all the atoms to place the center of
+                                mass of the corresponding selection at the
+                                origin. If both --wrap and --center are used,
+                                the particles are wrapped first, and then
                                 centered
+  --center-selection=<self>     selection of atoms to use to compute the center
+                                of mass to center inside the cell [default: all]
   -s <sel>, --selection=<sel>   selection to use for the output file
-                                [default: atoms: all]
+                                [default: all]
 )";
 
 static Convert::Options parse_options(int argc, const char* argv[]) {
@@ -71,8 +77,18 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     options.outfile = args.at("<output>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
     options.wrap = args.at("--wrap").asBool();
+    options.wrap_selection = args.at("--wrap-selection").asString();
     options.center = args.at("--center").asBool();
+    options.center_selection = args.at("--center-selection").asString();
     options.selection = args.at("--selection").asString();
+
+    if (options.wrap_selection != "all" && !options.wrap) {
+        throw CFilesError("'--wrap-selection' without --wrap does nothing");
+    }
+
+    if (options.center_selection != "all" && !options.center) {
+        throw CFilesError("'--center-selection' without --center does nothing");
+    }
 
     if (args.at("--steps")) {
         options.steps = steps_range::parse(args.at("--steps").asString());
@@ -127,7 +143,15 @@ int Convert::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
-    selection_ = Selection(options.selection);
+    auto selection = Selection(options.selection);
+    auto wrap_sel = Selection(options.wrap_selection);
+    if (wrap_sel.size() != 1) {
+        throw CFilesError("the wrapping selection should act on atoms");
+    }
+    auto center_sel = Selection(options.center_selection);
+    if (center_sel.size() != 1) {
+        throw CFilesError("the center selection should act on atoms");
+    }
     for (auto step: options.steps) {
         if (step >= infile.nsteps()) {
             break;
@@ -142,21 +166,33 @@ int Convert::run(int argc, const char* argv[]) {
             auto positions = frame.positions();
             auto cell = frame.cell();
 
-            for (auto& position: positions) {
-                position = cell.wrap(position);
+            if (options.wrap_selection != "all") {
+                for (auto i: wrap_sel.list(frame)) {
+                    positions[i] = cell.wrap(positions[i]);
+                }
+            } else {
+                for (auto& position: positions) {
+                    position = cell.wrap(position);
+                }
             }
         }
 
         if (options.center) {
             auto positions = frame.positions();
-            auto& topology = frame.topology();
-
             double total_mass = 0.0;
             auto com = Vector3D();
-            for (size_t i=0; i<frame.size(); i++) {
-                auto mass = topology[i].mass();
-                com = com + mass * positions[i];
-                total_mass += mass;
+            if (options.center_selection != "all") {
+                for (size_t i: center_sel.list(frame)) {
+                    auto mass = frame[i].mass();
+                    com = com + mass * positions[i];
+                    total_mass += mass;
+                }
+            } else {
+                for (size_t i=0; i<frame.size(); i++) {
+                    auto mass = frame[i].mass();
+                    com = com + mass * positions[i];
+                    total_mass += mass;
+                }
             }
             com = com / total_mass;
 
@@ -165,8 +201,8 @@ int Convert::run(int argc, const char* argv[]) {
             }
         }
 
-        if (options.selection != "") {
-            auto matched = selection_.evaluate(frame);
+        if (options.selection != "all") {
+            auto matched = selection.evaluate(frame);
 
             std::set<size_t> keep;
             for (auto match: matched) {

@@ -23,16 +23,14 @@ public:
         chemfiles::UnitCell cell;
         bool guess_bonds = false;
         bool wrap = false;
+        std::string wrap_selection = "";
         bool center = false;
+        std::string center_selection = "";
         steps_range steps;
     };
 
-    Convert(): selection_("all") {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
-private:
-    Options options_;
-    chemfiles::Selection selection_;
 };
 
 #endif

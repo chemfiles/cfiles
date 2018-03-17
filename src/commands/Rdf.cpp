@@ -188,11 +188,11 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
 void Rdf::check_rmax(const chemfiles::Frame& frame) const {
     auto r_sphere = biggest_sphere_radius(frame.cell());
     if (r_sphere < options_.rmax) {
-        warn_once(
+        warn_once(fmt::format(
             "The maximal distance (--max option) is too big for this cell.\n"
-            "The cell contains values up to " + std::to_string(r_sphere) +
-            " and the max distance is " + std::to_string(options_.rmax) + "."
-        );
+            "The cell contains values up to {:.2f} and the max distance is {}.",
+            r_sphere, options_.rmax
+        ));
     }
 }
 

@@ -13,6 +13,8 @@ public:
         std::string outfile;
         /// Selection for the atoms in radial distribution
         std::string selection;
+        /// Selection/3D vector description for the optional center point
+        std::string center;
         /// Number of points in the histogram
         size_t npoints = 0;
         /// Maximum distance for the histogram
@@ -35,6 +37,10 @@ private:
     Options options_;
     /// Selection for the atoms in the pair
     chemfiles::Selection selection_;
+    /// Selection for the center point
+    chemfiles::optional<chemfiles::Selection> center_sel_ = chemfiles::nullopt;
+    /// Fixed center point
+    chemfiles::optional<chemfiles::Vector3D> center_ = chemfiles::nullopt;
     /// Also compute and average coordination numbers
     Averager<double> coordination_;
 };

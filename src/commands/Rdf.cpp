@@ -46,6 +46,12 @@ Options:
                                 single selection ("name O") or a selection of
                                 two atoms ("pairs: name(#1) O and name(#2) H")
                                 [default: all]
+  --center=<sel/positions>      compute rdf with respect to a single center
+                                point instead of using pair distances. The
+                                center can either be a fixed position given as
+                                a 3D vector (0:2:0), or a selection. If a
+                                selection is used, the center of mass of
+                                selected atoms will be used as center point.
   --max=<max>                   maximal distance to use. If a custom unit cell
                                 is present (--cell option) and this option is
                                 not, the radius of the biggest inscribed sphere
@@ -69,6 +75,10 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
         options_.outfile = AveCommand::options().trajectory + ".rdf.dat";
     }
 
+    if (args["--center"]) {
+        options_.center = args["--center"].asString();
+    }
+
     options_.rmax = string2double(args["--max"].asString());
     options_.npoints = string2long(args["--points"].asString());
     options_.selection = args["--selection"].asString();
@@ -85,10 +95,26 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
     selection_ = Selection(options_.selection);
     if (selection_.size() > 2) {
         throw CFilesError("Can not use a selection with more than two atoms in RDF.");
-    } else {
-        coordination_ = Averager<double>(options_.npoints, 0, options_.rmax);
-        return Averager<double>(options_.npoints, 0, options_.rmax);
     }
+
+    if (!options_.center.empty()) {
+        auto center = split(options_.center, ':');
+        if (center.size() == 3) {
+            center_ = Vector3D(
+                string2double(center[0]),
+                string2double(center[1]),
+                string2double(center[2])
+            );
+        } else {
+            center_sel_ = Selection(options_.center);
+            if (selection_.size() != 1) {
+                throw CFilesError("Can not use a selection with more than one atoms with a center.");
+            }
+        }
+    }
+
+    coordination_ = Averager<double>(options_.npoints, 0, options_.rmax);
+    return Averager<double>(options_.npoints, 0, options_.rmax);
 }
 
 void Rdf::finish(const Histogram<double>& histogram) {
@@ -116,19 +142,56 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     size_t n_first = 0;
     size_t n_second = 0;
 
+    bool use_center = false;
+    auto center = Vector3D();
+    if (center_) {
+        // The center point is given as a vector
+        use_center = true;
+        center = *center_;
+    } else if (center_sel_) {
+        // The center point is the center of mass of a selection
+        use_center = true;
+        auto& positions = frame.positions();
+
+        auto mass = 0.0;
+        for (auto i: center_sel_->list(frame)) {
+            mass += frame[i].mass();
+            // TODO: Should this use PBC?
+            center = center + frame[i].mass() * positions[i];
+        }
+        center = center / mass;
+    }
+
+
     if (selection_.size() == 1) {
-        // If we have a single atom selection, use it for both atoms of the
-        // pairs
+        // Use the same selection for both atoms in the pair
         auto matched = selection_.list(frame);
         n_first = matched.size();
-        n_second = matched.size();
-        for (auto i: matched) {
-            for (auto j: matched) {
-                if (i == j) continue;
 
-                auto rij = frame.distance(i, j);
-                if (rij < options_.rmax){
-                    histogram.insert(rij);
+        if (use_center) {
+            // The center point is given as a vector
+            auto& cell = frame.cell();
+            auto& positions = frame.positions();
+            n_second = 1;
+            for (auto i: matched) {
+                auto rij = center - positions[i];
+                cell.wrap(rij);
+                auto d = rij.norm();
+                if (d < options_.rmax){
+                    histogram.insert(d);
+                }
+            }
+        } else {
+            // Use the same selection for both atoms in the pair
+            n_second = matched.size();
+            for (auto i: matched) {
+                for (auto j: matched) {
+                    if (i == j) continue;
+
+                    auto rij = frame.distance(i, j);
+                    if (rij < options_.rmax){
+                        histogram.insert(rij);
+                    }
                 }
             }
         }
@@ -175,9 +238,13 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
         return val / (4 * PI * factor * dr * r * r);
     });
 
-    double rho = (n_first + n_second) / volume;
-    double alpha = static_cast<double>(n_second) / static_cast<double>(n_first + n_second);
-    factor = alpha * 4 * PI * rho;
+    if (use_center) {
+        factor = 4 * PI * n_first / volume;
+    } else {
+        double rho = (n_first + n_second) / volume;
+        double alpha = static_cast<double>(n_second) / static_cast<double>(n_first + n_second);
+        factor = alpha * 4 * PI * rho;
+    }
     for (size_t i=1; i<histogram.size(); i++){
         auto r = (i + 0.5) * dr;
         coordination_[i] = coordination_[i - 1] + factor * histogram[i] * r * r * dr;

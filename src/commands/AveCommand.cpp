@@ -79,7 +79,7 @@ int AveCommand::run(int argc, const char* argv[]) {
         }
         auto frame = file.read_step(step);
         if (options_.guess_bonds) {
-            frame.guess_topology();
+            frame.guess_bonds();
         }
         if (!options_.custom_cell && frame.cell().shape() == UnitCell::INFINITE) {
             warn_once(

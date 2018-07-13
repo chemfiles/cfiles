@@ -55,7 +55,7 @@ target_include_directories(libcfiles PUBLIC
 )
 
 target_include_directories(libcfiles PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/chemfiles/external/fmt
+    ${CMAKE_CURRENT_BINARY_DIR}/chemfiles/external/fmt/include
 )
 
 target_link_libraries(libcfiles docopt chemfiles)

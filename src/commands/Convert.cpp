@@ -159,7 +159,7 @@ int Convert::run(int argc, const char* argv[]) {
         auto frame = infile.read_step(step);
 
         if (options.guess_bonds) {
-            frame.guess_topology();
+            frame.guess_bonds();
         }
 
         if (options.wrap) {

@@ -77,7 +77,7 @@ int Info::run(int argc, const char* argv[]) {
         );
 
         if (options.guess_bonds) {
-            frame.guess_topology();
+            frame.guess_bonds();
         }
 
         auto& topology = frame.topology();

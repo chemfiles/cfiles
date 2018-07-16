@@ -12,44 +12,38 @@
 #include <fmt/format.h>
 #include "warnings.hpp"
 
-/// Information for each dimension of a Histogram
-struct HistDim {
-    /// Number of bins
-    size_t nbins;
-    /// Starting value for the histogram
-    double min;
-    /// Width of a bin
-    double dr;
-
-    double max() const {
-        return min + nbins * dr;
-    }
-};
-
 /// Histogram class
-template <class T>
-class Histogram: private std::vector<T> {
-    using super = std::vector<T>;
+class Histogram {
 public:
-    using super::size;
-    using super::operator[];
-    using super::begin;
-    using super::end;
+    using iterator = std::vector<double>::const_iterator;
+
+    /// Information for each dimension of a Histogram
+    struct Dimension {
+        Dimension(size_t n, double min, double max): nbins(n), start(min), width((max - min) / n) {}
+
+        /// Number of bins
+        size_t nbins;
+        /// Starting value for the histogram
+        double start;
+        /// Width of a bin
+        double width;
+
+        double stop() const {
+            return start + nbins * width;
+        }
+
+        double coord(size_t i) const {
+            return start + (i + 0.5) * width;
+        }
+    };
 
     /// Default constructor
     Histogram(): Histogram(0, 0, 0, 0, 0, 0) {}
     /// Constructor for a flat 2d histogram with a specific number of bins in
     /// each direction `n1` and `n2`, and which can hold data in the `min_1 -
-    /// max_2` range (resp `min_1 - max_2`).
-    Histogram(size_t n1, double min1, double max1, size_t n2, double min2, double max2):
-        super(n1 * n2),
-        first_dimension_{n1, min1, (max1 - min1) / n1},
-        second_dimension_{n2, min2, (max2 - min2) / n2} {
-        static_assert(
-            std::is_arithmetic<T>::value,
-            "Histogram<T> is only defined for arithmetics types T"
-        );
-    }
+    /// mafirst_2` range (resp `min_1 - mafirst_2`).
+    Histogram(size_t n1, double min1, double max1, size_t n2, double min2, double max2)
+        : data_(n1 * n2), first_(n1, min1, max1), second_(n2, min2, max2) {}
 
     /// Constructor for a 1d histogram with a specific number of bins `n_bins`,
     /// and which can hold data in the `min - max` range.
@@ -59,61 +53,74 @@ public:
     Histogram(Histogram&&) = default;
     Histogram& operator=(const Histogram&) = default;
     Histogram& operator=(Histogram&&) = default;
-    /// Operator to get the (i,j) element of a 2D histogram
-    const T& operator()(size_t i, size_t j) const {
-        return (*this)[j + i * second_dimension_.nbins];
+
+    size_t size() const {
+        return data_.size();
+    }
+
+    iterator begin() const {
+        return data_.begin();
+    }
+
+    iterator end() const {
+        return data_.end();
+    }
+
+    double operator[](size_t i) const {
+        return data_[i];
+    }
+
+    double& operator[](size_t i) {
+        return data_[i];
+    }
+
+    /// Using call pperator for 2D indexing 2D histogram
+    double operator()(size_t i, size_t j) const {
+        return data_[j + i * second_.nbins];
     }
 
     /// Get the first dimension
-    const HistDim& first() const {return first_dimension_;}
+    const Dimension& first() const {return first_;}
 
     /// Get the second dimension
-    const HistDim& second() const {return second_dimension_;}
+    const Dimension& second() const {return second_;}
 
     /// Insert some `x,y` in the histogram
-    void insert(T x, T y = 0) {
-        auto bin1 = std::floor((x - first_dimension_.min) / first_dimension_.dr);
-        auto bin2 = std::floor((y - second_dimension_.min) / second_dimension_.dr);
-        if (bin1 >= first_dimension_.nbins or bin1 < 0) {
+    void insert(double x, double y = 0) {
+        auto bin1 = std::floor((x - first_.start) / first_.width);
+        auto bin2 = std::floor((y - second_.start) / second_.width);
+        if (bin1 >= first_.nbins or bin1 < 0) {
             warn_once(fmt::format(
                 "point {} is out of histogram boundaries ({}:{})",
-                x, first_dimension_.min, first_dimension_.max()
+                x, first_.start, first_.stop()
             ));
             return;
         }
-        if (bin2 >= second_dimension_.nbins or bin2 < 0) {
+        if (bin2 >= second_.nbins or bin2 < 0) {
             warn_once(fmt::format(
                 "point {} is out of histogram boundaries ({}:{})",
-                y, second_dimension_.min, second_dimension_.max()
+                y, second_.start, second_.stop()
             ));
             return;
         }
-        (*this)[bin2 + bin1 * second_dimension_.nbins] += 1;
-    }
-
-    /// Get the x value corresponding to the ith element of the histogram
-    T first_coord(size_t i) const {
-        return first_dimension_.min + (i + 0.5) * first_dimension_.dr;
-    }
-
-    /// Get the y value corresponding to the ith element of the histogram
-    T second_coord(size_t i) const {
-        return second_dimension_.min + (i + 0.5) * second_dimension_.dr;
+        data_[bin2 + bin1 * second_.nbins] += 1;
     }
 
     /// Normalize the data with a `function` callback, which will be called for
     /// each value. The function should take two arguments being the current
     /// bin index and the data, and return the new data.
-    void normalize(std::function<T(size_t, T)> function) {
-        for (size_t i=0; i< size(); i++){
-            (*this)[i] = function(i, (*this)[i]);
+    void normalize(std::function<double(size_t, double)> function) {
+        for (size_t i = 0; i < this->size(); i++){
+            data_[i] = function(i, data_[i]);
         }
     }
 private:
+    /// Histogram data
+    std::vector<double> data_;
     /// First dimension
-    HistDim first_dimension_;
+    Dimension first_;
     /// Second dimension
-    HistDim second_dimension_;
+    Dimension second_;
 };
 
 #endif

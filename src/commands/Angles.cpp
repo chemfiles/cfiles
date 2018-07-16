@@ -47,7 +47,7 @@ std::string AngleDistribution::description() const {
     return "compute angles and dihedral angles distribution";
 }
 
-Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
+Averager AngleDistribution::setup(int argc, const char* argv[]) {
     auto options = command_header("angles", AngleDistribution().description());
     options += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
@@ -66,15 +66,15 @@ Averager<double> AngleDistribution::setup(int argc, const char* argv[]) {
 
     selection_ = Selection(options_.selection);
     if (selection_.size() == 3) {
-        return Averager<double>(options_.npoints, 0, PI);
+        return Averager(options_.npoints, 0, PI);
     } else if (selection_.size() == 4) {
-        return Averager<double>(options_.npoints, -PI, PI);
+        return Averager(options_.npoints, -PI, PI);
     } else {
         throw CFilesError("Can not use a selection with less than three atoms in angle distribution.");
     }
 }
 
-void AngleDistribution::finish(const Histogram<double>& histogram) {
+void AngleDistribution::finish(const Histogram& histogram) {
     auto max = *std::max_element(histogram.begin(), histogram.end());
 
     std::ofstream outfile(options_.outfile, std::ios::out);
@@ -83,14 +83,14 @@ void AngleDistribution::finish(const Histogram<double>& histogram) {
         outfile << "# Selection: " << options_.selection << std::endl;
 
         for (size_t i=0; i<histogram.size(); i++){
-            outfile << histogram.first_coord(i) * 180 / PI << "  " << histogram[i] / max << "\n";
+            outfile << histogram.first().coord(i) * 180 / PI << "  " << histogram[i] / max << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");
     }
 }
 
-void AngleDistribution::accumulate(const Frame& frame, Histogram<double>& histogram) {
+void AngleDistribution::accumulate(const Frame& frame, Histogram& histogram) {
     auto matched = selection_.evaluate(frame);
     if (matched.empty()) {
         warn_once(

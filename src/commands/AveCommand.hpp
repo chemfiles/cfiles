@@ -46,11 +46,11 @@ public:
 
     /// Setup the command and the histogram.
     /// This function MUST call `AverageCommand::parse_options`.
-    virtual Averager<double> setup(int argc, const char* argv[]) = 0;
+    virtual Averager setup(int argc, const char* argv[]) = 0;
     /// Add the data from a `frame` to the `histogram`
-    virtual void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) = 0;
+    virtual void accumulate(const chemfiles::Frame& frame, Histogram& histogram) = 0;
     /// Finish the run, and write any output
-    virtual void finish(const Histogram<double>& histogram) = 0;
+    virtual void finish(const Histogram& histogram) = 0;
 
 protected:
     /// Get access to the options for this run
@@ -62,7 +62,7 @@ private:
     /// Options
     Options options_;
     /// Averaging histogram for the data
-    Averager<double> histogram_;
+    Averager histogram_;
 };
 
 #endif

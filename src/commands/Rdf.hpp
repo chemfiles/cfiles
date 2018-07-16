@@ -24,9 +24,9 @@ public:
     Rdf(): selection_("all") {}
     std::string description() const override;
 
-    Averager<double> setup(int argc, const char* argv[]) override;
-    void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) override;
-    void finish(const Histogram<double>& histogram) override;
+    Averager setup(int argc, const char* argv[]) override;
+    void accumulate(const chemfiles::Frame& frame, Histogram& histogram) override;
+    void finish(const Histogram& histogram) override;
 
 private:
     /// Check if the maximal distance is larger than the biggest inscribed
@@ -42,7 +42,7 @@ private:
     /// Fixed center point
     chemfiles::optional<chemfiles::Vector3D> center_ = chemfiles::nullopt;
     /// Also compute and average coordination numbers
-    Averager<double> coordination_;
+    Averager coordination_;
 };
 
 #endif

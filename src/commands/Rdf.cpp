@@ -62,7 +62,7 @@ std::string Rdf::description() const {
     return "compute radial distribution functions";
 }
 
-Averager<double> Rdf::setup(int argc, const char* argv[]) {
+Averager Rdf::setup(int argc, const char* argv[]) {
     auto options = command_header("rdf", Rdf().description());
     options += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
@@ -113,11 +113,11 @@ Averager<double> Rdf::setup(int argc, const char* argv[]) {
         }
     }
 
-    coordination_ = Averager<double>(options_.npoints, 0, options_.rmax);
-    return Averager<double>(options_.npoints, 0, options_.rmax);
+    coordination_ = Averager(options_.npoints, 0, options_.rmax);
+    return Averager(options_.npoints, 0, options_.rmax);
 }
 
-void Rdf::finish(const Histogram<double>& histogram) {
+void Rdf::finish(const Histogram& histogram) {
     coordination_.average();
 
     std::ofstream outfile(options_.outfile, std::ios::out);
@@ -130,11 +130,11 @@ void Rdf::finish(const Histogram<double>& histogram) {
     outfile << "# r\tg(r)\tN(r) " << std::endl;
 
     for (size_t i=0; i<histogram.size(); i++){
-        outfile << histogram.first_coord(i) << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
+        outfile << histogram.first().coord(i) << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
     }
 }
 
-void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
+void Rdf::accumulate(const Frame& frame, Histogram& histogram) {
     check_rmax(frame);
 
     auto positions = frame.positions();
@@ -230,7 +230,7 @@ void Rdf::accumulate(const Frame& frame, Histogram<double>& histogram) {
     double volume = cell.volume();
     if (volume <= 0) {volume = 1;}
 
-    double dr = histogram.first().dr;
+    double dr = histogram.first().width;
     double factor = n_first * n_second / volume;
 
     histogram.normalize([factor, dr](size_t i, double val){

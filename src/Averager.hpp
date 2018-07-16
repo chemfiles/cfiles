@@ -7,18 +7,17 @@
 #include "Histogram.hpp"
 
 /// Average class, averaging an historgram over multiple steps
-template <class T>
-class Averager: public Histogram<T> {
+class Averager: public Histogram {
 public:
     /// Default constructor
-    Averager(): Histogram<T>(), averaged_() {}
+    Averager(): Histogram(), averaged_() {}
     /// Constructor for a flat 2d histogram with a specific number of bins in each direction
-    /// `n_x` and `n_y`, and which can hold data in the `min_x - max_x` range (resp `min_y - max_y`).
-    Averager(size_t n_x, double min_x, double max_x, size_t n_y, double min_y, double max_y):
-        Histogram<T>(n_x, min_x, max_x, n_y, min_y, max_y), averaged_(n_x*n_y) {}
+    /// `n1` and `n2`, and which can hold data in the `min1 - max1` range (resp `min2 - max2`).
+    Averager(size_t n1, double min1, double max1, size_t n2, double min2, double max2):
+        Histogram(n1, min1, max1, n2, min2, max2), averaged_(n1 * n2) {}
     /// Constructor with a specific number of bins `nbins`, and which can hold
     /// data in the `min - max` range.
-    Averager(size_t nbins, double min, double max): Histogram<T>(nbins, min, max), averaged_(nbins) {}
+    Averager(size_t nbins, double min, double max): Histogram(nbins, min, max), averaged_(nbins) {}
 
     Averager(const Averager&) = default;
     Averager(Averager&&) = default;
@@ -30,7 +29,7 @@ public:
     void step() {
         for (size_t i=0; i<this->size(); i++) {
             averaged_[i] += (*this)[i];
-            (*this)[i] = T();
+            (*this)[i] = 0;
         }
         nsteps_++;
     }
@@ -43,7 +42,7 @@ public:
 
 private:
     /// Accumulating the averaged values
-    std::vector<T> averaged_;
+    std::vector<double> averaged_;
     /// Number of time `step` was called
     size_t nsteps_ = 0;
 };

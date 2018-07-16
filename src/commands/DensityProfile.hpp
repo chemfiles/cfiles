@@ -30,9 +30,9 @@ public:
     DensityProfile(): selection_("atoms: all"), axis_() {}
     std::string description() const override;
 
-    Averager<double> setup(int argc, const char* argv[]) override;
-    void accumulate(const chemfiles::Frame& frame, Histogram<double>& histogram) override;
-    void finish(const Histogram<double>& histogram) override;
+    Averager setup(int argc, const char* argv[]) override;
+    void accumulate(const chemfiles::Frame& frame, Histogram& histogram) override;
+    void finish(const Histogram& histogram) override;
 
     size_t dimensionality() { return axis_.size();}
 

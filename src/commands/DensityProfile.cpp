@@ -63,7 +63,7 @@ Options:
   --min=<min>                   minimum distance in the profile. [default: 0]
                                 For radial profiles, <min> must be positive.)";
 
-Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
+Averager DensityProfile::setup(int argc, const char* argv[]) {
     auto options = command_header("density", DensityProfile().description()) + "\n";
     options += "Laura Scalfi <laura.scalfi@ens.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
@@ -174,7 +174,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
                 throw CFilesError("Min value for radial axis should be positive");
             }
         }
-        return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0]);
+        return Averager(options_.npoints[0], options_.min[0], options_.max[0]);
     } else {
         assert(dimension == 2);
         if (axis_[0].is_radial()) {
@@ -182,7 +182,7 @@ Averager<double> DensityProfile::setup(int argc, const char* argv[]) {
                 throw CFilesError("Min value for radial axis should be positive");
             }
         }
-        return Averager<double>(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
+        return Averager(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
     }
 }
 
@@ -191,7 +191,7 @@ std::string DensityProfile::description() const {
     return "compute density profiles";
 }
 
-void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>& profile) {
+void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram& profile) {
     auto positions = frame.positions();
     auto cell = frame.cell();
 
@@ -229,7 +229,7 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram<double>
     }
 }
 
-void DensityProfile::finish(const Histogram<double>& profile) {
+void DensityProfile::finish(const Histogram& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
     if (outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
@@ -242,10 +242,10 @@ void DensityProfile::finish(const Histogram<double>& profile) {
         if (dimensionality() == 1) {
             for (size_t i = 0; i < profile.size(); i++){
                 if (axis_[0].is_linear()) {
-                    outfile << profile.first_coord(i) << "  " << profile[i] << "\n";
+                    outfile << profile.first().coord(i) << "  " << profile[i] << "\n";
                 } else {
                     assert(axis_[0].is_radial());
-                    outfile << profile.first_coord(i) << "  " << profile[i] / profile.first_coord(i) << "\n";
+                    outfile << profile.first().coord(i) << "  " << profile[i] / profile.first().coord(i) << "\n";
                 }
             }
         } else {
@@ -253,12 +253,12 @@ void DensityProfile::finish(const Histogram<double>& profile) {
 
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
-                    outfile << profile.first_coord(i) << "\t" << profile.second_coord(j) << "\t";
+                    outfile << profile.first().coord(i) << "\t" << profile.second().coord(j) << "\t";
                     if (axis_[0].is_linear() and axis_[1].is_linear()) {
                         outfile << profile(i,j) << "\n";
                     } else {
                         assert(axis_[0].is_linear() and axis_[1].is_radial());
-                        outfile << profile(i,j) / profile.second_coord(j) << "\n";
+                        outfile << profile(i,j) / profile.second().coord(j) << "\n";
                     }
                 }
             }

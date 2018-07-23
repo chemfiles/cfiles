@@ -26,7 +26,7 @@ inline std::unique_ptr<Command> get_command(const std::string& name) {
             return command.create();
         }
     }
-    throw CFilesError("Can not find the subcommand '" + name + "'");
+    throw cfiles_error("No subcommand named '{}' available", name);
 }
 
 #endif

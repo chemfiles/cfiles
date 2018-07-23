@@ -98,14 +98,14 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--topology")){
         if (options.guess_bonds) {
-            throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
+            throw cfiles_error("Can not use both '--topology' and '--guess-bonds'");
         }
         options.topology = args.at("--topology").asString();
     }
 
     if (args.at("--topology-format")){
         if (options.topology == "") {
-            throw CFilesError("Can not use '--topology-format' without a '--topology'");
+            throw cfiles_error("Can not use '--topology-format' without a '--topology'");
         }
         options.topology_format = args.at("--topology-format").asString();
     }
@@ -137,16 +137,16 @@ int HBonds::run(int argc, const char* argv[]) {
 
     auto donors = Selection(options.donor_selection);
     if (donors.size() != 2) {
-        throw CFilesError("Can not use a selection for donors with size that is not 2.");
+        throw cfiles_error("Can not use a selection for donors with size that is not 2.");
     }
 
     if (split(donors.string(),':')[0] != "bonds") {
-        throw CFilesError("'Bonds' type selection compulsory for donors.");
+        throw cfiles_error("'Bonds' type selection compulsory for donors.");
     }
 
     auto acceptors = Selection(options.acceptor_selection);
     if (acceptors.size() != 1) {
-        throw CFilesError("Can not use a selection for acceptors with size larger than 1.");
+        throw cfiles_error("Can not use a selection for acceptors with size larger than 1.");
     }
 
     auto infile = Trajectory(options.trajectory, 'r', options.format);
@@ -159,7 +159,7 @@ int HBonds::run(int argc, const char* argv[]) {
         outfile << "# donor-acceptor distance < " << options.distance << " angstroms" << std::endl;
         outfile << "# acceptor-donor-H angle < " << options.angle * 180 / PI << " degrees" << std::endl;
     } else {
-        throw CFilesError("Could not open the '" + options.outfile + "' file.");
+        throw cfiles_error("Could not open the file at '{}'", options.outfile);
     }
 
     if (options.custom_cell) {
@@ -196,7 +196,7 @@ int HBonds::run(int argc, const char* argv[]) {
                 donor = match[0];
                 hydrogen = match[1];
             } else {
-                throw CFilesError("Invalid donors selection: there is no hydrogen atom.");
+                throw cfiles_error("Invalid donors selection: there is no hydrogen atom.");
             }
 
             for (auto acceptor: acceptors.list(frame)) {

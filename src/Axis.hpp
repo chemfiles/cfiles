@@ -25,7 +25,7 @@ public:
     Axis(double a, double b, double c, Type type): vector_(Vector3D(a, b, c)), type_(type) {
         /// normalize the axis
         if (vector_  == Vector3D(0, 0, 0)) {
-            throw CFilesError("Axis should not be null");
+            throw cfiles_error("Axis should not be null");
         } else {
             vector_ = vector_ / vector_.norm();
         }
@@ -41,7 +41,7 @@ public:
             } else if (splitted[0] == "Z" or splitted[0] == "z") {
                 return Axis(0, 0, 1, type);
             } else {
-                throw CFilesError("Unknown axis specification'" + splitted[0] + "'. It should be x, y, z or a:b:c");
+                throw cfiles_error("Unknown axis specification '{}'. It should be x, y, z or a:b:c", splitted[0]);
             }
         } else if (splitted.size() == 3) {
             auto a = string2double(splitted[0]);
@@ -49,7 +49,7 @@ public:
             auto c = string2double(splitted[2]);
             return Axis(a, b, c, type);
         } else {
-            throw CFilesError("Axis option should be x, y, z or a:b:c");
+            throw cfiles_error("Axis option should be x, y, z or a:b:c");
         }
     }
 

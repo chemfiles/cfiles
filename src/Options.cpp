@@ -4,17 +4,10 @@
 #include "Options.hpp"
 #include "utils.hpp"
 
-#include <fmt/format.h>
-
 #include <unordered_set>
 #include <cassert>
 
 using namespace options;
-
-template <typename... Args>
-static OptionError option_error(const char *format, const Args & ... arguments) {
-    return OptionError(fmt::format(format, arguments...));
-}
 
 /// Wrap a given string at 80 chars, ignoring single new line and repeated
 /// spaces in the input string. The output is indented by `shift` spaces.

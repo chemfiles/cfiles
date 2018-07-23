@@ -61,7 +61,7 @@ static Elastic::Options parse_options(int argc, const char* argv[]) {
     if (args["--temperature"]) {
         options.temperature = string2double(args.at("--temperature").asString());
     } else {
-        throw CFilesError("missing --temperature argument");
+        throw cfiles_error("missing --temperature argument");
     }
 
     if (args.at("--steps")) {
@@ -171,13 +171,13 @@ int Elastic::run(int argc, const char* argv[]) {
     SVoigt(5, 5) = compute(1, 0, 1, 0);
 
     if (std::abs(SVoigt.determinant()) < 100 * DBL_EPSILON) {
-        throw CFilesError("the compliance matrix is not invertible");
+        throw cfiles_error("the compliance matrix is not invertible");
     }
 
     auto CVoigt = SVoigt.inverse();
     std::ofstream outfile(options.outfile, std::ios::out);
     if (!outfile.is_open()) {
-        throw CFilesError("Could not open the '" + options.outfile + "' file.");
+        throw cfiles_error("Could not open the file at '{}'", options.outfile);
     }
 
     fmt::print(outfile, "# stiffness tensor in GPa from {}\n", options.trajectory);

@@ -74,7 +74,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     options_.selection = args.at("--selection").asString();
     selection_ = Selection(options_.selection);
     if (selection_.size() != 1) {
-        throw CFilesError("Can not use a selection with size different than 1.");
+        throw cfiles_error("Can not use a selection with size different than 1.");
     }
 
     if (args.at("--output")){
@@ -98,7 +98,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     size_t dimension = dimensionality();
 
     if (dimension == 0 or dimension > 2) {
-        throw CFilesError("No axis or too many axis were given");
+        throw cfiles_error("No axis or too many axis were given");
     }
 
     if (args.at("--points")) {
@@ -108,19 +108,19 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
             options_.npoints[1] = string2long(splitted[0]);
         } else if (splitted.size() == 2) {
             if (dimension < 2) {
-                throw CFilesError("More --points options than axis");
+                throw cfiles_error("More --points options than axis");
             }
             options_.npoints[0] = string2long(splitted[0]);
             options_.npoints[1] = string2long(splitted[1]);
         } else {
-            throw CFilesError("Too many arguments for --points option");
+            throw cfiles_error("Too many arguments for --points option");
         }
     }
 
     if (args.at("--origin")) {
         auto splitted = split(args.at("--origin").asString(),':');
         if (splitted.size() != 3) {
-            throw CFilesError("Origin for density profile should be a vector of size 3");
+            throw cfiles_error("Origin for density profile should be a vector of size 3");
         }
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
@@ -135,12 +135,12 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
             options_.max[1] = string2double(splitted[0]);
         } else if (splitted.size() == 2) {
             if (dimension < 2) {
-                throw CFilesError("More --max options than axis");
+                throw cfiles_error("More --max options than axis");
             }
             options_.max[0] = string2double(splitted[0]);
             options_.max[1] = string2double(splitted[1]);
         } else {
-            throw CFilesError("Too many arguments for --max option");
+            throw cfiles_error("Too many arguments for --max option");
         }
     }
 
@@ -151,27 +151,27 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
              options_.min[1] = string2double(splitted[0]);
          } else if (splitted.size() == 2) {
              if (dimension < 2) {
-                 throw CFilesError("More --min options than axis");
+                 throw cfiles_error("More --min options than axis");
              }
              options_.min[0] = string2double(splitted[0]);
              options_.min[1] = string2double(splitted[1]);
          } else {
-             throw CFilesError("Too many arguments for --min option");
+             throw cfiles_error("Too many arguments for --min option");
          }
     }
 
     if (options_.min[0] > options_.max[0]) {
-        throw CFilesError("Min > Max for first dimension");
+        throw cfiles_error("Min > Max for first dimension");
     }
 
     if (options_.min[1] > options_.max[1]) {
-        throw CFilesError("Min > Max for second dimension");
+        throw cfiles_error("Min > Max for second dimension");
     }
 
     if (dimension == 1) {
         if (axis_[0].is_radial()) {
             if (options_.min[0] < 0) {
-                throw CFilesError("Min value for radial axis should be positive");
+                throw cfiles_error("Min value for radial axis should be positive");
             }
         }
         return Averager(options_.npoints[0], options_.min[0], options_.max[0]);
@@ -179,7 +179,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
         assert(dimension == 2);
         if (axis_[0].is_radial()) {
             if (options_.min[1] < 0) {
-                throw CFilesError("Min value for radial axis should be positive");
+                throw cfiles_error("Min value for radial axis should be positive");
             }
         }
         return Averager(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
@@ -264,6 +264,6 @@ void DensityProfile::finish(const Histogram& profile) {
             }
         }
     } else {
-        throw CFilesError("Could not open the '" + options_.outfile + "' file.");
+        throw cfiles_error("Could not open the file at '{}'", options_.outfile);
     }
 }

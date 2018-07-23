@@ -83,11 +83,11 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
     options.selection = args.at("--selection").asString();
 
     if (options.wrap_selection != "all" && !options.wrap) {
-        throw CFilesError("'--wrap-selection' without --wrap does nothing");
+        throw cfiles_error("'--wrap-selection' without --wrap does nothing");
     }
 
     if (options.center_selection != "all" && !options.center) {
-        throw CFilesError("'--center-selection' without --center does nothing");
+        throw cfiles_error("'--center-selection' without --center does nothing");
     }
 
     if (args.at("--steps")) {
@@ -104,14 +104,14 @@ static Convert::Options parse_options(int argc, const char* argv[]) {
 
     if (args.at("--topology")){
         if (options.guess_bonds) {
-            throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
+            throw cfiles_error("Can not use both '--topology' and '--guess-bonds'");
         }
         options.topology = args.at("--topology").asString();
     }
 
     if (args.at("--topology-format")){
         if (options.topology == "") {
-            throw CFilesError("Can not use '--topology-format' without a '--topology'");
+            throw cfiles_error("Can not use '--topology-format' without a '--topology'");
         }
         options.topology_format = args["--topology-format"].asString();
     }
@@ -146,11 +146,11 @@ int Convert::run(int argc, const char* argv[]) {
     auto selection = Selection(options.selection);
     auto wrap_sel = Selection(options.wrap_selection);
     if (wrap_sel.size() != 1) {
-        throw CFilesError("the wrapping selection should act on atoms");
+        throw cfiles_error("the wrapping selection should act on atoms");
     }
     auto center_sel = Selection(options.center_selection);
     if (center_sel.size() != 1) {
-        throw CFilesError("the center selection should act on atoms");
+        throw cfiles_error("the center selection should act on atoms");
     }
     for (auto step: options.steps) {
         if (step >= infile.nsteps()) {

@@ -47,7 +47,7 @@ static Info::Options parse_options(int argc, const char* argv[]) {
     if (step >= 0) {
         options.step = static_cast<size_t>(step);
     } else {
-        throw CFilesError("step must be positive");
+        throw cfiles_error("step must be positive");
     }
 
     return options;

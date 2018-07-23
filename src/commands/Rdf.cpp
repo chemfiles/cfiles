@@ -94,7 +94,7 @@ Averager Rdf::setup(int argc, const char* argv[]) {
 
     selection_ = Selection(options_.selection);
     if (selection_.size() > 2) {
-        throw CFilesError("Can not use a selection with more than two atoms in RDF.");
+        throw cfiles_error("Can not use a selection with more than two atoms in RDF.");
     }
 
     if (!options_.center.empty()) {
@@ -108,7 +108,7 @@ Averager Rdf::setup(int argc, const char* argv[]) {
         } else {
             center_sel_ = Selection(options_.center);
             if (selection_.size() != 1) {
-                throw CFilesError("Can not use a selection with more than one atoms with a center.");
+                throw cfiles_error("Can not use a selection with more than one atoms with a center.");
             }
         }
     }
@@ -122,7 +122,7 @@ void Rdf::finish(const Histogram& histogram) {
 
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(!outfile.is_open()) {
-        throw CFilesError("Could not open the '" + options_.outfile + "' file.");
+        throw cfiles_error("Could not open the file at '{}'", options_.outfile);
     }
 
     outfile << "# Radial distribution function in trajectory " << AveCommand::options().trajectory << std::endl;

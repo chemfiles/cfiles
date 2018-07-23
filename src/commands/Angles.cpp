@@ -70,7 +70,7 @@ Averager AngleDistribution::setup(int argc, const char* argv[]) {
     } else if (selection_.size() == 4) {
         return Averager(options_.npoints, -PI, PI);
     } else {
-        throw CFilesError("Can not use a selection with less than three atoms in angle distribution.");
+        throw cfiles_error("Can not use a selection with less than three atoms in angle distribution.");
     }
 }
 
@@ -86,7 +86,7 @@ void AngleDistribution::finish(const Histogram& histogram) {
             outfile << histogram.first().coord(i) * 180 / PI << "  " << histogram[i] / max << "\n";
         }
     } else {
-        throw CFilesError("Could not open the '" + options_.outfile + "' file.");
+        throw cfiles_error("Could not open the file at '{}'", options_.outfile);
     }
 }
 

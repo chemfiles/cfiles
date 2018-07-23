@@ -38,7 +38,7 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
 
     if (args.at("--topology")) {
         if (options_.guess_bonds) {
-            throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
+            throw cfiles_error("Can not use both '--topology' and '--guess-bonds'");
         }
         options_.topology = args.at("--topology").asString();
     }
@@ -49,7 +49,7 @@ void AveCommand::parse_options(const std::map<std::string, docopt::value>& args)
 
     if (args.at("--topology-format")) {
         if (options_.topology == "") {
-            throw CFilesError("Can not use '--topology-format' without a '--topology'");
+            throw cfiles_error("Can not use '--topology-format' without a '--topology'");
         }
         options_.topology_format = args.at("--topology-format").asString();
     }

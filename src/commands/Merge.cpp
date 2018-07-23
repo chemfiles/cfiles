@@ -51,12 +51,11 @@ static Merge::Options parse_options(int argc, const char* argv[]) {
         auto n_files = options.infiles.size();
         auto n_formats = options.input_formats.size();
         if (n_files != n_formats) {
-            throw CFilesError(
-                "Input formats do not match input files: we have " +
-                std::to_string(n_files) + " file but " +
-                std::to_string(n_formats) + " formats.\n"
-                "Input file formats must be provided as a comma separated "
-                "list: --input-format='XYZ,PDB,AmberNetCDF'"
+            throw cfiles_error(
+                "Input formats do not match input files: we have {} file and {} "
+                "formats.\n Formats must be provided as a comma separated list: "
+                "--input-format='XYZ,PDB,AmberNetCDF'",
+                n_files, n_formats
             );
         }
     } else {
@@ -126,7 +125,7 @@ int Merge::run(int argc, const char* argv[]) {
             for (auto& frame: frames) {
                 if (frame.cell().shape() != UnitCell::INFINITE) {
                     if (frame.cell() != reference) {
-                        throw CFilesError(
+                        throw cfiles_error(
                             "Mismatch in unit cells. Please specify which one "
                             "you want using the --cell argument."
                         );

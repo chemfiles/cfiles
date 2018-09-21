@@ -18,13 +18,15 @@ public:
     /// Selection for the donor-acceptor
     std::string selection;
     /// Coordinate of origin
-        Vector3D origin;
-        /// Number of points in the profile
-        size_t npoints[2];
-        /// Maximum in the profile
-        double max[2] = {0, 0};
-        /// Minimum in the profile
-        double min[2] = {0, 0};
+    Vector3D origin;
+    /// Number of points in the profile
+    size_t npoints[2];
+    /// Maximum in the profile
+    double max[2] = {0, 0};
+    /// Minimum in the profile
+    double min[2] = {0, 0};
+    /// Should fractional cooordinates be used
+    bool fractional = false;
     };
 
     DensityProfile(): selection_("atoms: all"), axis_() {}

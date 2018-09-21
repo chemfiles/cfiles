@@ -58,6 +58,8 @@ Options:
                                 or a vector defining the axis (e.g. 1:1:1).
   --origin=<coord>              coordinates for the origin of the axis (only
                                 relevant for radial profiles). [default: 0:0:0]
+  --fractional                  use fractional coordinates instead of cartesian
+                                coordinates
   -p <n>, --points=<n>          number of points in the profile [default: 200]
   --max=<max>                   maximum distance in the profile. [default: 10]
   --min=<min>                   minimum distance in the profile. [default: 0]
@@ -160,6 +162,10 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
          }
     }
 
+    if (args.at("--fractional")) {
+        options_.fractional = args.at("--fractional").asBool();
+    }
+
     if (options_.min[0] > options_.max[0]) {
         throw CFilesError("Min > Max for first dimension");
     }
@@ -168,24 +174,23 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
         throw CFilesError("Min > Max for second dimension");
     }
 
-    if (dimension == 1) {
-        if (axis_[0].is_radial()) {
-            if (options_.min[0] < 0) {
-                throw CFilesError("Min value for radial axis should be positive");
-            }
+    if (axis_[0].is_radial()) {
+        if (options_.min[0] < 0) {
+            throw CFilesError("Min value for radial axis should be positive");
         }
+    } else if (dimension == 2 && axis_[1].is_radial()) {
+        if (options_.min[1] < 0) {
+            throw CFilesError("Min value for radial axis should be positive");
+        }
+    }
+
+    if (dimension == 1) {
         return Averager(options_.npoints[0], options_.min[0], options_.max[0]);
     } else {
         assert(dimension == 2);
-        if (axis_[0].is_radial()) {
-            if (options_.min[1] < 0) {
-                throw CFilesError("Min value for radial axis should be positive");
-            }
-        }
         return Averager(options_.npoints[0], options_.min[0], options_.max[0], options_.npoints[1], options_.min[1], options_.max[1]);
     }
 }
-
 
 std::string DensityProfile::description() const {
     return "compute density profiles";
@@ -204,21 +209,26 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram& profil
         );
     }
 
+    auto scaling = Matrix3D::unit();
+    if (options_.fractional) {
+        scaling = cell.matrix().invert();
+    }
+
     for (auto i: selected) {
         double x = 0;
         double y = 0;
         if (axis_[0].is_linear()) {
-            x = axis_[0].projection(cell.wrap(positions[i]));
+            x = axis_[0].projection(scaling * cell.wrap(positions[i]));
         } else {
             assert(axis_[0].is_radial());
-            x = axis_[0].projection(cell.wrap(positions[i] - options_.origin));
+            x = axis_[0].projection(scaling * cell.wrap(positions[i] - options_.origin));
         }
         if (dimensionality() == 2) {
             if (axis_[1].is_linear()) {
-                y = axis_[1].projection(cell.wrap(positions[i]));
+                y = axis_[1].projection(scaling * cell.wrap(positions[i]));
             } else {
                 assert(axis_[1].is_radial());
-                y = axis_[1].projection(cell.wrap(positions[i] - options_.origin));
+                y = axis_[1].projection(scaling * cell.wrap(positions[i] - options_.origin));
             }
         }
         if (dimensionality() == 1) {

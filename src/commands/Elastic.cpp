@@ -16,6 +16,10 @@ using namespace chemfiles;
 
 using Matrix6 = Eigen::Matrix<double, 6, 6>;
 
+static size_t CARTESIAN_TO_VOIGT[][2] = {
+    {0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1},
+};
+
 static const std::string OPTIONS =
 R"(Compute the elastic tensor of a system from the unit cell fluctuations during
 a NPT simulation.
@@ -23,7 +27,8 @@ a NPT simulation.
 The values given here are highly dependent on having good statistic during the
 simulation: both in term of having a long enough simulation time to get to the
 equilibrium, and using a good barostat that does produce isobaric-isothermal
-ensemble fluctuations (not just average).
+ensemble fluctuations (not just average). The theory behind this code is
+described in https://dx.doi.org/10.1080/08927022.2017.1313418.
 
 Usage:
   cfiles elastic [options] <trajectory>
@@ -83,11 +88,8 @@ std::string Elastic::description() const {
 
 int Elastic::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
-
-    auto epsilons = std::vector<Matrix3D>();
-    auto reference = Matrix3D::zero();
-    auto reference_T = Matrix3D::zero();
-    bool got_reference = false;
+    auto cells = std::vector<Matrix3D>();
+    cells.reserve(options.steps.count());
 
     auto trajectory = Trajectory(options.trajectory, 'r', options.format);
     for (auto step: options.steps) {
@@ -95,23 +97,42 @@ int Elastic::run(int argc, const char* argv[]) {
             break;
         }
         auto frame = trajectory.read_step(step);
-        auto cell = frame.cell().matrix();
+        cells.emplace_back(frame.cell().matrix());
+    }
 
-        if (!got_reference) {
-            reference = cell.invert();
-            reference_T = reference.transpose();
-            got_reference = true;
-            continue;
-        }
+    // Use the avrerage as the reference state
+    auto reference = Matrix3D::zero();
+    for (auto& cell: cells) {
+        reference += cell.invert();
+    }
+    reference /= cells.size();
+    auto reference_t = reference.transpose();
 
-        epsilons.emplace_back(0.5 * (reference_T * cell.transpose() * cell * reference - Matrix3D::unit()));
+    auto epsilons = std::vector<Matrix3D>();
+    epsilons.reserve(cells.size());
+    for (auto& cell: cells) {
+        epsilons.emplace_back(0.5 * (reference_t * cell.transpose() * cell * reference - Matrix3D::unit()));
     }
 
     // in GPa A^2 / K
     auto BOLTZMANN = 1.38065e-2;
-    auto volume = 1.0 / reference.determinant();
-    auto v_kt = volume / (BOLTZMANN * options.temperature);
-    auto compute = [&](size_t i, size_t j, size_t k, size_t l) {
+    auto volume_inv = reference.determinant();
+    auto v_kt = 1.0 / (volume_inv * BOLTZMANN * options.temperature);
+    auto compute = [&](size_t ij[2], size_t kl[2]) {
+        auto i = ij[0];
+        auto j = ij[1];
+        auto k = kl[0];
+        auto l = kl[1];
+
+        // Multiplicative factors for cross terms yz xz xy
+        double factor = 1.0;
+        if (i != j) {
+            factor *= 2;
+        }
+        if (k != l) {
+            factor *= 2;
+        }
+
         double eij = 0;
         double ekl = 0;
         double eij_ekl = 0;
@@ -124,51 +145,21 @@ int Elastic::run(int argc, const char* argv[]) {
         ekl /= epsilons.size();
         eij_ekl /= epsilons.size();
 
-        return v_kt * (eij_ekl - eij * ekl);
+        return factor * v_kt * (eij_ekl - eij * ekl);
     };
 
     auto SVoigt = Matrix6();
-    SVoigt(0, 0) = compute(0, 0, 0, 0);
-    SVoigt(0, 1) = compute(0, 0, 1, 1);
-    SVoigt(0, 2) = compute(0, 0, 2, 2);
-    SVoigt(0, 3) = compute(0, 0, 2, 1);
-    SVoigt(0, 4) = compute(0, 0, 2, 0);
-    SVoigt(0, 5) = compute(0, 0, 1, 0);
-
-    SVoigt(1, 0) = SVoigt(0, 1);
-    SVoigt(1, 1) = compute(1, 1, 1, 1);
-    SVoigt(1, 2) = compute(1, 1, 2, 2);
-    SVoigt(1, 3) = compute(1, 1, 2, 1);
-    SVoigt(1, 4) = compute(1, 1, 2, 0);
-    SVoigt(1, 5) = compute(1, 1, 1, 0);
-
-    SVoigt(2, 0) = SVoigt(0, 2);
-    SVoigt(2, 1) = SVoigt(1, 2);
-    SVoigt(2, 2) = compute(2, 2, 2, 2);
-    SVoigt(2, 3) = compute(2, 2, 2, 1);
-    SVoigt(2, 4) = compute(2, 2, 2, 0);
-    SVoigt(2, 5) = compute(2, 2, 1, 0);
-
-    SVoigt(3, 0) = SVoigt(0, 3);
-    SVoigt(3, 1) = SVoigt(1, 3);
-    SVoigt(3, 2) = SVoigt(2, 3);
-    SVoigt(3, 3) = compute(2, 1, 2, 1);
-    SVoigt(3, 4) = compute(2, 1, 2, 0);
-    SVoigt(3, 5) = compute(2, 1, 1, 0);
-
-    SVoigt(4, 0) = SVoigt(0, 4);
-    SVoigt(4, 1) = SVoigt(1, 4);
-    SVoigt(4, 2) = SVoigt(2, 4);
-    SVoigt(4, 3) = SVoigt(3, 4);
-    SVoigt(4, 4) = compute(2, 0, 2, 0);
-    SVoigt(4, 5) = compute(2, 0, 1, 0);
-
-    SVoigt(5, 0) = SVoigt(0, 5);
-    SVoigt(5, 1) = SVoigt(1, 5);
-    SVoigt(5, 2) = SVoigt(2, 5);
-    SVoigt(5, 3) = SVoigt(3, 5);
-    SVoigt(5, 4) = SVoigt(4, 5);
-    SVoigt(5, 5) = compute(1, 0, 1, 0);
+    for (size_t i=0; i<6; i++) {
+        for (size_t j=0; j<=i; j++) {
+            SVoigt(i, j) = compute(CARTESIAN_TO_VOIGT[i], CARTESIAN_TO_VOIGT[j]);
+        }
+    }
+    // Make the matrix symetric
+    for (size_t i=0; i<6; i++) {
+        for (size_t j=i+1; j<6; j++) {
+            SVoigt(i, j) = SVoigt(j, i);
+        }
+    }
 
     if (std::abs(SVoigt.determinant()) < 100 * DBL_EPSILON) {
         throw CFilesError("the compliance matrix is not invertible");

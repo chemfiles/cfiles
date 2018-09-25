@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
 from testrun import cfiles
+import tempfile
 import os
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
-OUTPUT = "tmp.dat"
 
 
 def read_data(path):
@@ -29,22 +29,22 @@ def check_angles(data):
             assert(abs(value) < 0.02)
 
 
-def angles(selection):
+def angles(selection, output):
     out, err = cfiles(
         "angles",
         "--guess-bonds",
         "-c", "15",
         "-s", selection,
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_data(OUTPUT)
+    data = read_data(output)
     check_angles(data)
 
 
 if __name__ == '__main__':
-    angles("angles: all")
-    angles("angles: name(#1) H and name(#2) O and name(#3) H")
-    os.unlink(OUTPUT)
+    with tempfile.NamedTemporaryFile() as file:
+        angles("angles: all", file.name)
+        angles("angles: name(#1) H and name(#2) O and name(#3) H", file.name)

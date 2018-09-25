@@ -68,14 +68,21 @@ class isolate_files(object):
 
 if __name__ == '__main__':
     filename = "convert"
+
     with isolate_files(filename):
         out, err = cfiles("convert", filename + ".pdb", filename + ".xyz")
         assert(out == "")
         assert(err == "")
         with open(filename + ".xyz") as fd:
             assert(fd.read() == XYZ_CONTENT)
+
     with isolate_files(filename):
-        out, err = cfiles("convert", filename + ".pdb", filename + ".xyz","--selection", 'atoms: type O')
+        out, err = cfiles(
+            "convert",
+            filename + ".pdb",
+            filename + ".xyz",
+            "--selection", 'atoms: type O'
+        )
         assert(out == "")
         assert(err == "")
         with open(filename + ".xyz") as fd:

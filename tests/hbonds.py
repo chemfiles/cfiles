@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
 from testrun import cfiles
+import tempfile
 import os
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
-OUTPUT = "tmp.dat"
 EXPECTED = [
     (0, 1, 39), (0, 2, 270), (3, 4, 69), (3, 5, 75), (6, 8, 228), (9, 10, 66),
     (9, 11, 3), (18, 19, 24), (18, 20, 27), (21, 22, 42)
@@ -31,20 +31,20 @@ def check_hbonds(indexes):
         assert(bond in indexes)
 
 
-def hbonds():
+def hbonds(output):
     out, err = cfiles(
         "hbonds",
         "--guess-bonds",
         "-c", "15",
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    indexes = read_data(OUTPUT)
+    indexes = read_data(output)
     check_hbonds(indexes)
 
 
 if __name__ == '__main__':
-    hbonds()
-    os.unlink(OUTPUT)
+    with tempfile.NamedTemporaryFile() as file:
+        hbonds(file.name)

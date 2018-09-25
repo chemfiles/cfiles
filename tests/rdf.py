@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
 from testrun import cfiles
+import tempfile
 import os
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
-OUTPUT = "tmp.rdf"
 
 
 def read_rdf(path):
@@ -74,23 +74,23 @@ def check_ho_rdf(data):
     assert(abs(ave - 1) < 1e-1)
 
 
-def oxygen_rdf_all():
+def oxygen_rdf_all(output):
     '''Oxygen rdf for the whole trajectory'''
     out, err = cfiles(
         "rdf",
         "-c", "15",          # Set cell
         "-p", "150",         # Use 150 points in the histogram
         "-s", "name O",      # Compute rdf between O
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_oxygen_rdf(data)
 
 
-def oxygen_rdf_partial():
+def oxygen_rdf_partial(output):
     '''Oxygen rdf for the second half of the trajectory'''
     out, err = cfiles(
         "rdf",
@@ -98,28 +98,28 @@ def oxygen_rdf_partial():
         "-c", "15",          # Set cell
         "-p", "150",         # Use 150 points in the histogram
         "-s", "name O",      # Compute rdf between O
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_oxygen_rdf(data)
 
 
-def OH_rdf_all():
+def OH_rdf_all(output):
     '''Oxygen-Hydrogen rdf for the whole trajectory'''
     out, err = cfiles(
         "rdf",
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) O and name(#2) H",
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_oh_rdf(data)
 
     out, err = cfiles(
@@ -127,16 +127,16 @@ def OH_rdf_all():
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) H and name(#2) O",
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_ho_rdf(data)
 
 
-def OH_rdf_partial():
+def OH_rdf_partial(output):
     '''Oxygen-Hydrogen rdf for half of the trajectory'''
     out, err = cfiles(
         "rdf",
@@ -144,12 +144,12 @@ def OH_rdf_partial():
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) O and name(#2) H",
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_oh_rdf(data)
 
     out, err = cfiles(
@@ -158,18 +158,18 @@ def OH_rdf_partial():
         "-c", "15",
         "-p", "150",
         "-s", "pairs: name(#1) H and name(#2) O",
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_rdf(OUTPUT)
+    data = read_rdf(output)
     check_ho_rdf(data)
 
 
 if __name__ == '__main__':
-    oxygen_rdf_all()
-    oxygen_rdf_partial()
-    OH_rdf_all()
-    OH_rdf_partial()
-    os.unlink(OUTPUT)
+    with tempfile.NamedTemporaryFile() as file:
+        oxygen_rdf_all(file.name)
+        oxygen_rdf_partial(file.name)
+        OH_rdf_all(file.name)
+        OH_rdf_partial(file.name)

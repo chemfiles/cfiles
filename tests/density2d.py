@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
 from testrun import cfiles
+import tempfile
 import os
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "nt.xyz")
-OUTPUT = "tmp.dat"
 
 
 def read_data(path):
@@ -29,12 +29,14 @@ def check_density(data):
         if (z > 1 and z < 3 and r < 8 and r > 7):
             assert(value == 0)
 
+
 def check_max(data):
     # Check the maximal value
     max_value = max(data, key=lambda u: u[1])
     assert(max_value[1] > 0)
 
-def density(selection):
+
+def density(selection, output):
     out, err = cfiles(
         "density",
         "-c", "24:24:25.458:90:90:120",
@@ -45,23 +47,26 @@ def density(selection):
         "--points=200",
         "--origin", "0:0:0",
         "-s", selection,
-        TRAJECTORY, "-o", OUTPUT
+        TRAJECTORY, "-o", output
     )
     assert(out == "")
     assert(err == "")
 
-    data = read_data(OUTPUT)
+    data = read_data(output)
     check_density(data)
     check_max(data)
     return data
 
+
 if __name__ == '__main__':
-    tot = density("atoms: all")
-    al = density("atoms: type Al")
-    si = density("atoms: type Si")
-    o = density("atoms: type O")
-    h = density("atoms: type H")
-    # Check tot is the sum of all the elements
-    for point in range(200):
-        assert(tot[point][2] - (al[point][2] + si[point][2] + o[point][2] + h[point][2]) < 0.1)
-    os.unlink(OUTPUT)
+    with tempfile.NamedTemporaryFile() as file:
+        tot = density("atoms: all", file.name)
+        al = density("atoms: type Al", file.name)
+        si = density("atoms: type Si", file.name)
+        o = density("atoms: type O", file.name)
+        h = density("atoms: type H", file.name)
+
+        # Check tot is the sum of all the elements
+        for point in range(200):
+            sum = al[point][2] + si[point][2] + o[point][2] + h[point][2]
+            assert(abs(tot[point][2] - sum) < 1e-3)

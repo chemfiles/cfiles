@@ -5,41 +5,27 @@ import os
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
 OUTPUT = "tmp.dat"
 EXPECTED = [
-    (39, 0, 1), (270, 0, 2), (69, 3, 4), (75, 3, 5), (228, 6, 8), (66, 9, 10),
-    (3, 9, 11), (24, 18, 19), (27, 18, 20), (42, 21, 22)
+    (0, 1, 39), (0, 2, 270), (3, 4, 69), (3, 5, 75), (6, 8, 228), (9, 10, 66),
+    (9, 11, 3), (18, 19, 24), (18, 20, 27), (21, 22, 42)
 ]
 
 
 def read_data(path):
-    data = []
     indexes = []
-    frame = True
     with open(path) as fd:
         for line in fd:
             if line.startswith("#"):
-                if line.startswith("# Frame: 1"):
-                    frame = False
                 continue
-            dist, angle = map(float, line.split()[-2:])
-            data.append((dist, angle))
-            if (frame):
-                donor = int(line.split()[1])
-                acceptor = int(line.split()[3])
-                hydrogen = int(line.split()[5])
-                indexes.append((donor, acceptor, hydrogen))
-    return data, indexes
-
-
-def check_angles(data):
-    # Check the maximal value
-    max_value = max(data, key=lambda u: u[0])
-    assert(max_value[0] <= 3)
-    max_value = max(data, key=lambda u: u[1])
-    assert(max_value[1] <= 30)
-    assert(max_value[1] >= 0)
+            splitted = map(int, line.split())
+            if len(splitted) == 2:
+                continue
+            donor, acceptor, hydrogen = splitted
+            indexes.append((donor, acceptor, hydrogen))
+    return indexes
 
 
 def check_hbonds(indexes):
+    print(indexes)
     # Check the first hbonds
     for bond in EXPECTED:
         assert(bond in indexes)
@@ -55,8 +41,7 @@ def hbonds():
     assert(out == "")
     assert(err == "")
 
-    data, indexes = read_data(OUTPUT)
-    check_angles(data)
+    indexes = read_data(OUTPUT)
     check_hbonds(indexes)
 
 

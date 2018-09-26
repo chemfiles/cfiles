@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-project(cfiles CXX)
+project(cfiles C CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
+
+option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/chemfiles/CMakeLists.txt")
     add_subdirectory(chemfiles)
@@ -42,26 +44,41 @@ add_custom_target(version
 )
 
 
-add_library(docopt STATIC external/docopt/docopt.cpp)
-target_include_directories(docopt PUBLIC external)
+add_library(docopt OBJECT external/docopt/docopt.cpp)
+target_include_directories(docopt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external)
 
 add_library(eigen INTERFACE)
-target_include_directories(eigen INTERFACE external)
+target_include_directories(eigen INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_compile_definitions(eigen INTERFACE -DEIGEN_MPL2_ONLY)
+
+add_library(kissfft OBJECT external/kissfft/kiss_fft.c external/kissfft/tools/kiss_fftr.c)
+target_include_directories(kissfft PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft/tools
+)
 
 file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp)
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-add_library(libcfiles STATIC ${sources} $<TARGET_OBJECTS:fmt::object>)
-target_include_directories(libcfiles PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_BINARY_DIR}/
+
+add_library(libcfiles
+    ${sources}
+    $<TARGET_OBJECTS:docopt>
+    $<TARGET_OBJECTS:kissfft>
+    $<TARGET_OBJECTS:fmt::object>
+)
+set_target_properties(libcfiles PROPERTIES OUTPUT_NAME cfiles)
+
+target_include_directories(libcfiles
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_BINARY_DIR}/
+    PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/chemfiles/external/fmt/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft/tools
 )
 
-target_include_directories(libcfiles PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/chemfiles/external/fmt/include
-)
-
-target_link_libraries(libcfiles docopt eigen chemfiles)
+target_link_libraries(libcfiles eigen chemfiles)
 
 include(CompilerFlags)
 try_compile(STD_REGEX_WORKS

@@ -4,11 +4,14 @@
 #include <docopt/docopt.h>
 #include <sstream>
 #include <fstream>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
 #include "HBonds.hpp"
+#include "Autocorrelation.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 #include "warnings.hpp"
@@ -71,6 +74,10 @@ Options:
   --angle=<angle>               angle criterion to use for the hydrogen bond
                                 detection. <angle> is the acceptor-donor-hydrogen
                                 maximum angle in degrees. [default: 30.0]
+  --autocorrelation=<output>    compute the hydrogen bond existence
+                                autocorrelation and output it to the given
+                                <ouput> file. This can be used to retrieve the
+                                lifetime of hydrogen bonds.
 )";
 
 struct hbond {
@@ -78,6 +85,26 @@ struct hbond {
     size_t hydrogen;
     size_t acceptor;
 };
+
+bool operator==(const hbond& lhs, const hbond& rhs) {
+    return (lhs.donor == rhs.donor && lhs.hydrogen == rhs.hydrogen && lhs.acceptor == rhs.acceptor);
+}
+
+inline void hash_combine(size_t& hash, size_t value) {
+    hash ^= std::hash<size_t>()(value) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+}
+
+namespace std {
+    template <> struct hash<hbond> {
+        size_t operator()(const hbond& bond) const {
+            size_t hash = 0;
+            hash_combine(hash, bond.donor);
+            hash_combine(hash, bond.hydrogen);
+            hash_combine(hash, bond.acceptor);
+            return hash;
+        }
+    };
+}
 
 static HBonds::Options parse_options(int argc, const char* argv[]) {
     auto options_str = command_header("hbonds", HBonds().description()) + "\n";
@@ -92,28 +119,38 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
     options.acceptor_selection = args.at("--acceptors").asString();
     options.donor_selection = args.at("--donors").asString();
 
-    if (args.at("--output")){
+    options.distance = string2double(args.at("--distance").asString());
+    options.angle = string2double(args.at("--angle").asString()) * PI / 180;
+
+    if (args.at("--output")) {
         options.outfile = args.at("--output").asString();
     } else {
         options.outfile = options.trajectory + ".hbonds.dat";
+    }
+
+    if (args.at("--autocorrelation")) {
+        options.autocorr_output = args.at("--autocorrelation").asString();
+        options.autocorrelation = true;
+    } else {
+        options.autocorrelation = false;
     }
 
     if (args.at("--steps")) {
         options.steps = steps_range::parse(args.at("--steps").asString());
     }
 
-    if (args.at("--format")){
+    if (args.at("--format")) {
         options.format = args.at("--format").asString();
     }
 
-    if (args.at("--topology")){
+    if (args.at("--topology")) {
         if (options.guess_bonds) {
             throw CFilesError("Can not use both '--topology' and '--guess-bonds'");
         }
         options.topology = args.at("--topology").asString();
     }
 
-    if (args.at("--topology-format")){
+    if (args.at("--topology-format")) {
         if (options.topology == "") {
             throw CFilesError("Can not use '--topology-format' without a '--topology'");
         }
@@ -125,18 +162,8 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
         options.cell = parse_cell(args.at("--cell").asString());
     }
 
-    options.distance = 3.0;
-    options.angle = 30.0;
-    if (args.at("--distance")) {
-        options.distance = string2double(args.at("--distance").asString());
-    }
-    if (args.at("--angle")) {
-        options.angle = string2double(args.at("--angle").asString()) * PI / 180;
-    }
-
     return options;
 }
-
 
 std::string HBonds::description() const {
     return "compute hydrogen bonds using distance/angle criteria";
@@ -171,6 +198,8 @@ int HBonds::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
+    auto existing_bonds = std::unordered_map<hbond, std::vector<float>>();
+    size_t used_steps = 0;
     for (auto step: options.steps) {
         if (step >= infile.nsteps()) {
             break;
@@ -180,7 +209,7 @@ int HBonds::run(int argc, const char* argv[]) {
             frame.guess_bonds();
         }
 
-        auto bonds = std::vector<hbond>();
+        auto bonds = std::unordered_set<hbond>();
         auto matched = donors.evaluate(frame);
         for (auto match: matched) {
             assert(match.size() == 2);
@@ -190,8 +219,8 @@ int HBonds::run(int argc, const char* argv[]) {
 
             if (frame[hydrogen].type() != "H") {
                 warn_once(
-                    "the second atom in the donors selection is not an hydrogen (type "
-                    + frame[hydrogen].type() + ")"
+                    "the second atom in the donors selection might not be an "
+                    "hydrogen (expected type H, got type " + frame[hydrogen].type() + ")"
                 );
             }
 
@@ -200,7 +229,7 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto distance = frame.distance(acceptor, donor);
                     auto theta = frame.angle(acceptor, donor, hydrogen);
                     if (distance < options.distance && theta < options.angle) {
-                        bonds.push_back({donor, hydrogen, acceptor});
+                        bonds.emplace(hbond{donor, hydrogen, acceptor});
                     }
                 }
             }
@@ -211,6 +240,47 @@ int HBonds::run(int argc, const char* argv[]) {
         fmt::print(outfile, "# Donnor Hydrogen Acceptor\n", step);
         for (auto& bond: bonds) {
             fmt::print(outfile, "{} {} {}\n", bond.donor, bond.hydrogen, bond.acceptor);
+        }
+
+        if (options.autocorrelation) {
+            for (auto& bond: bonds) {
+                auto it = existing_bonds.find(bond);
+                if (it == existing_bonds.end()) {
+                    // New bond. Insert it and pad with zeros
+                    auto pair = existing_bonds.emplace(bond, std::vector<float>(used_steps, 0.0));
+                    pair.first->second.push_back(1.0);
+                } else {
+                    // Already seen this bond, add a single 1
+                    it->second.push_back(1.0);
+                }
+            }
+            // Add 0 to all bonds we did not see in this frame
+            for (auto& it: existing_bonds) {
+                if (it.second.size() != used_steps + 1) {
+                    it.second.push_back(0.0);
+                }
+            }
+        }
+        used_steps += 1;
+    }
+
+    if (options.autocorrelation) {
+        // Compute the autocorrelation for all bonds and average them
+        auto correlator = Autocorrelation(used_steps);
+        for (auto&& it: std::move(existing_bonds)) {
+            correlator.add_timeserie(std::move(it.second));
+        }
+        correlator.normalize();
+        auto& correlation = correlator.average();
+
+        std::ofstream outcorr(options.autocorr_output, std::ios::out);
+        if (!outcorr.is_open()) {
+            throw CFilesError("Could not open the '" + options.autocorr_output + "' file.");
+        }
+        fmt::print(outcorr, "# Auto correlation between H-bonds existence\n");
+        fmt::print(outcorr, "# step value\n");
+        for (size_t i=0; i<correlation.size() / 2; i++) {
+            fmt::print(outcorr, "{} {}\n", i * options.steps.stride(), correlation[i]);
         }
     }
 

@@ -61,6 +61,18 @@ public:
         return 1 + (last_ - first_) / stride_;
     }
 
+    size_t first() const {
+        return first_;
+    }
+
+    size_t last() const {
+        return last_;
+    }
+
+    size_t stride() const {
+        return stride_;
+    }
+
     /// Parse a range `string` of the form `first:last:stride`, which will
     /// generate the steps from first to last (excluded) by a step of stride.
     static steps_range parse(const std::string& string);

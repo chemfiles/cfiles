@@ -5,9 +5,10 @@
 #define CFILES_ERRORS_HPP
 
 #include <stdexcept>
+#include <string>
 
 struct CFilesError : public std::runtime_error {
-    CFilesError(const std::string& message): std::runtime_error(message) {}
+    CFilesError(std::string message): std::runtime_error(std::move(message)) {}
 };
 
 #endif

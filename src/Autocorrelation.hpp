@@ -4,32 +4,79 @@
 #ifndef CFILES_AUTOCORRELATION_HPP
 #define CFILES_AUTOCORRELATION_HPP
 
-#include <kiss_fftr.h>
 #include <vector>
-
 #include "Errors.hpp"
 
-/// A RAII capsule for kiss_fftr_cfg
-class fft_config {
-public:
-    fft_config():fft_config(0, false) {}
+#ifdef CFILES_USE_FFTW3
+#include <fftw3.h>
+#else
+#include <kiss_fftr.h>
+#endif
 
-    fft_config(size_t size, bool reverse) {
-        cfg_ = kiss_fftr_alloc(size, reverse, nullptr, nullptr);
-        if (cfg_ == nullptr) {
-            throw CFilesError("Could not alocate memory for FFT");
+#ifdef CFILES_USE_FFTW3
+/// A RAII capsule for fftwf_plan
+class FFTWPlan {
+public:
+    FFTWPlan(size_t size, bool reverse) {
+        if (reverse) {
+            // Use the FFTW_UNALIGNED flag, as this will be used for multiple
+            // array, over which this code does not have control w.r.t.
+            // alignment. Allocating memory with fftw_malloc would need a big
+            // refactoring.
+            plan_ = fftwf_plan_dft_c2r_1d(size, nullptr, nullptr, FFTW_ESTIMATE | FFTW_UNALIGNED);
+        } else {
+            plan_ = fftwf_plan_dft_r2c_1d(size, nullptr, nullptr, FFTW_ESTIMATE | FFTW_UNALIGNED);
+        }
+        if (plan_ == nullptr) {
+            throw CFilesError("Could not allocate memory for FFT");
         }
     }
 
-    ~fft_config() {
+    ~FFTWPlan() {
+        fftwf_destroy_plan(plan_);
+    }
+
+    FFTWPlan(FFTWPlan&& other): plan_(other.plan_) {
+        other.plan_ = nullptr;
+    }
+
+    FFTWPlan& operator=(FFTWPlan&& other) {
+        fftwf_destroy_plan(this->plan_);
+        this->plan_ = other.plan_;
+        other.plan_ = nullptr;
+        return *this;
+    }
+
+    operator fftwf_plan() const {
+        return plan_;
+    }
+private:
+    fftwf_plan plan_ = nullptr;
+};
+
+using fft_complex = fftwf_complex;
+using fft_plan = FFTWPlan;
+
+#else
+/// A RAII capsule for kiss_fftr_cfg
+class KissFTTConfig {
+public:
+    KissFTTConfig(size_t size, bool reverse) {
+        cfg_ = kiss_fftr_alloc(size, reverse, nullptr, nullptr);
+        if (cfg_ == nullptr) {
+            throw CFilesError("Could not allocate memory for FFT");
+        }
+    }
+
+    ~KissFTTConfig() {
         kiss_fft_free(cfg_);
     }
 
-    fft_config(fft_config&& other): cfg_(other.cfg_) {
+    KissFTTConfig(KissFTTConfig&& other): cfg_(other.cfg_) {
         other.cfg_ = nullptr;
     }
 
-    fft_config& operator=(fft_config&& other) {
+    KissFTTConfig& operator=(KissFTTConfig&& other) {
         kiss_fft_free(this->cfg_);
         this->cfg_ = other.cfg_;
         other.cfg_ = nullptr;
@@ -43,6 +90,9 @@ private:
     kiss_fftr_cfg cfg_ = nullptr;
 };
 
+using fft_complex = kiss_fft_cpx;
+using fft_plan = KissFTTConfig;
+#endif
 
 class Autocorrelation {
 public:
@@ -54,13 +104,14 @@ public:
 
     /// Normalize the averaged autocorrelations
     void normalize() {
+        float norm = result_[0] / size_;
         for (size_t i=0; i<size_; i++) {
-            result_[i] /= n_timeseries_;
+            result_[i] /= (norm * (size_ - i));
         }
     }
 
     /// Get the averaged autocorrelations
-    const std::vector<float>& average() const {
+    const std::vector<float>& get_result() const {
         return result_;
     }
 
@@ -75,17 +126,19 @@ private:
 
     /// Number of elements in the time series
     size_t size_;
+    /// Number of points for the FFT
+    size_t fft_size_;
     /// Number of timeseries used
     size_t n_timeseries_ = 0;
     /// Accumulated autocorrelations
     std::vector<float> result_;
 
     /// Buffer for FFT data
-    std::vector<kiss_fft_cpx> buffer_;
+    std::vector<fft_complex> spectrum_;
     /// FFT configuration
-    fft_config direct_;
+    fft_plan direct_;
     /// Reverse FFT configuration
-    fft_config reverse_;
+    fft_plan reverse_;
 };
 
 #endif

@@ -271,7 +271,7 @@ int HBonds::run(int argc, const char* argv[]) {
             correlator.add_timeserie(std::move(it.second));
         }
         correlator.normalize();
-        auto& correlation = correlator.average();
+        auto& correlation = correlator.get_result();
 
         std::ofstream outcorr(options.autocorr_output, std::ios::out);
         if (!outcorr.is_open()) {

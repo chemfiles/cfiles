@@ -211,6 +211,10 @@ int HBonds::run(int argc, const char* argv[]) {
 
         auto bonds = std::unordered_set<hbond>();
         auto matched = donors.evaluate(frame);
+        if (matched.empty()) {
+            warn("no atom matching the donnor selection at step " + std::to_string(step));
+        }
+
         for (auto match: matched) {
             assert(match.size() == 2);
 
@@ -224,7 +228,12 @@ int HBonds::run(int argc, const char* argv[]) {
                 );
             }
 
-            for (auto acceptor: acceptors.list(frame)) {
+            auto acceptors_list = acceptors.list(frame);
+            if (acceptors_list.empty()) {
+                warn("no atom matching the acceptor selection at step " + std::to_string(step));
+            }
+
+            for (auto acceptor: acceptors_list) {
                 if (acceptor != donor && frame.topology()[acceptor].type() != "H") {
                     auto distance = frame.distance(acceptor, donor);
                     auto theta = frame.angle(acceptor, donor, hydrogen);

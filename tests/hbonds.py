@@ -25,7 +25,6 @@ def read_data(path):
 
 
 def check_hbonds(indexes):
-    print(indexes)
     # Check the first hbonds
     for bond in EXPECTED:
         assert(bond in indexes)
@@ -45,6 +44,38 @@ def hbonds(output):
     check_hbonds(indexes)
 
 
+def correlations(output):
+    output_corr = output + ".autocorr"
+    out, err = cfiles(
+        "hbonds",
+        "--guess-bonds",
+        "-c", "15",
+        TRAJECTORY, "-o", output,
+        "--autocorrelation", output_corr
+    )
+    assert(out == "")
+    assert(err == "")
+
+    # This is only a regression test, checking that the right output is
+    # generated.
+    expected = os.path.join(
+        os.path.dirname(__file__), "data", "water.hbonds.autocorrelation.dat"
+    )
+    with open(output_corr) as actual:
+        with open(expected) as expected:
+            for line in actual:
+                expected_line = expected.readline()
+                if line.startswith("#"):
+                    continue
+                step, value = map(float, line.split())
+                exp_step, exp_value = map(float, expected_line.split())
+                assert(step == exp_step)
+                assert(abs((value - exp_value) / value) < 1e-3)
+
+    os.unlink(output_corr)
+
+
 if __name__ == '__main__':
     with tempfile.NamedTemporaryFile() as file:
         hbonds(file.name)
+        correlations(file.name)

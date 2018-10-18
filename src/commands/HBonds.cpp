@@ -68,9 +68,9 @@ Options:
   --acceptors=<sel>             selection to use for the acceptors. This must
                                 be a selection of size 1.
                                 [default: atoms: type O or type N or type F]
-  --distance=<dist>             distance criterion to use for the hydrogen bond
-                                detection. <dist> is the donor-acceptor maximum
-                                distance in angstroms. [default: 3.0]
+  --distance=<distance>         distance criterion to use for the hydrogen bond
+                                detection. <distance> is the donor-acceptor
+                                maximum distance in angstroms. [default: 3.5]
   --angle=<angle>               angle criterion to use for the hydrogen bond
                                 detection. <angle> is the acceptor-donor-hydrogen
                                 maximum angle in degrees. [default: 30.0]

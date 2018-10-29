@@ -12,6 +12,7 @@
 #include "commands/Info.hpp"
 #include "commands/Merge.hpp"
 #include "commands/Rdf.hpp"
+#include "commands/RotationCorrelation.hpp"
 
 const std::vector<command_creator>& all_commands() {
     static std::vector<command_creator> commands = {
@@ -24,6 +25,7 @@ const std::vector<command_creator>& all_commands() {
         {"info", [](){return std::unique_ptr<Command>(new Info());}},
         {"merge", [](){return std::unique_ptr<Command>(new Merge());}},
         {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
+        {"rotcf", [](){return std::unique_ptr<Command>(new RotationCorrelation());}},
     };
     return commands;
 }

@@ -288,8 +288,10 @@ int HBonds::run(int argc, const char* argv[]) {
         }
         fmt::print(outcorr, "# Auto correlation between H-bonds existence\n");
         fmt::print(outcorr, "# step value\n");
+
+        auto norm = correlation[0];
         for (size_t i=0; i<correlation.size() / 2; i++) {
-            fmt::print(outcorr, "{} {}\n", i * options.steps.stride(), correlation[i]);
+            fmt::print(outcorr, "{} {}\n", i * options.steps.stride(), correlation[i] / norm);
         }
     }
 

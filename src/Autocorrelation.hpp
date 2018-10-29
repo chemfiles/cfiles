@@ -104,9 +104,10 @@ public:
 
     /// Normalize the averaged autocorrelations
     void normalize() {
-        float norm = result_[0] / size_;
         for (size_t i=0; i<size_; i++) {
-            result_[i] /= (norm * (size_ - i));
+            // 2 * size_ is the gain from doing FFT -> iFFT with both FFTW3 and
+            // KissFFT
+            result_[i] /=  2 * size_ * n_timeseries_ * (size_ - i);
         }
     }
 
@@ -129,7 +130,7 @@ private:
     /// Number of points for the FFT
     size_t fft_size_;
     /// Number of timeseries used
-    size_t n_timeseries_ = 0;
+    size_t n_timeseries_;
     /// Accumulated autocorrelations
     std::vector<float> result_;
 

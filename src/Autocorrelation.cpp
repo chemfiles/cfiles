@@ -14,6 +14,7 @@ Autocorrelation::Autocorrelation(size_t size):
 #else
     fft_size_(std::max(2 * size_, static_cast<size_t>(kiss_fftr_next_fast_size_real(size_)))),
 #endif
+    n_timeseries_(0),
     result_(size_, 0),
     spectrum_(fft_size_ / 2 + 1),
     direct_(fft_size_, false),

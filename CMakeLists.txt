@@ -52,19 +52,24 @@ add_library(eigen INTERFACE)
 target_include_directories(eigen INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_compile_definitions(eigen INTERFACE -DEIGEN_MPL2_ONLY)
 
-add_library(kissfft OBJECT external/kissfft/kiss_fft.c external/kissfft/tools/kiss_fftr.c)
-target_include_directories(kissfft PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft/tools
-)
+if (${CFILES_USE_FFTW3})
+    set(KISSFTT_OBJECTS "")
+else()
+    add_library(kissfft OBJECT external/kissfft/kiss_fft.c external/kissfft/tools/kiss_fftr.c)
+    target_include_directories(kissfft PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/kissfft/tools
+    )
+    set(KISSFTT_OBJECTS $<TARGET_OBJECTS:kissfft>)
+endif()
 
 file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp)
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
 add_library(libcfiles
     ${sources}
+    ${KISSFTT_OBJECTS}
     $<TARGET_OBJECTS:docopt>
-    $<TARGET_OBJECTS:kissfft>
     $<TARGET_OBJECTS:fmt::object>
 )
 set_target_properties(libcfiles PROPERTIES OUTPUT_NAME cfiles)
@@ -81,11 +86,13 @@ target_include_directories(libcfiles
 
 target_link_libraries(libcfiles eigen chemfiles)
 
-include(CompilerFlags)
-try_compile(STD_REGEX_WORKS
-    ${PROJECT_BINARY_DIR}
-    ${PROJECT_SOURCE_DIR}/cmake/check_std_regex.cpp
-)
+if (NOT DEFINED STD_REGEX_WORKS)
+    include(CompilerFlags)
+    try_compile(STD_REGEX_WORKS
+        ${PROJECT_BINARY_DIR}
+        ${PROJECT_SOURCE_DIR}/cmake/check_std_regex.cpp
+    )
+endif()
 
 if(NOT ${STD_REGEX_WORKS})
     message(STATUS "Using Boost.Regex instead of std::regex")

@@ -12,8 +12,8 @@ def read_rdf(path):
         for line in fd:
             if line.startswith("#"):
                 continue
-            r, g_r, n_r = map(float, line.split())
-            data.append((r, g_r, n_r))
+            r, g_r, n_ij, n_ji = map(float, line.split())
+            data.append((r, g_r, n_ij, n_ji))
     return data
 
 
@@ -25,6 +25,7 @@ def check_oxygen_rdf(data):
     assert(max_value[1] > 3)
     # Check that the coordination number in the first sphere is around 2.6
     assert(abs(data[max_index + 3][2] - 2.6) < 0.2)
+    assert(abs(data[max_index + 3][3] - 2.6) < 0.2)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
@@ -42,8 +43,9 @@ def check_oh_rdf(data):
     max_value = data[max_index]
     assert(max_value[0] == 0.975)
     assert(max_value[1] > 25)
-    # Check that the coordination number in the first sphere is 2
-    assert(abs(data[max_index + 3][2] - 2) < 0.1)
+    # Check the coordination number in the first sphere
+    assert(abs(data[max_index + 3][2] - 2) < 0.01)
+    assert(abs(data[max_index + 3][3] - 1) < 0.01)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]
@@ -61,8 +63,9 @@ def check_ho_rdf(data):
     max_value = data[max_index]
     assert(max_value[0] == 0.975)
     assert(max_value[1] > 25)
-    # Check that the coordination number in the first sphere is 1
-    assert(abs(data[max_index + 3][2] - 1) < 0.1)
+    # Check the coordination number in the first sphere
+    assert(abs(data[max_index + 3][2] - 1) < 0.01)
+    assert(abs(data[max_index + 3][3] - 2) < 0.01)
 
     # Check the last zero value
     last_zero = [u for u in data if u[1] == 0 and u[0] < max_value[0]][-1]

@@ -113,12 +113,14 @@ Averager Rdf::setup(int argc, const char* argv[]) {
         }
     }
 
-    coordination_ = Averager(options_.npoints, 0, options_.rmax);
+    coord_ij_ = Averager(options_.npoints, 0, options_.rmax);
+    coord_ji_ = Averager(options_.npoints, 0, options_.rmax);
     return Averager(options_.npoints, 0, options_.rmax);
 }
 
 void Rdf::finish(const Histogram& histogram) {
-    coordination_.average();
+    coord_ij_.average();
+    coord_ji_.average();
 
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(!outfile.is_open()) {
@@ -127,10 +129,10 @@ void Rdf::finish(const Histogram& histogram) {
 
     outfile << "# Radial distribution function in trajectory " << AveCommand::options().trajectory << std::endl;
     outfile << "# Using selection: " << options_.selection << std::endl;
-    outfile << "# r\tg(r)\tN(r) " << std::endl;
+    outfile << "# r   g(r)   N_ij(r)   N_ji(r)" << std::endl;
 
     for (size_t i=0; i<histogram.size(); i++){
-        outfile << histogram.first().coord(i) << "\t" << histogram[i] << "\t" << coordination_[i] << "\n";
+        outfile << histogram.first().coord(i) << " " << histogram[i] << " " << coord_ij_[i] << " " << coord_ji_[i] << "\n";
     }
 }
 
@@ -238,6 +240,7 @@ void Rdf::accumulate(const Frame& frame, Histogram& histogram) {
         return val / (4 * PI * factor * dr * r * r);
     });
 
+    // Normalize i->j neighbors count
     if (use_center) {
         factor = 4 * PI * n_first / volume;
     } else {
@@ -247,9 +250,24 @@ void Rdf::accumulate(const Frame& frame, Histogram& histogram) {
     }
     for (size_t i=1; i<histogram.size(); i++){
         auto r = (i + 0.5) * dr;
-        coordination_[i] = coordination_[i - 1] + factor * histogram[i] * r * r * dr;
+        coord_ij_[i] = coord_ij_[i - 1] + factor * histogram[i] * r * r * dr;
     }
-    coordination_.step();
+
+    // Normalize j->i neighbors count
+    if (use_center) {
+        factor = 4 * PI * n_second / volume;
+    } else {
+        double rho = (n_first + n_second) / volume;
+        double alpha = static_cast<double>(n_first) / static_cast<double>(n_first + n_second);
+        factor = alpha * 4 * PI * rho;
+    }
+    for (size_t i=1; i<histogram.size(); i++){
+        auto r = (i + 0.5) * dr;
+        coord_ji_[i] = coord_ji_[i - 1] + factor * histogram[i] * r * r * dr;
+    }
+
+    coord_ij_.step();
+    coord_ji_.step();
 }
 
 void Rdf::check_rmax(const chemfiles::Frame& frame) const {

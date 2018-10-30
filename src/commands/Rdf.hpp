@@ -41,8 +41,10 @@ private:
     chemfiles::optional<chemfiles::Selection> center_sel_ = chemfiles::nullopt;
     /// Fixed center point
     chemfiles::optional<chemfiles::Vector3D> center_ = chemfiles::nullopt;
-    /// Also compute and average coordination numbers
-    Averager coordination_;
+    /// Also compute and average coordination numbers, for both i->j pairs and
+    /// j->i pairs
+    Averager coord_ij_;
+    Averager coord_ji_;
 };
 
 #endif

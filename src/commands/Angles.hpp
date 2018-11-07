@@ -7,7 +7,7 @@
 #include "AveCommand.hpp"
 #include "utils.hpp"
 
-class AngleDistribution final: public AveCommand {
+class Angles final: public AveCommand {
 public:
     struct Options {
         /// Output data file
@@ -18,7 +18,7 @@ public:
         size_t npoints;
     };
 
-    AngleDistribution(): selection_("angles: all") {}
+    Angles(): selection_("angles: all") {}
     std::string description() const override;
 
     Averager setup(int argc, const char* argv[]) override;

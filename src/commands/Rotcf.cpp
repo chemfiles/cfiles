@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#include "RotationCorrelation.hpp"
+#include "Rotcf.hpp"
 #include "Autocorrelation.hpp"
 #include "warnings.hpp"
 
@@ -33,7 +33,7 @@ Examples:
 Options:
   -h --help                     show this help
   -o <file>, --output=<file>    write result to <file>. This default to the
-                                trajectory file name with the `.RotationCorrelation.dat`
+                                trajectory file name with the `.rotcf.dat`
                                 extension.
   --format=<format>             force the input file format to be <format>
   -t <path>, --topology=<path>  alternative topology file for the input
@@ -54,13 +54,13 @@ Options:
                                 selection of size 2 [default: bonds: all]
 )";
 
-static RotationCorrelation::Options parse_options(int argc, const char* argv[]) {
-    auto options_str = command_header("rotcf", RotationCorrelation().description()) + "\n";
+static Rotcf::Options parse_options(int argc, const char* argv[]) {
+    auto options_str = command_header("rotcf", Rotcf().description()) + "\n";
     options_str += "Guillaume Fraux <guillaume@fraux.fr>\n";
     options_str += OPTIONS;
     auto args = docopt::docopt(options_str, {argv, argv + argc}, true, "");
 
-    RotationCorrelation::Options options;
+    Rotcf::Options options;
     options.trajectory = args.at("<trajectory>").asString();
     options.guess_bonds = args.at("--guess-bonds").asBool();
 
@@ -69,7 +69,7 @@ static RotationCorrelation::Options parse_options(int argc, const char* argv[]) 
     if (args.at("--output")) {
         options.outfile = args.at("--output").asString();
     } else {
-        options.outfile = options.trajectory + ".RotationCorrelation.dat";
+        options.outfile = options.trajectory + ".rotcf.dat";
     }
 
     if (args.at("--steps")) {
@@ -102,11 +102,11 @@ static RotationCorrelation::Options parse_options(int argc, const char* argv[]) 
     return options;
 }
 
-std::string RotationCorrelation::description() const {
+std::string Rotcf::description() const {
     return "rotation correlation dynamic for arbitrary bonds and molecules";
 }
 
-int RotationCorrelation::run(int argc, const char* argv[]) {
+int Rotcf::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
 
     auto selection = Selection(options.selection);

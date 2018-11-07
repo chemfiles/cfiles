@@ -1,8 +1,8 @@
 // cfiles, an analysis frontend for the Chemfiles library
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
 
-#ifndef CFILES_DENSITY_PROFILE_HPP
-#define CFILES_DENSITY_PROFILE_HPP
+#ifndef CFILES_DENSITY_HPP
+#define CFILES_DENSITY_HPP
 
 #include <chemfiles.hpp>
 
@@ -10,7 +10,7 @@
 #include "Axis.hpp"
 #include "utils.hpp"
 
-class DensityProfile final: public AveCommand {
+class Density final: public AveCommand {
 public:
     struct Options {
     /// Output
@@ -29,7 +29,7 @@ public:
     bool fractional = false;
     };
 
-    DensityProfile(): selection_("atoms: all"), axis_() {}
+    Density(): selection_("atoms: all"), axis_() {}
     std::string description() const override;
 
     Averager setup(int argc, const char* argv[]) override;

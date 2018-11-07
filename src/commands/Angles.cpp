@@ -43,12 +43,12 @@ Options:
   -p <n>, --points=<n>          number of points in the histogram [default: 200])";
 
 
-std::string AngleDistribution::description() const {
+std::string Angles::description() const {
     return "compute angles and dihedral angles distribution";
 }
 
-Averager AngleDistribution::setup(int argc, const char* argv[]) {
-    auto options = command_header("angles", AngleDistribution().description());
+Averager Angles::setup(int argc, const char* argv[]) {
+    auto options = command_header("angles", Angles().description());
     options += "Guillaume Fraux <guillaume@fraux.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
@@ -74,7 +74,7 @@ Averager AngleDistribution::setup(int argc, const char* argv[]) {
     }
 }
 
-void AngleDistribution::finish(const Histogram& histogram) {
+void Angles::finish(const Histogram& histogram) {
     auto max = *std::max_element(histogram.begin(), histogram.end());
 
     std::ofstream outfile(options_.outfile, std::ios::out);
@@ -90,7 +90,7 @@ void AngleDistribution::finish(const Histogram& histogram) {
     }
 }
 
-void AngleDistribution::accumulate(const Frame& frame, Histogram& histogram) {
+void Angles::accumulate(const Frame& frame, Histogram& histogram) {
     auto matched = selection_.evaluate(frame);
     if (matched.empty()) {
         warn_once(

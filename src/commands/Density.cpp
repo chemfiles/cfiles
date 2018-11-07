@@ -5,7 +5,7 @@
 #include <sstream>
 #include <fstream>
 
-#include "DensityProfile.hpp"
+#include "Density.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 #include "warnings.hpp"
@@ -18,7 +18,7 @@ The output for the radial density profile is normalized by r.
 Selections for the particles can be specified using the chemfiles selection
 language. It is possible to provide an alternative unit cell or topology for the
 trajectory file if they are not defined in the trajectory format. The axis can
-be specified using a coordinate vector (e.g. z axis would be (0,0,1)).
+be specified using a coordinate vector (e.g. z axis would be (0, 0, 1)).
 
 It is also possible to compute 2D profiles by specifying 2 axis (see --axis and
 --radial options). Other options (--points, --max, --min) may accept two values,
@@ -40,7 +40,7 @@ Examples:
   cfiles density water.xyz --cell 15:15:25 --guess-bonds --axis=1:1:1
   cfiles density in.pdb --selection="x > 3" --points=500
   cfiles density nt.pdb --radial=Z --max=3 --origin=0:0:2
-  cfiles density nt.pdb --profile=Z --radial=Z --max=10:5 --origin=0:0:2
+  cfiles density nt.pdb --axis=Z --radial=Z --max=10:5 --origin=0:0:2
 
 Options:
   -h --help                     show this help
@@ -50,12 +50,12 @@ Options:
   -s <sel>, --selection=<sel>   selection to use for the particles. This must
                                 be a selection of size 1. [default: atoms: all]
   --axis=<axis>...              computes a linear density profile along <axis>.
-                                It should be either one of 'X','Y','Z'
+                                It should be either one of X, Y, or Z
                                 or a vector defining the axis (e.g. 1:1:1).
   --radial=<axis>...            computes a radial density profile using the
-                                distance to <axis>.
-                                It should be either one of 'X','Y','Z'
-                                or a vector defining the axis (e.g. 1:1:1).
+                                distance to <axis>. It should be either one of
+                                X, Y , or Z; or a vector defining the axis
+                                (e.g. 1:1:1).
   --origin=<coord>              coordinates for the origin of the axis (only
                                 relevant for radial profiles). [default: 0:0:0]
   --fractional                  use fractional coordinates instead of cartesian
@@ -65,8 +65,8 @@ Options:
   --min=<min>                   minimum distance in the profile. [default: 0]
                                 For radial profiles, <min> must be positive.)";
 
-Averager DensityProfile::setup(int argc, const char* argv[]) {
-    auto options = command_header("density", DensityProfile().description()) + "\n";
+Averager Density::setup(int argc, const char* argv[]) {
+    auto options = command_header("density", Density().description()) + "\n";
     options += "Laura Scalfi <laura.scalfi@ens.fr>\n\n";
     options += std::string(OPTIONS) + AveCommand::AVERAGE_OPTIONS;
     auto args = docopt::docopt(options, {argv, argv + argc}, true, "");
@@ -104,7 +104,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     }
 
     if (args.at("--points")) {
-        auto splitted = split(args.at("--points").asString(),':');
+        auto splitted = split(args.at("--points").asString(), ':');
         if (splitted.size() == 1) {
             options_.npoints[0] = string2long(splitted[0]);
             options_.npoints[1] = string2long(splitted[0]);
@@ -120,7 +120,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     }
 
     if (args.at("--origin")) {
-        auto splitted = split(args.at("--origin").asString(),':');
+        auto splitted = split(args.at("--origin").asString(), ':');
         if (splitted.size() != 3) {
             throw CFilesError("Origin for density profile should be a vector of size 3");
         }
@@ -131,7 +131,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     }
 
     if (args.at("--max")) {
-        auto splitted = split(args.at("--max").asString(),':');
+        auto splitted = split(args.at("--max").asString(), ':');
         if (splitted.size() == 1) {
             options_.max[0] = string2double(splitted[0]);
             options_.max[1] = string2double(splitted[0]);
@@ -147,7 +147,7 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     }
 
     if (args.at("--min")) {
-         auto splitted = split(args.at("--min").asString(),':');
+         auto splitted = split(args.at("--min").asString(), ':');
          if (splitted.size() == 1) {
              options_.min[0] = string2double(splitted[0]);
              options_.min[1] = string2double(splitted[0]);
@@ -192,11 +192,11 @@ Averager DensityProfile::setup(int argc, const char* argv[]) {
     }
 }
 
-std::string DensityProfile::description() const {
+std::string Density::description() const {
     return "compute density profiles";
 }
 
-void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram& profile) {
+void Density::accumulate(const chemfiles::Frame& frame, Histogram& profile) {
     auto positions = frame.positions();
     auto cell = frame.cell();
 
@@ -234,19 +234,20 @@ void DensityProfile::accumulate(const chemfiles::Frame& frame, Histogram& profil
         if (dimensionality() == 1) {
             profile.insert(x);
         } else {
-            profile.insert(x,y);
+            profile.insert(x, y);
         }
     }
 }
 
-void DensityProfile::finish(const Histogram& profile) {
+void Density::finish(const Histogram& profile) {
     std::ofstream outfile(options_.outfile, std::ios::out);
     if (outfile.is_open()) {
         outfile << "# Density profile in trajectory " << AveCommand::options().trajectory << std::endl;
-        outfile << "# along axis " << axis_[0].str() << std::endl;
+        outfile << "# along axis " << axis_[0].str();
         if (dimensionality() == 2) {
-            outfile << "# and along axis " << axis_[1].str() << std::endl;
+            outfile << " and " << axis_[1].str();
         }
+        outfile << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
         if (dimensionality() == 1) {
@@ -259,16 +260,16 @@ void DensityProfile::finish(const Histogram& profile) {
                 }
             }
         } else {
-            outfile << "# FirstDimension SecondDimension Density" << std::endl;
+            outfile << "# first second density" << std::endl;
 
             for (size_t i = 0; i < profile.first().nbins; i++){
                 for (size_t j = 0; j < profile.second().nbins; j++){
                     outfile << profile.first().coord(i) << "\t" << profile.second().coord(j) << "\t";
                     if (axis_[0].is_linear() and axis_[1].is_linear()) {
-                        outfile << profile(i,j) << "\n";
+                        outfile << profile(i, j) << "\n";
                     } else {
                         assert(axis_[0].is_linear() and axis_[1].is_radial());
-                        outfile << profile(i,j) / profile.second().coord(j) << "\n";
+                        outfile << profile(i, j) / profile.second().coord(j) << "\n";
                     }
                 }
             }

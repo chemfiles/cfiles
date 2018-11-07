@@ -5,27 +5,27 @@
 
 #include "commands/Angles.hpp"
 #include "commands/Convert.hpp"
-#include "commands/DensityProfile.hpp"
+#include "commands/Density.hpp"
 #include "commands/Elastic.hpp"
 #include "commands/Formats.hpp"
 #include "commands/HBonds.hpp"
 #include "commands/Info.hpp"
 #include "commands/Merge.hpp"
 #include "commands/Rdf.hpp"
-#include "commands/RotationCorrelation.hpp"
+#include "commands/Rotcf.hpp"
 
 const std::vector<command_creator>& all_commands() {
     static std::vector<command_creator> commands = {
-        {"angles", [](){return std::unique_ptr<Command>(new AngleDistribution());}},
+        {"angles", [](){return std::unique_ptr<Command>(new Angles());}},
         {"convert", [](){return std::unique_ptr<Command>(new Convert());}},
-        {"density", [](){return std::unique_ptr<Command>(new DensityProfile());}},
+        {"density", [](){return std::unique_ptr<Command>(new Density());}},
         {"elastic", [](){return std::unique_ptr<Command>(new Elastic());}},
         {"formats", [](){return std::unique_ptr<Command>(new Formats());}},
         {"hbonds", [](){return std::unique_ptr<Command>(new HBonds());}},
         {"info", [](){return std::unique_ptr<Command>(new Info());}},
         {"merge", [](){return std::unique_ptr<Command>(new Merge());}},
         {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
-        {"rotcf", [](){return std::unique_ptr<Command>(new RotationCorrelation());}},
+        {"rotcf", [](){return std::unique_ptr<Command>(new Rotcf());}},
     };
     return commands;
 }

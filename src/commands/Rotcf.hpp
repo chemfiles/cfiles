@@ -9,7 +9,7 @@
 #include "Command.hpp"
 #include "utils.hpp"
 
-class RotationCorrelation final: public Command {
+class Rotcf final: public Command {
 public:
     struct Options {
         /// Input trajectory
@@ -34,7 +34,7 @@ public:
         std::string selection;
     };
 
-    RotationCorrelation() {}
+    Rotcf() {}
     int run(int argc, const char* argv[]) override;
     std::string description() const override;
 };

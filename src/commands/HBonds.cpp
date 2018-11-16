@@ -273,7 +273,7 @@ int HBonds::run(int argc, const char* argv[]) {
         used_steps += 1;
     }
 
-    if (options.autocorrelation) {
+    if (options.autocorrelation && used_steps != 0) {
         // Compute the autocorrelation for all bonds and average them
         auto correlator = Autocorrelation(used_steps);
         for (auto&& it: std::move(existing_bonds)) {

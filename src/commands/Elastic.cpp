@@ -89,7 +89,6 @@ std::string Elastic::description() const {
 int Elastic::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
     auto cells = std::vector<Matrix3D>();
-    cells.reserve(options.steps.count());
 
     auto trajectory = Trajectory(options.trajectory, 'r', options.format);
     for (auto step: options.steps) {

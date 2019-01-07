@@ -34,6 +34,10 @@ public:
         bool autocorrelation = false;
         /// Autocorrelation output
         std::string autocorr_output;
+        /// Should we compute the hydrogen bonds histogram
+        bool histogram = false;
+        /// Autocorrelation output
+        std::string histogram_output;
         /// Selection for the acceptor of the hydrogen bond (usually O/N/S)
         std::string acceptor_selection;
         /// Selection for the donor of the hydrogen bond (usually O-H/N-H)
@@ -42,6 +46,8 @@ public:
         double distance;
         /// and for acceptor-donor-hydrogen max angle (in degrees)
         double angle;
+        /// If computing the histogram, how many points should it have
+        size_t npoints;
     };
 
     HBonds() {}

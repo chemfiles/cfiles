@@ -12,6 +12,7 @@
 
 #include "HBonds.hpp"
 #include "Autocorrelation.hpp"
+#include "Histogram.hpp"
 #include "Errors.hpp"
 #include "utils.hpp"
 #include "warnings.hpp"
@@ -74,6 +75,10 @@ Options:
   --angle=<angle>               angle criterion to use for the hydrogen bond
                                 detection. <angle> is the acceptor-donor-hydrogen
                                 maximum angle in degrees. [default: 30.0]
+  --histogram=<output>          accumulate the hydrogen bond histogram as a
+                                function of (r, theta) and output it to the
+                                given <ouput> file.
+  -p <n>, --points=<n>          number of points in the histogram [default: 200]
   --autocorrelation=<output>    compute the hydrogen bond existence
                                 autocorrelation and output it to the given
                                 <ouput> file. This can be used to retrieve the
@@ -121,6 +126,7 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
 
     options.distance = string2double(args.at("--distance").asString());
     options.angle = string2double(args.at("--angle").asString()) * PI / 180;
+    options.npoints = string2long(args["--points"].asString());
 
     if (args.at("--output")) {
         options.outfile = args.at("--output").asString();
@@ -133,6 +139,13 @@ static HBonds::Options parse_options(int argc, const char* argv[]) {
         options.autocorrelation = true;
     } else {
         options.autocorrelation = false;
+    }
+
+    if (args.at("--histogram")) {
+        options.histogram_output = args.at("--histogram").asString();
+        options.histogram = true;
+    } else {
+        options.histogram = false;
     }
 
     if (args.at("--steps")) {
@@ -198,6 +211,7 @@ int HBonds::run(int argc, const char* argv[]) {
         infile.set_topology(options.topology, options.topology_format);
     }
 
+    auto histogram = Histogram(options.npoints, 0, options.distance, options.npoints, 0, options.angle * 180 / PI);
     auto existing_bonds = std::unordered_map<hbond, std::vector<float>>();
     size_t used_steps = 0;
     for (auto step: options.steps) {
@@ -239,6 +253,9 @@ int HBonds::run(int argc, const char* argv[]) {
                     auto theta = frame.angle(acceptor, donor, hydrogen);
                     if (distance < options.distance && theta < options.angle) {
                         bonds.emplace(hbond{donor, hydrogen, acceptor});
+                        if (options.histogram) {
+                            histogram.insert(distance, theta * 180 / PI);
+                        }
                     }
                 }
             }
@@ -249,6 +266,34 @@ int HBonds::run(int argc, const char* argv[]) {
         fmt::print(outfile, "# Donnor Hydrogen Acceptor\n", step);
         for (auto& bond: bonds) {
             fmt::print(outfile, "{} {} {}\n", bond.donor, bond.hydrogen, bond.acceptor);
+        }
+
+        if (options.histogram) {
+            auto max = *std::max_element(histogram.begin(), histogram.end());
+            histogram.normalize([max](size_t, double value) {
+                return value / max;
+            });
+
+            std::ofstream outhist(options.histogram_output, std::ios::out);
+            if (!outhist.is_open()) {
+                throw CFilesError("Could not open the '" + options.histogram_output + "' file.");
+            }
+
+            fmt::print(outhist, "# Hydrogen bonds density histogram in {}\n", options.trajectory);
+            fmt::print(outhist, "# Between '{}' and '{}'\n", options.acceptor_selection, options.donor_selection);
+            fmt::print(outhist, "# r theta density\n", options.acceptor_selection, options.donor_selection);
+
+            for (size_t i = 0; i < histogram.first().nbins; i++){
+                for (size_t j = 0; j < histogram.second().nbins; j++){
+                    fmt::print(
+                        outhist,
+                        "{} {} {}\n",
+                        histogram.first().coord(i),
+                        histogram.second().coord(j),
+                        histogram(i, j)
+                    );
+                }
+            }
         }
 
         if (options.autocorrelation) {

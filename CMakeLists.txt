@@ -70,7 +70,7 @@ add_library(libcfiles
     ${sources}
     ${KISSFTT_OBJECTS}
     $<TARGET_OBJECTS:docopt>
-    $<TARGET_OBJECTS:fmt::object>
+    $<TARGET_OBJECTS:fmt>
 )
 set_target_properties(libcfiles PROPERTIES OUTPUT_NAME cfiles)
 

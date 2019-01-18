@@ -12,6 +12,10 @@
 using namespace chemfiles;
 constexpr double PI = 3.141592653589793238463;
 
+static inline double rad2deg(double value) {
+    return value * 180 / PI;
+}
+
 static const std::string OPTIONS =
 R"(Compute distribution of angles or dihedral angles along a trajectory. The
 angle can be specified using the chemfiles selection language. It is possible
@@ -55,7 +59,7 @@ Averager Angles::setup(int argc, const char* argv[]) {
 
     AveCommand::parse_options(args);
 
-    if (args["--output"]){
+    if (args["--output"]) {
         options_.outfile = args["--output"].asString();
     } else {
         options_.outfile = AveCommand::options().trajectory + ".angles.dat";
@@ -75,15 +79,18 @@ Averager Angles::setup(int argc, const char* argv[]) {
 }
 
 void Angles::finish(const Histogram& histogram) {
-    auto max = *std::max_element(histogram.begin(), histogram.end());
+    double sum = 0;
+    for (size_t i=0; i<histogram.size(); i++) {
+        sum += rad2deg(histogram.first().width) * histogram[i];
+    }
 
     std::ofstream outfile(options_.outfile, std::ios::out);
     if(outfile.is_open()) {
         outfile << "# Angles distribution in trajectory " << AveCommand::options().trajectory << std::endl;
         outfile << "# Selection: " << options_.selection << std::endl;
 
-        for (size_t i=0; i<histogram.size(); i++){
-            outfile << histogram.first().coord(i) * 180 / PI << "  " << histogram[i] / max << "\n";
+        for (size_t i=0; i<histogram.size(); i++) {
+            outfile << rad2deg(histogram.first().coord(i)) << "  " << histogram[i] / sum << "\n";
         }
     } else {
         throw CFilesError("Could not open the '" + options_.outfile + "' file.");

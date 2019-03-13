@@ -40,8 +40,8 @@ Usage:
 
 Examples:
   cfiles hbonds water.xyz --cell 15:15:25 --guess-bonds
-  cfiles hbonds in.pdb --donors=="bonds: type(#1) == O and type(#2) == H"
-  cfiles hbonds protein.pdb --acceptors=="atoms: type N" --angle 20.0
+  cfiles hbonds in.pdb --donors="bonds: type(#1) == O and type(#2) == H"
+  cfiles hbonds protein.pdb --acceptors="atoms: type N" --angle 20.0
 
 Options:
   -h --help                     show this help

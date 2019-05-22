@@ -57,8 +57,17 @@ public:
     iterator begin() const {return iterator(first_, stride_);}
     iterator end() const {return iterator(last_, 0);}
 
-    size_t count() const {
-        return 1 + (last_ - first_) / stride_;
+    /// Count the number of steps, given the maximal step of a trajectory
+    size_t count(size_t max) const {
+        auto last = last_;
+        if (last_ > max) {
+            last = max;
+        }
+        if (last < first_) {
+            return 0;
+        } else {
+            return (last - first_) / stride_;
+        }
     }
 
     size_t first() const {

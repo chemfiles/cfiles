@@ -8,17 +8,29 @@ TEST_CASE("Steps ranges") {
     auto range = steps_range::parse("10:20");
     auto result = std::vector<size_t>(range.begin(), range.end());
     auto expected = std::vector<size_t>{10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+    CHECK(range.count(100) == expected.size());
     CHECK(result == expected);
 
     range = steps_range::parse("10:20:2");
     result = std::vector<size_t>(range.begin(), range.end());
     expected = std::vector<size_t>{10, 12, 14, 16, 18};
+    CHECK(range.count(100) == expected.size());
     CHECK(result == expected);
 
     range = steps_range::parse(":20:3");
     result = std::vector<size_t>(range.begin(), range.end());
     expected = std::vector<size_t>{0, 3, 6, 9, 12, 15, 18};
     CHECK(result == expected);
+    CHECK(range.count(100) == expected.size());
+
+    range = steps_range::parse("10:10");
+    CHECK(range.count(100) == 0);
+    result = std::vector<size_t>(range.begin(), range.end());
+    CHECK(result.empty());
+
+    range = steps_range::parse(":");
+    CHECK(range.count(142) == 142);
+    CHECK(range.count(8520) == 8520);
 
     // Warning: this is an open ended range, do not create a vector from it
     range = steps_range::parse("200::5");
@@ -30,6 +42,10 @@ TEST_CASE("Steps ranges") {
     CHECK(*it == 210);
     ++it;
     CHECK(*it == 215);
+
+    CHECK(range.count(100) == 0);
+    CHECK(range.count(1001) == 160);
+
 
     SECTION("Errors") {
         auto bad_ranges = {

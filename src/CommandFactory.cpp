@@ -11,6 +11,7 @@
 #include "commands/HBonds.hpp"
 #include "commands/Info.hpp"
 #include "commands/Merge.hpp"
+#include "commands/Msd.hpp"
 #include "commands/Rdf.hpp"
 #include "commands/Rotcf.hpp"
 
@@ -24,6 +25,7 @@ const std::vector<command_creator>& all_commands() {
         {"hbonds", [](){return std::unique_ptr<Command>(new HBonds());}},
         {"info", [](){return std::unique_ptr<Command>(new Info());}},
         {"merge", [](){return std::unique_ptr<Command>(new Merge());}},
+        {"msd", [](){return std::unique_ptr<Command>(new MSD());}},
         {"rdf", [](){return std::unique_ptr<Command>(new Rdf());}},
         {"rotcf", [](){return std::unique_ptr<Command>(new Rotcf());}},
     };

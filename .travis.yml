@@ -1,67 +1,72 @@
 language: cpp
-sudo: false
+dist: trusty
 
-# Build matrix
-os:
-  - linux
-  - osx
-compiler:
-  - gcc
-  - clang
-
-osx_image: xcode7.3
-
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.6
-    - kalakris-cmake
-    packages:
-    - g++-4.9
-    - clang-3.6
-    - cmake
+matrix:
+  fast_finish: true
+  include:
+    - name: linux gcc
+      os: linux
+      compiler: gcc
+      env: DO_COVERAGE=true
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - libboost-regex-dev
+    - name: linux clang
+      os: linux
+      compiler: clang
+      addons:
+        apt:
+          packages:
+            - libboost-regex-dev
+    - name: osx gcc
+      os: osx
+      compiler: gcc
+      osx_image: xcode8.3
+      addons:
+        homebrew:
+          packages:
+            - gcc@6
+    - name: osx clang
+      os: osx
+      compiler: clang
+      osx_image: xcode8.3
 
 before_install:
   # Setting environement
-  - export C_COMPILER="$CC"
   - |
-    if test "$TRAVIS_OS_NAME" == "linux" && test "$C_COMPILER" == "gcc"; then
-        export DO_COVERAGE=true
+    if [[ "$DO_COVERAGE" == "true" ]] ; then
         export CMAKE_ARGS="-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage"
         pip install --user codecov
-    else
-        export DO_COVERAGE=false
     fi
   # Install Linux stuff
   - |
-    if test "${TRAVIS_OS_NAME}" == "linux"; then
-        if test "${C_COMPILER}" == "gcc"; then
+    if test "$TRAVIS_OS_NAME" == "linux"; then
+        if test "$TRAVIS_COMPILER" == "gcc"; then
             export CC=gcc-4.9
             export CXX=g++-4.9
-        elif test "${C_COMPILER}" == "clang"; then
-            export CC=clang-3.6
-            export CXX=clang++-3.6
+        elif test "$TRAVIS_COMPILER" == "clang"; then
+            export CC=clang
+            export CXX=clang++
         fi
     fi
   # Install OS X stuff
   - |
     if test "$TRAVIS_OS_NAME" == "osx"; then
-        brew tap homebrew/science
-        brew update
-        brew rm gcc
-        brew install gcc@5
-        if test "${C_COMPILER}" == "gcc"; then
-            export CC=gcc-5
-            export CXX=g++-5
-        elif test "${C_COMPILER}" == "clang"; then
+        if test "$TRAVIS_COMPILER" == "gcc"; then
+            export CC=gcc-6
+            export CXX=g++-6
+        elif test "$TRAVIS_COMPILER" == "clang"; then
             export CC=clang
             export CXX=clang++
         fi
     fi
 
 script:
-  - cd ${TRAVIS_BUILD_DIR}
+  - cd $TRAVIS_BUILD_DIR
   - ./scripts/check-whitespaces.py
   - mkdir -p build
   - cd build
@@ -69,7 +74,7 @@ script:
   - make
   - ctest -L cfiles --output-on-failure
   - |
-    if ${DO_COVERAGE}; then
-        cd ${TRAVIS_BUILD_DIR}
+    if [[ "$DO_COVERAGE" == "true" ]] ; then
+        cd $TRAVIS_BUILD_DIR
         codecov --gcov-exec=gcov-4.9
     fi

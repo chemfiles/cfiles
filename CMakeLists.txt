@@ -7,6 +7,18 @@ set(CXX_STANDARD_REQUIRED ON)
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
 option(CFILES_USE_FFTW3 "Use FFTW3 for FFT, instead of the bundled KissFFT" OFF)
 
+# Set a default build type if none was specified
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "" AND "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
+        message(STATUS "Setting build type to 'release' as none was specified.")
+        set(CMAKE_BUILD_TYPE "release"
+            CACHE STRING
+            "Choose the type of build, options are: none(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) debug release relwithdebinfo minsizerel."
+        FORCE)
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS release debug relwithdebuginfo minsizerel none)
+    endif()
+endif()
+
 if(EXISTS "${PROJECT_SOURCE_DIR}/chemfiles/CMakeLists.txt")
     add_subdirectory(chemfiles)
 else()

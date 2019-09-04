@@ -30,6 +30,7 @@ matrix:
         homebrew:
           packages:
             - gcc@6
+          update: true
     - name: osx clang
       os: osx
       compiler: clang
@@ -44,24 +45,18 @@ before_install:
     fi
   # Install Linux stuff
   - |
-    if test "$TRAVIS_OS_NAME" == "linux"; then
-        if test "$TRAVIS_COMPILER" == "gcc"; then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
             export CC=gcc-4.9
             export CXX=g++-4.9
-        elif test "$TRAVIS_COMPILER" == "clang"; then
-            export CC=clang
-            export CXX=clang++
         fi
     fi
   # Install OS X stuff
   - |
-    if test "$TRAVIS_OS_NAME" == "osx"; then
-        if test "$TRAVIS_COMPILER" == "gcc"; then
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+        if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
             export CC=gcc-6
             export CXX=g++-6
-        elif test "$TRAVIS_COMPILER" == "clang"; then
-            export CC=clang
-            export CXX=clang++
         fi
     fi
 

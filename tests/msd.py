@@ -32,6 +32,16 @@ def msd(output):
     check_msd(data)
 
 
+def msd_no_cell(output):
+    out, err = cfiles(
+        "msd",
+        "--selection", "name O",
+        TRAJECTORY, "-o", output
+    )
+    assert(out == "")
+    assert(err == "")
+
+
 def check_msd(data):
     # This is only a regression test, checking that the right output is
     # generated.
@@ -47,3 +57,6 @@ def check_msd(data):
 if __name__ == '__main__':
     with tempfile.NamedTemporaryFile() as file:
         msd(file.name)
+
+    with tempfile.NamedTemporaryFile() as file:
+        msd_no_cell(file.name)

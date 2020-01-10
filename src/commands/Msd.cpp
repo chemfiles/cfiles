@@ -104,9 +104,7 @@ static MSD::Options parse_options(int argc, const char* argv[]) {
         options.cell = parse_cell(args.at("--cell").asString());
     }
 
-    if (args.at("--unwrap")) {
-        options.unwrap = true;
-    }
+    options.unwrap = args.at("--unwrap").asBool();
 
     return options;
 }
@@ -182,9 +180,10 @@ int MSD::run(int argc, const char* argv[]) {
         auto cell_inv = cell;
         auto prev_cell_inv = prev_cell;
 
-        if (options.unwrap && frame.cell().shape() == UnitCell::INFINITE) {
-            throw CFilesError("can not unwrap in infinite unit cell");
-        } else {
+        if (options.unwrap) {
+            if (frame.cell().shape() == UnitCell::INFINITE) {
+                throw CFilesError("can not unwrap in infinite unit cell");
+            }
             cell_inv = cell.invert();
             prev_cell_inv = prev_cell.invert();
         }

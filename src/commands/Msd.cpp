@@ -186,6 +186,13 @@ int MSD::run(int argc, const char* argv[]) {
             }
             cell_inv = cell.invert();
             prev_cell_inv = prev_cell.invert();
+        } else {
+            if (frame.cell().shape() != UnitCell::INFINITE) {
+                warn_once(
+                    "Periodic Boundary Conditions seems to be used, but --unwrap was not given. "
+                    "If you get strange results, try again with --unwrap."
+                );
+            }
         }
 
         for (size_t atom=0; atom<natoms; atom++) {

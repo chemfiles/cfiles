@@ -25,7 +25,7 @@ matrix:
     - name: osx gcc
       os: osx
       compiler: gcc
-      osx_image: xcode8.3
+      osx_image: xcode9.4
       addons:
         homebrew:
           packages:
@@ -34,16 +34,14 @@ matrix:
     - name: osx clang
       os: osx
       compiler: clang
-      osx_image: xcode8.3
+      osx_image: xcode9.4
 
 before_install:
-  # Setting environement
   - |
     if [[ "$DO_COVERAGE" == "true" ]] ; then
         export CMAKE_ARGS="-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage"
         pip install --user codecov
     fi
-  # Install Linux stuff
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
         if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then
@@ -51,7 +49,6 @@ before_install:
             export CXX=g++-4.9
         fi
     fi
-  # Install OS X stuff
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
         if [[ "$TRAVIS_COMPILER" == "gcc" ]] ; then

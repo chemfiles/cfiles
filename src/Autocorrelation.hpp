@@ -105,9 +105,9 @@ public:
     /// Normalize the averaged autocorrelations
     void normalize() {
         for (size_t i=0; i<size_; i++) {
-            // 2 * size_ is the gain from doing FFT -> iFFT with both FFTW3 and
+            // fft_size_ is the gain from doing FFT -> iFFT with both FFTW3 and
             // KissFFT
-            result_[i] /=  2 * size_ * n_timeseries_ * (size_ - i);
+            result_[i] /=  fft_size_ * n_timeseries_ * (size_ - i);
         }
     }
 

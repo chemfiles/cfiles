@@ -238,7 +238,7 @@ int MSD::run(int argc, const char* argv[]) {
         for (size_t step=1; step<nsteps; step++) {
             cum_sum += rsq[step - 1];
             cum_sum_reverse += rsq[nsteps - step];
-            msd[step] += (sum_rsq - cum_sum - cum_sum_reverse) / (nsteps - 1 - step);
+            msd[step] += (sum_rsq - cum_sum - cum_sum_reverse) / (nsteps - step);
         }
     }
 

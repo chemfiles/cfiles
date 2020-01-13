@@ -51,7 +51,7 @@ def check_msd(data):
 
     for ((r, msd), (exp_r, exp_msd)) in zip(data, expected):
         assert(r == exp_r)
-        assert(abs((msd - exp_msd) / msd) < 1e-3)
+        assert(abs((msd - exp_msd) / msd) < 2e-3)
 
 
 if __name__ == '__main__':

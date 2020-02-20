@@ -28,6 +28,7 @@ Examples:
 
 Options:
   -h --help                     show this help
+  --format=<format>             force the input file format to be <format>
   --guess-bonds                 guess the bonds in the input
   --step=<step>                 give informations about the frame at <step>
                                 [default: 0]
@@ -44,6 +45,10 @@ static Info::Options parse_options(int argc, const char* argv[]) {
     options.guess_bonds = args.at("--guess-bonds").asBool();
     auto step = args.at("--step").asLong();
 
+    if (args.at("--format")) {
+        options.format = args.at("--format").asString();
+    }
+
     if (step >= 0) {
         options.step = static_cast<size_t>(step);
     } else {
@@ -59,7 +64,7 @@ std::string Info::description() const {
 
 int Info::run(int argc, const char* argv[]) {
     auto options = parse_options(argc, argv);
-    auto input = Trajectory(options.input, 'r', "");
+    auto input = Trajectory(options.input, 'r', options.format);
 
     std::stringstream output;
     fmt::print(output, "file = {}\n", options.input);
@@ -67,8 +72,7 @@ int Info::run(int argc, const char* argv[]) {
 
     if (input.nsteps() > options.step) {
         auto frame = input.read_step(options.step);
-        fmt::print(output, "\n[frame]\n", frame.step());
-        fmt::print(output, "step = {}\n", options.step);
+        fmt::print(output, "\n[frame(step={})]\n", frame.step());
 
         auto& cell = frame.cell();
         fmt::print(output, "cell = [{}, {}, {}, {}, {}, {}]\n",

@@ -10,6 +10,7 @@ class Info final: public Command {
 public:
     struct Options {
         std::string input;
+        std::string format;
         bool guess_bonds;
         size_t step;
     };

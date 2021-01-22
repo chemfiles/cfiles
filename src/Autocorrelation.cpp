@@ -16,10 +16,33 @@ Autocorrelation::Autocorrelation(size_t size):
 #endif
     n_timeseries_(0),
     result_(size_, 0),
-    spectrum_(fft_size_ / 2 + 1),
+    spectrum_(nullptr),
     direct_(fft_size_, false),
     reverse_(fft_size_, true)
-{}
+{
+    spectrum_ = new fft_complex[fft_size_ / 2 + 1];
+}
+
+Autocorrelation::~Autocorrelation() {
+    delete[] spectrum_;
+}
+
+Autocorrelation::Autocorrelation(Autocorrelation&& other): Autocorrelation(0) {
+    *this = std::move(other);
+}
+
+Autocorrelation& Autocorrelation::operator=(Autocorrelation&& other) {
+    this->size_ = std::move(other.size_);
+    this->fft_size_ = std::move(other.fft_size_);
+    this->n_timeseries_ = std::move(other.n_timeseries_);
+    this->result_ = std::move(other.result_);
+    this->spectrum_ = std::move(other.spectrum_);
+    other.spectrum_ = nullptr;
+    this->direct_ = std::move(other.direct_);
+    this->reverse_ = std::move(other.reverse_);
+
+    return *this;
+}
 
 void Autocorrelation::add_timeserie(std::vector<float> timeserie) {
     // The algorithm used here compute autocorrelation using FFT.
@@ -31,20 +54,23 @@ void Autocorrelation::add_timeserie(std::vector<float> timeserie) {
     timeserie.insert(timeserie.end(), fft_size_ - size_, 0);
 
 #ifdef CFILES_USE_FFTW3
-    fftwf_execute_dft_r2c(direct_, timeserie.data(), spectrum_.data());
-    for (auto& value: spectrum_) {
+    fftwf_execute_dft_r2c(direct_, timeserie.data(), spectrum_);
+    for (size_t i=0; i<fft_size_ / 2 + 1; i++) {
+        auto& value = spectrum_[i];
+        // Replace values by their norm
         value[0] = value[0] * value[0] + value[1] * value[1];
         value[1] = 0;
     }
-    fftwf_execute_dft_c2r(reverse_, spectrum_.data(), timeserie.data());
+    fftwf_execute_dft_c2r(reverse_, spectrum_, timeserie.data());
 #else
-    kiss_fftr(direct_, timeserie.data(), spectrum_.data());
-    for (auto& value: spectrum_) {
+    kiss_fftr(direct_, timeserie.data(), spectrum_);
+    for (size_t i=0; i<fft_size_ / 2 + 1; i++) {
+        auto& value = spectrum_[i];
         // Replace values by their norm
         value.r = value.r * value.r + value.i * value.i;
         value.i = 0;
     }
-    kiss_fftri(reverse_, spectrum_.data(), timeserie.data());
+    kiss_fftri(reverse_, spectrum_, timeserie.data());
 #endif
 
     for (size_t i=0; i<size_; i++) {

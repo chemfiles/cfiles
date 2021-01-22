@@ -97,6 +97,13 @@ using fft_plan = KissFTTConfig;
 class Autocorrelation {
 public:
     Autocorrelation(size_t size);
+    ~Autocorrelation();
+
+    Autocorrelation(const Autocorrelation&) = delete;
+    Autocorrelation& operator=(const Autocorrelation&) = delete;
+
+    Autocorrelation(Autocorrelation&&);
+    Autocorrelation& operator=(Autocorrelation&&);
 
     /// Compute autocorrelation for the given time serie, and store it for
     /// future averaging
@@ -135,7 +142,7 @@ private:
     std::vector<float> result_;
 
     /// Buffer for FFT data
-    std::vector<fft_complex> spectrum_;
+    fft_complex* spectrum_;
     /// FFT configuration
     fft_plan direct_;
     /// Reverse FFT configuration

@@ -75,9 +75,11 @@ int Info::run(int argc, const char* argv[]) {
         fmt::print(output, "\n[frame(step={})]\n", frame.step());
 
         auto& cell = frame.cell();
-        fmt::print(output, "cell = [{}, {}, {}, {}, {}, {}]\n",
-            cell.a(), cell.b(), cell.c(),
-            cell.alpha(), cell.beta(), cell.gamma()
+        auto lengths = cell.lengths();
+        auto angles = cell.angles();
+        fmt::print(output, "cell = [({}, {}, {}), ({}, {}, {})]\n",
+            lengths[0], lengths[1], lengths[2],
+            angles[0], angles[1], angles[2]
         );
 
         if (options.guess_bonds) {

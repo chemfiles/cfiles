@@ -1,3 +1,1 @@
-# -*- coding: utf8 -*-
-
-from runner import cfiles
+from .runner import cfiles  # noqa

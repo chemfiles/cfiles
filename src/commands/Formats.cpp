@@ -5,7 +5,7 @@
 
 #include <fmt/format.h>
 #include <docopt/docopt.h>
-#include <chemfiles/FormatFactory.hpp>
+#include <chemfiles.hpp>
 
 #include "Formats.hpp"
 #include "utils.hpp"
@@ -41,10 +41,11 @@ int Formats::run(int argc, const char* argv[]) {
     parse_options(argc, argv);
 
     fmt::print("Available formats [name (extension) description]:\n\n");
-    for (auto format: FormatFactory::get().formats()) {
-        auto name = format.name();
-        auto ext = format.extension();
-        auto description = format.description();
+    for (auto format_ref: chemfiles::formats_list()) {
+        auto& format = format_ref.get();
+        auto name = std::string(format.name);
+        auto ext = std::string(format.extension.value_or(""));
+        auto description = format.description;
 
         int fill = 18 - name.length() - ext.length();
         if (fill < 0) { fill = 0; }

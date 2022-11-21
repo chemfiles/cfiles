@@ -1,5 +1,4 @@
-# -*- coding: utf8 -*-
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 
 class CfilesError(Exception):
@@ -18,4 +17,4 @@ def cfiles(*args):
             "Process '{}' exited with non-zero return code".format(command)
         )
 
-    return stdout, stderr
+    return stdout.decode("utf8"), stderr.decode("utf8")

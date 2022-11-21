@@ -86,13 +86,13 @@ TEST_CASE("Split") {
 
 TEST_CASE("Parse cell") {
     auto cell = parse_cell("10");
-    CHECK(cell == chemfiles::UnitCell(10));
+    CHECK(cell == chemfiles::UnitCell({10, 10, 10}));
 
     cell = parse_cell("10:20:30");
-    CHECK(cell == chemfiles::UnitCell(10, 20, 30));
+    CHECK(cell == chemfiles::UnitCell({10, 20, 30}));
 
     cell = parse_cell("10:20:30:90:90:100");
-    CHECK(cell == chemfiles::UnitCell(10, 20, 30, 90, 90, 100));
+    CHECK(cell == chemfiles::UnitCell({10, 20, 30}, {90, 90, 100}));
 
     SECTION("Errors") {
         auto bad_cells = {

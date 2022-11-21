@@ -76,7 +76,7 @@ chemfiles::UnitCell parse_cell(const std::string& string) {
         if (a <= 0) {
             throw CFilesError("custom cell can not have negative length");
         }
-        return chemfiles::UnitCell(a);
+        return chemfiles::UnitCell({a, a, a});
     } else if (splitted.size() == 3) {
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
@@ -84,7 +84,7 @@ chemfiles::UnitCell parse_cell(const std::string& string) {
         if (a <= 0 || b <= 0 || c <= 0) {
             throw CFilesError("custom cell can not have negative length");
         }
-        return chemfiles::UnitCell(a, b, c);
+        return chemfiles::UnitCell({a, b, c});
     } else if (splitted.size() == 6) {
         auto a = string2double(splitted[0]);
         auto b = string2double(splitted[1]);
@@ -98,7 +98,7 @@ chemfiles::UnitCell parse_cell(const std::string& string) {
         if (alpha <= 0 || beta <= 0 || gamma <= 0) {
             throw CFilesError("custom cell can not have negative angles");
         }
-        return chemfiles::UnitCell(a, b, c, alpha, beta, gamma);
+        return chemfiles::UnitCell({a, b, c}, {alpha, beta, gamma});
     } else {
         throw CFilesError(
             "custom cell should be specified as 'a:b:c:α:β:γ'' or 'a:b:c' or 'a'"

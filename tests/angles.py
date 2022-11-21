@@ -1,7 +1,7 @@
-# -*- coding: utf8 -*-
-from testrun import cfiles
-import tempfile
 import os
+import tempfile
+
+from testrun import cfiles
 
 TRAJECTORY = os.path.join(os.path.dirname(__file__), "data", "water.xyz")
 

@@ -54,8 +54,10 @@ std::ostream& docopt::operator<<(std::ostream& os, value const& val)
 	return os;
 }
 
+#if 0
 #pragma mark -
 #pragma mark Parsing stuff
+#endif
 
 class Tokens {
 public:
@@ -521,7 +523,7 @@ static PatternList parse_argv(Tokens tokens, std::vector<Option>& options, bool 
 	return ret;
 }
 
-std::vector<Option> parse_defaults(std::string const& doc) {
+static std::vector<Option> parse_defaults(std::string const& doc) {
 	// This pattern is a delimiter by which we split the options.
 	// The delimiter is a new line followed by a whitespace(s) followed by one or two hyphens.
 	static std::regex const re_delimiter{
@@ -531,7 +533,7 @@ std::vector<Option> parse_defaults(std::string const& doc) {
 
 	std::vector<Option> defaults;
 	for (auto s : parse_section("options:", doc)) {
-		s.erase(s.begin(), s.begin() + s.find(':') + 1); // get rid of "options:"
+		s.erase(s.begin(), s.begin() + static_cast<std::ptrdiff_t>(s.find(':')) + 1); // get rid of "options:"
 
 		for (const auto& opt : regex_split(s, re_delimiter)) {
 			if (starts_with(opt, "-")) {
@@ -607,7 +609,7 @@ static std::pair<Required, std::vector<Option>> create_pattern_tree(std::string 
 }
 
 DOCOPT_INLINE
-std::map<std::string, value>
+docopt::Options
 docopt::docopt_parse(std::string const& doc,
 		     std::vector<std::string> const& argv,
 		     bool help,
@@ -634,7 +636,7 @@ docopt::docopt_parse(std::string const& doc,
 	std::vector<std::shared_ptr<LeafPattern>> collected;
 	bool matched = pattern.fix().match(argv_patterns, collected);
 	if (matched && argv_patterns.empty()) {
-		std::map<std::string, value> ret;
+		docopt::Options ret;
 
 		// (a.name, a.value) for a in (pattern.flat() + collected)
 		for (auto* p : pattern.leaves()) {
@@ -657,7 +659,7 @@ docopt::docopt_parse(std::string const& doc,
 }
 
 DOCOPT_INLINE
-std::map<std::string, value>
+docopt::Options
 docopt::docopt(std::string const& doc,
 	       std::vector<std::string> const& argv,
 	       bool help,
